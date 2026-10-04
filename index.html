@@ -28,6 +28,9 @@
             min-height: 100dvh;
             color: #1e293b;
             overflow-x: hidden;
+            /* Padding hỗ trợ safe-area trên mobile */
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
         /* Hiệu ứng Gương 3D trong suốt (Frosted Glassmorphism) */
@@ -117,6 +120,18 @@
             opacity: 1; transform: translateY(0) scale(1);
         }
 
+        /* Toast thông báo được tính chuẩn safe-area né Dynamic Island */
+        #toast {
+            top: calc(env(safe-area-inset-top) + 16px);
+            max-width: calc(100vw - 24px);
+        }
+
+        /* Nút nổi FAB tránh Home Indicator trên iPhone */
+        .floating-action-buttons {
+            bottom: calc(env(safe-area-inset-bottom) + 20px);
+            right: max(16px, env(safe-area-inset-right));
+        }
+
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(203, 213, 225, 0.6); border-radius: 10px; }
@@ -127,7 +142,7 @@
 
     <div class="relative z-10 flex flex-col h-[100dvh] w-full max-w-6xl mx-auto overflow-hidden p-3 sm:p-6 gap-4">
         
-        <!-- Header (Đảo nổi 3D Cân bằng tuyệt đối, không có dòng phụ) -->
+        <!-- Header Cân đối tuyệt đối, không có dòng phụ -->
         <header class="flex-shrink-0">
             <div class="flex items-center justify-center glass-panel rounded-3xl p-4 px-6 shadow-xl relative">
                 <div class="flex items-center gap-3">
@@ -199,9 +214,9 @@
             </div>
         </main>
 
-        <!-- Nút nổi thao tác nhanh (FAB): AI & Add cân đối -->
-        <div class="fixed bottom-6 right-6 flex flex-col gap-3.5 z-40">
-            <!-- Nút AI (To bằng nút (+), đẩy lên trên) -->
+        <!-- Nút nổi thao tác nhanh (FAB): AI & Add cân đối, né hoàn toàn Home Indicator trên iPhone -->
+        <div class="floating-action-buttons fixed flex flex-col gap-3.5 z-40">
+            <!-- Nút AI -->
             <button onclick="openModal('modal-ai')" class="w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center text-white shadow-2xl shadow-purple-500/40 hover:scale-105 active:scale-95 transition-all border border-purple-300/60">
                 <i class="ph-fill ph-sparkle text-2xl animate-pulse"></i>
             </button>
@@ -214,11 +229,10 @@
 
     </div>
 
-    <!-- Modal Thêm Sữa Mới (Cố định chiều cao, thanh cuộn giữa, không bao giờ mất nút Lưu) -->
+    <!-- Modal Thêm Sữa Mới -->
     <div id="modal-add" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
         <div class="modal-content w-full max-w-md glass-panel rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden max-h-[85vh]">
             
-            <!-- Header cố định -->
             <div class="flex-shrink-0 px-6 py-4 border-b border-white/40 flex items-center justify-between bg-white/25">
                 <h3 class="font-extrabold text-lg text-slate-800">Thêm cữ sữa mới</h3>
                 <button onclick="closeModals()" class="w-8 h-8 flex items-center justify-center rounded-full bg-white/50 text-slate-600 hover:bg-pink-100 transition-colors">
@@ -226,7 +240,6 @@
                 </button>
             </div>
             
-            <!-- Phần điền thông tin tự cuộn -->
             <div class="flex-1 overflow-y-auto p-6 space-y-5">
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Lượng sữa (ml)</label>
@@ -250,12 +263,11 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Trạng thái bảo quản (Chuẩn Việt Nam 🇻🇳)</label>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Trạng thái bảo quản (Chuẩn Y khoa Việt Nam 🇻🇳)</label>
                     <div class="grid grid-cols-2 gap-2.5" id="status-grid"></div>
                 </div>
             </div>
 
-            <!-- Footer cố định giữ chắc nút lưu -->
             <div class="flex-shrink-0 p-5 bg-white/40 backdrop-blur-md border-t border-white/40">
                 <button onclick="saveMilk()" class="w-full py-4 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold rounded-2xl shadow-lg shadow-pink-500/30 active:scale-[0.98] transition-transform text-base border border-pink-400/50">
                     Lưu cữ sữa
@@ -301,7 +313,7 @@
         </div>
     </div>
 
-    <!-- Modal AI Chat (Bác sĩ bỉm sữa kết nối thật) -->
+    <!-- Modal AI Chat kết nối thật ckey.vn -->
     <div id="modal-ai" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
         <div class="modal-content w-full max-w-md h-[70vh] glass-panel rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden">
             <div class="flex-shrink-0 px-5 py-4 border-b border-white/40 flex items-center justify-between bg-white/25">
@@ -340,17 +352,15 @@
     </div>
 
     <!-- Thông báo In-App Vui Nhộn -->
-    <div id="toast" class="fixed top-6 left-1/2 -translate-x-1/2 z-[100] bg-slate-900/90 text-white px-5 py-3 rounded-full shadow-2xl flex items-center gap-3 transition-all duration-300 transform -translate-y-24 opacity-0 backdrop-blur-lg border border-white/10">
-        <i id="toast-icon" class="ph-fill ph-heart text-pink-400 text-lg"></i>
-        <span id="toast-text" class="text-xs font-semibold whitespace-nowrap">Thông báo</span>
+    <div id="toast" class="fixed left-1/2 -translate-x-1/2 z-[100] bg-slate-900/90 text-white px-5 py-3 rounded-full shadow-2xl flex items-center gap-3 transition-all duration-300 transform -translate-y-24 opacity-0 backdrop-blur-lg border border-white/10">
+        <i id="toast-icon" class="ph-fill ph-heart text-pink-400 text-lg shrink-0"></i>
+        <span id="toast-text" class="text-xs font-semibold">Thông báo</span>
     </div>
 
     <script>
-        // Cấu hình API Key của bạn (Dùng chung qua proxy ckey.vn)
         const API_KEY = "sk-5814cf33f4def1ae38f70d526d17dcf4424e10f3138502ca98f5e21e981439c4";
         const API_URL = "https://ckey.vn/v1/chat/completions";
 
-        // Chuẩn thời gian Y khoa Việt Nam 🇻🇳 (Tính bằng mili-giây)
         const MS_MIN = 60000; 
         const MS_HR = 60 * MS_MIN; 
         const MS_DAY = 24 * MS_HR;
@@ -373,7 +383,6 @@
             PARTIAL: []
         };
 
-        // Danh sách hơn 20 thông báo vui nhộn, hài hước, nhắc nhở mẹ bỉm
         const FUN_MESSAGES = [
             "Cố lên mẹ nhé, bé ngoan sẽ mau lớn lắm đấy! 🍼",
             "Mẹ siêu nhân hôm nay vất vả nhiều rồi, tự thưởng cho mình một ly nước ấm nha! ❤️",
@@ -386,7 +395,10 @@
             "Bé yêu đang thầm cảm ơn 'siêu nhân sữa' của con đấy! 🦸‍♀️",
             "Tranh thủ lúc bé ngủ, mẹ chợp mắt một xíu lấy sức chiến đấu ca đêm nhé! 🌙",
             "Góc nhắc nhở: Sữa mẹ mát lành, tình mẹ bao la! Chúc mẹ ngày mới siêu năng lượng! 🌸",
-            "Ai là mẹ bỉm sữa xuất sắc nhất thế giới nào? Chắc chắn là bạn rồi! 🏆"
+            "Ai là mẹ bỉm sữa xuất sắc nhất thế giới nào? Chắc chắn là bạn rồi! 🏆",
+            "Mẹ ơi, nhớ kiểm tra cữ sữa trong tủ lạnh xem có em nào sắp hết hạn chưa nhé! 🧊",
+            "Một ly sữa ấm buổi đêm sẽ giúp mẹ vơi đi mệt mỏi đấy! ☕",
+            "Tiếng khóc của con là âm thanh báo thức đỉnh cao nhất quả đất! 😂"
         ];
 
         let milks = [];
@@ -395,13 +407,10 @@
         let addState = 'FRIDGE';
         let currentTargetId = null;
 
-        // Lưu và tải dữ liệu vĩnh cửu từ localStorage
         function loadData() {
             try {
-                const saved = localStorage.getItem('viet_milk_tracker_data_v2');
-                if (saved) {
-                    milks = JSON.parse(saved);
-                }
+                const saved = localStorage.getItem('viet_milk_tracker_data_v3');
+                if (saved) milks = JSON.parse(saved);
                 const medY = localStorage.getItem('med_yellow');
                 if (medY === 'true') {
                     document.getElementById('toggle-yellow').checked = true;
@@ -419,7 +428,7 @@
 
         function saveData() {
             try {
-                localStorage.setItem('viet_milk_tracker_data_v2', JSON.stringify(milks));
+                localStorage.setItem('viet_milk_tracker_data_v3', JSON.stringify(milks));
             } catch (e) {
                 console.error("Lỗi ghi bộ nhớ:", e);
             }
@@ -435,9 +444,8 @@
             window.toastTimer = setTimeout(() => {
                 el.classList.remove('translate-y-0', 'opacity-100');
                 el.classList.add('-translate-y-24', 'opacity-0');
-            }, 4000);
+            }, 4500);
 
-            // Gửi đẩy thông báo hệ thống trình duyệt nếu được cấp quyền
             if ("Notification" in window && Notification.permission === "granted") {
                 try {
                     new Notification("Sổ Sữa Của Bé 🍼", {
@@ -448,19 +456,11 @@
             }
         }
 
-        // Tự động kích hoạt xin quyền thông báo khi vào trang
-        function initNotificationPermission() {
-            if ("Notification" in window && Notification.permission === "default") {
-                Notification.requestPermission();
-            }
-        }
-
-        // Tự động phát thông báo vui nhộn ngẫu nhiên mỗi 10 phút
         function startAutoFunNotifications() {
             setInterval(() => {
                 const randomMsg = FUN_MESSAGES[Math.floor(Math.random() * FUN_MESSAGES.length)];
                 showToast(randomMsg, 'ph-fill ph-sparkle text-yellow-300');
-            }, 10 * 60 * 1000); // 10 phút / lần
+            }, 12 * 60 * 1000);
         }
 
         function openModal(id) {
@@ -687,7 +687,6 @@
             });
         }
 
-        // Tích hợp Bác sĩ AI thông minh kết nối thật qua ckey.vn
         async function sendAiMsg() {
             const inp = document.getElementById('ai-input');
             const txt = inp.value.trim();
@@ -726,7 +725,6 @@
                 const typingEl = document.getElementById(typingId);
                 if(typingEl) typingEl.remove();
                 
-                // Dự phòng thông minh khi gặp lỗi mạng/CORS tại local
                 let fallback = "Mẹ ơi, theo chuẩn y khoa Việt Nam: Sữa mẹ nhiệt độ phòng dùng 2h, ngăn mát 24h, trữ đông 3 tháng. Sữa bú dở dùng trong 1h nha mẹ! 🍼✨";
                 const lower = txt.toLowerCase();
                 if(lower.includes('hạn') || lower.includes('lâu')) {
@@ -758,11 +756,9 @@
             h.scrollTop = h.scrollHeight;
         }
 
-        // Khởi chạy ứng dụng
         loadData();
         renderApp();
         timerId = setInterval(tick, 1000);
-        initNotificationPermission();
         startAutoFunNotifications();
     </script>
 </body>
