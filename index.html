@@ -3,698 +3,380 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#fbcfe8">
-    
-    <title>Sổ Theo Dõi Sữa</title>
-    
-    <!-- Tailwind CSS -->
+    <title>Sổ Sữa Của Bé 🍼</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Phosphor Icons -->
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <!-- Inter Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <style>
-        * {
-            -webkit-tap-highlight-color: transparent;
-            -webkit-font-smoothing: antialiased;
-            transform: translateZ(0);
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        glass: 'rgba(255, 255, 255, 0.65)',
+                        glassDark: 'rgba(255, 255, 255, 0.85)',
+                    }
+                }
+            }
         }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
         body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #fbcfe8 0%, #e0e7ff 50%, #f3e8ff 100%);
-            min-height: 100dvh;
-            color: #1e293b;
-            overflow-x: hidden;
-            /* Padding hỗ trợ safe-area trên mobile */
+            font-family: 'Plus+Jakarta+Sans', sans-serif;
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            min-height: 100vh;
+            color: #1f2937;
             padding-top: env(safe-area-inset-top);
             padding-bottom: env(safe-area-inset-bottom);
         }
-
-        /* Hiệu ứng Gương 3D trong suốt (Frosted Glassmorphism) */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.65);
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 10px 30px 0 rgba(0, 0, 0, 0.05);
+        }
+        .glass-modal {
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.9);
-            border-top: 1px solid rgba(255, 255, 255, 1);
-            border-left: 1px solid rgba(255, 255, 255, 1);
-            box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.12), inset 0 0 20px rgba(255, 255, 255, 0.4);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 1);
         }
-
-        .glass-panel:hover {
-            background: rgba(255, 255, 255, 0.8);
-            transform: translateY(-2px);
-            box-shadow: 0 16px 48px 0 rgba(31, 38, 135, 0.18);
+        /* Custom scrollbar for inner modal */
+        .modal-scroll::-webkit-scrollbar {
+            width: 5px;
         }
-
-        /* iOS Toggle Switch */
-        .ios-switch {
-            appearance: none;
-            width: 50px;
-            height: 30px;
-            background: rgba(203, 213, 225, 0.8);
-            border-radius: 30px;
-            position: relative;
-            cursor: pointer;
-            outline: none;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
-            transition: background 0.3s;
+        .modal-scroll::-webkit-scrollbar-thumb {
+            background: rgba(209, 213, 219, 0.5);
+            border-radius: 10px;
         }
-        .ios-switch::after {
-            content: '';
-            position: absolute;
-            top: 3px;
-            left: 3px;
-            width: 24px;
-            height: 24px;
-            background: white;
-            border-radius: 50%;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .ios-switch:checked.switch-yellow { background: #fbbf24; }
-        .ios-switch:checked.switch-red { background: #ef4444; }
-        .ios-switch:checked::after { transform: translateX(20px); }
-
-        /* Thanh tiến trình dạng lỏng (Liquid Progress Bar) */
-        .liquid-track {
-            background: rgba(241, 245, 249, 0.8);
-            border-radius: 999px;
-            overflow: hidden;
-            height: 10px;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
-        }
-        .liquid-fill {
-            height: 100%;
-            border-radius: 999px;
-            transition: width 1s linear, background 0.5s ease;
-            position: relative;
-            overflow: hidden;
-            will-change: width;
-        }
-        .liquid-fill::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
-            animation: shimmer 2s infinite linear;
-            background-size: 200% 100%;
-        }
-        @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
-
-        /* Hộp thoại Modal chuyển động mượt */
-        .modal-overlay {
-            opacity: 0; visibility: hidden; transition: all 0.3s ease;
-        }
-        .modal-overlay.active {
-            opacity: 1; visibility: visible;
-        }
-        .modal-content {
-            opacity: 0; transform: translateY(20px) scale(0.95); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .modal-overlay.active .modal-content {
-            opacity: 1; transform: translateY(0) scale(1);
-        }
-
-        /* Toast thông báo được tính chuẩn safe-area né Dynamic Island */
-        #toast {
-            top: calc(env(safe-area-inset-top) + 16px);
-            max-width: calc(100vw - 24px);
-        }
-
-        /* Nút nổi FAB tránh Home Indicator trên iPhone */
-        .floating-action-buttons {
-            bottom: calc(env(safe-area-inset-bottom) + 20px);
-            right: max(16px, env(safe-area-inset-right));
-        }
-
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(203, 213, 225, 0.6); border-radius: 10px; }
-        body.modal-open { overflow: hidden; }
     </style>
 </head>
-<body class="selection:bg-pink-500 selection:text-white">
+<body class="flex flex-col h-full min-h-screen selection:bg-pink-200">
 
-    <div class="relative z-10 flex flex-col h-[100dvh] w-full max-w-6xl mx-auto overflow-hidden p-3 sm:p-6 gap-4">
+    <!-- Toast Notification (Fixed safe-area for Dynamic Island) -->
+    <div id="toast" class="fixed left-1/2 -translate-x-1/2 z-50 transition-all duration-300 pointer-events-none opacity-0 translate-y-[-20px]" style="top: calc(env(safe-area-inset-top) + 16px); width: calc(100% - 32px); max-width: 400px;">
+        <div class="glass-card bg-white/90 border border-white/80 p-4 rounded-2xl shadow-xl flex items-center space-x-3 pointer-events-auto">
+            <span class="text-2xl" id="toast-icon">🍼</span>
+            <div class="flex-1">
+                <h4 class="font-bold text-sm text-gray-900" id="toast-title">Nhắc nhở cho mẹ</h4>
+                <p class="text-xs text-gray-600 leading-relaxed" id="toast-desc">Nội dung thông báo...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header Section -->
+    <header class="px-5 pt-6 pb-4 flex flex-col items-center justify-center relative">
+        <h1 class="text-2xl font-extrabold text-gray-800 tracking-tight flex items-center gap-2">
+            <span>Sổ Sữa Của Bé</span> <span class="text-xl">🍼</span>
+        </h1>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 px-4 pb-28 max-w-xl w-full mx-auto space-y-4">
         
-        <!-- Header Cân đối tuyệt đối, không có dòng phụ -->
-        <header class="flex-shrink-0">
-            <div class="flex items-center justify-center glass-panel rounded-3xl p-4 px-6 shadow-xl relative">
-                <div class="flex items-center gap-3">
-                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-pink-500 to-rose-400 flex items-center justify-center text-white shadow-lg shadow-pink-500/30 border border-white/50">
-                        <i class="ph-fill ph-baby text-2xl"></i>
-                    </div>
-                    <h1 class="text-xl font-extrabold text-slate-800 tracking-tight">Sổ Sữa Của Bé</h1>
-                </div>
-            </div>
-        </header>
-
-        <!-- Main Layout (Responsive: Mobile 1 cột, Laptop/Tablet 2 cột) -->
-        <main class="flex-1 overflow-y-auto pb-32 grid grid-cols-1 lg:grid-cols-3 gap-6 pr-1">
-            
-            <!-- Cột Trái (Uống thuốc & Tiện ích) -->
-            <div class="lg:col-span-1 space-y-4">
-                <h2 class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-3 flex items-center gap-2">
-                    <i class="ph-fill ph-pill text-pink-500 text-base"></i> Uống thuốc hôm nay
+        <!-- Quick Stats / Status Card -->
+        <div class="glass-card rounded-3xl p-5 shadow-sm">
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="font-bold text-gray-700 text-sm flex items-center gap-1.5">
+                    <span>📊</span> Trạng thái tủ sữa hiện tại
                 </h2>
-                
-                <div class="glass-panel rounded-3xl p-4 flex items-center justify-between">
-                    <div class="flex items-center gap-3.5">
-                        <div class="w-11 h-11 rounded-2xl bg-white/70 backdrop-blur-md border border-white/60 flex items-center justify-center text-yellow-600 shadow-sm">
-                            <i class="ph-fill ph-flask text-xl"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-sm text-slate-800">Chai Vàng</h3>
-                            <p class="text-[11px] font-semibold text-slate-500">Uống 5 giọt</p>
-                            <p id="status-yellow" class="text-[10px] font-bold text-slate-400 mt-0.5">Chưa cho uống</p>
-                        </div>
-                    </div>
-                    <input type="checkbox" id="toggle-yellow" class="ios-switch switch-yellow" onchange="toggleMed('yellow')">
+                <span id="total-count" class="text-xs font-semibold px-2.5 py-1 bg-pink-100 text-pink-600 rounded-full">0 cữ sữa</span>
+            </div>
+            <div class="grid grid-cols-3 gap-2 text-center">
+                <div class="bg-blue-50/60 p-2.5 rounded-2xl border border-blue-100/50">
+                    <span class="block text-xs text-blue-500 font-medium">Nhiệt độ phòng</span>
+                    <span id="stat-room" class="text-lg font-bold text-blue-700">0</span>
                 </div>
-
-                <div class="glass-panel rounded-3xl p-4 flex items-center justify-between">
-                    <div class="flex items-center gap-3.5">
-                        <div class="w-11 h-11 rounded-2xl bg-white/70 backdrop-blur-md border border-white/60 flex items-center justify-center text-red-500 shadow-sm">
-                            <i class="ph-fill ph-flask text-xl"></i>
-                        </div>
-                        <div>
-                            <h3 class="font-bold text-sm text-slate-800">Chai Đỏ</h3>
-                            <p class="text-[11px] font-semibold text-slate-500">Uống 3 giọt</p>
-                            <p id="status-red" class="text-[10px] font-bold text-slate-400 mt-0.5">Chưa cho uống</p>
-                        </div>
-                    </div>
-                    <input type="checkbox" id="toggle-red" class="ios-switch switch-red" onchange="toggleMed('red')">
+                <div class="bg-emerald-50/60 p-2.5 rounded-2xl border border-emerald-100/50">
+                    <span class="block text-xs text-emerald-500 font-medium">Ngăn mát</span>
+                    <span id="stat-cool" class="text-lg font-bold text-emerald-700">0</span>
+                </div>
+                <div class="bg-purple-50/60 p-2.5 rounded-2xl border border-purple-100/50">
+                    <span class="block text-xs text-purple-500 font-medium">Trữ đông</span>
+                    <span id="stat-freeze" class="text-lg font-bold text-purple-700">0</span>
                 </div>
             </div>
-
-            <!-- Cột Phải (Danh sách Sữa) -->
-            <div class="lg:col-span-2 space-y-4">
-                <h2 class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-3 flex items-center gap-2">
-                    <i class="ph-fill ph-drop text-blue-500 text-base"></i> Tủ sữa của bé
-                </h2>
-
-                <!-- Trạng thái trống -->
-                <div id="empty-state" class="glass-panel rounded-3xl p-12 flex flex-col items-center justify-center text-center">
-                    <div class="w-20 h-20 bg-white/50 backdrop-blur-md border border-white/60 rounded-full flex items-center justify-center text-slate-400 mb-4 shadow-inner">
-                        <i class="ph-fill ph-baby-carriage text-4xl"></i>
-                    </div>
-                    <h3 class="font-extrabold text-lg text-slate-800 mb-1">Chưa có cữ sữa nào</h3>
-                    <p class="text-slate-500 text-xs font-medium max-w-xs">Nhấn nút dấu cộng (+) ở góc dưới bên phải để bắt đầu lưu trữ nhé mẹ.</p>
-                </div>
-
-                <!-- Container danh sách sữa -->
-                <div id="milk-list" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <!-- Rendered by JS -->
-                </div>
-            </div>
-        </main>
-
-        <!-- Nút nổi thao tác nhanh (FAB): AI & Add cân đối, né hoàn toàn Home Indicator trên iPhone -->
-        <div class="floating-action-buttons fixed flex flex-col gap-3.5 z-40">
-            <!-- Nút AI -->
-            <button onclick="openModal('modal-ai')" class="w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center text-white shadow-2xl shadow-purple-500/40 hover:scale-105 active:scale-95 transition-all border border-purple-300/60">
-                <i class="ph-fill ph-sparkle text-2xl animate-pulse"></i>
-            </button>
-            
-            <!-- Nút Thêm Cữ Sữa -->
-            <button onclick="openAddModal()" class="w-16 h-16 bg-gradient-to-br from-pink-500 to-rose-500 rounded-full flex items-center justify-center text-white shadow-2xl shadow-pink-500/40 hover:scale-105 active:scale-95 transition-all border border-pink-300/60">
-                <i class="ph-bold ph-plus text-2xl"></i>
-            </button>
         </div>
 
+        <!-- Milk List Container -->
+        <div class="space-y-3">
+            <div class="flex justify-between items-center px-1">
+                <h3 class="font-bold text-gray-800 text-base">Danh sách cữ sữa</h3>
+                <button onclick="clearAllMilk()" class="text-xs text-gray-400 hover:text-red-500 transition">Xóa tất cả</button>
+            </div>
+            
+            <div id="milk-list" class="space-y-3">
+                <!-- Javascript will inject milk items here -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Floating Action Buttons (Safe-area inset bottom for Home Indicator) -->
+    <div class="fixed right-6 z-40 flex flex-col gap-3" style="bottom: calc(env(safe-area-inset-bottom) + 24px);">
+        <!-- AI Assistant FAB -->
+        <button onclick="openAiModal()" class="w-14 h-14 bg-white/90 backdrop-blur-md border border-white shadow-lg rounded-full flex items-center justify-center text-xl hover:scale-105 active:scale-95 transition">
+            ✨
+        </button>
+        <!-- Add Milk FAB -->
+        <button onclick="openModal()" class="w-14 h-14 bg-gradient-to-tr from-pink-500 to-rose-400 shadow-xl shadow-pink-500/30 rounded-full flex items-center justify-center text-white text-2xl hover:scale-105 active:scale-95 transition">
+            ＋
+        </button>
     </div>
 
-    <!-- Modal Thêm Sữa Mới -->
-    <div id="modal-add" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
-        <div class="modal-content w-full max-w-md glass-panel rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden max-h-[85vh]">
-            
-            <div class="flex-shrink-0 px-6 py-4 border-b border-white/40 flex items-center justify-between bg-white/25">
-                <h3 class="font-extrabold text-lg text-slate-800">Thêm cữ sữa mới</h3>
-                <button onclick="closeModals()" class="w-8 h-8 flex items-center justify-center rounded-full bg-white/50 text-slate-600 hover:bg-pink-100 transition-colors">
-                    <i class="ph-bold ph-x text-sm"></i>
-                </button>
+    <!-- Add Milk Modal -->
+    <div id="milk-modal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="glass-modal w-full max-w-md rounded-3xl p-6 shadow-2xl flex flex-col max-h-[85vh]">
+            <div class="flex justify-between items-center pb-3 border-b border-gray-100">
+                <h3 class="font-bold text-lg text-gray-800">Thêm cữ sữa mới 🍼</h3>
+                <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200">✕</button>
             </div>
             
-            <div class="flex-1 overflow-y-auto p-6 space-y-5">
+            <!-- Modal Body with Scrollbar -->
+            <div class="modal-scroll overflow-y-auto flex-1 py-4 space-y-4 pr-1">
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Lượng sữa (ml)</label>
-                    <div class="relative">
-                        <input type="number" id="input-volume" value="100" class="w-full bg-white/60 backdrop-blur-md border border-white/60 text-slate-800 text-lg font-bold rounded-2xl px-5 py-3.5 pl-12 focus:outline-none focus:ring-2 focus:ring-pink-500/50 shadow-inner">
-                        <i class="ph-fill ph-drop text-blue-500 text-xl absolute left-4 top-1/2 -translate-y-1/2"></i>
-                    </div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Loại bảo quản</label>
+                    <select id="storage-type" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400">
+                        <option value="room">Nhiệt độ phòng (Chuẩn: 2 giờ)</option>
+                        <option value="cool" selected>Ngăn mát tủ lạnh (Chuẩn: 24 giờ)</option>
+                        <option value="freeze">Ngăn trữ đông (Chuẩn: 3 tháng)</option>
+                        <option value="half">Sữa bú dở (Chuẩn: 1 giờ)</option>
+                    </select>
                 </div>
-
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Thời gian vắt / pha</label>
-                    <input type="datetime-local" id="input-time" class="w-full bg-white/60 backdrop-blur-md border border-white/60 text-slate-800 font-bold rounded-2xl px-5 py-3.5 focus:outline-none focus:ring-2 focus:ring-pink-500/50 shadow-inner">
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Dung tích (ml)</label>
+                    <input type="number" id="milk-amount" value="120" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400">
                 </div>
-
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Loại sữa</label>
-                    <div class="flex bg-white/40 p-1 rounded-2xl backdrop-blur-md shadow-inner">
-                        <button id="btn-type-breast" onclick="selectType('BREAST')" class="flex-1 py-3 text-xs font-bold rounded-xl bg-pink-500 text-white shadow-md transition-all">Sữa mẹ</button>
-                        <button id="btn-type-formula" onclick="selectType('FORMULA')" class="flex-1 py-3 text-xs font-bold rounded-xl text-slate-600 hover:text-slate-800 transition-all">Sữa công thức</button>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Trạng thái bảo quản (Chuẩn Y khoa Việt Nam 🇻🇳)</label>
-                    <div class="grid grid-cols-2 gap-2.5" id="status-grid"></div>
+                    <label class="block text-xs font-semibold text-gray-600 mb-1">Ghi chú (Tên bé, vị trí cất...)</label>
+                    <input type="text" id="milk-note" placeholder="Ví dụ: Kệ trên cùng tủ lạnh" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400">
                 </div>
             </div>
 
-            <div class="flex-shrink-0 p-5 bg-white/40 backdrop-blur-md border-t border-white/40">
-                <button onclick="saveMilk()" class="w-full py-4 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold rounded-2xl shadow-lg shadow-pink-500/30 active:scale-[0.98] transition-transform text-base border border-pink-400/50">
-                    Lưu cữ sữa
+            <div class="pt-3 border-t border-gray-100">
+                <button onclick="saveMilk()" class="w-full bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold py-3.5 rounded-2xl shadow-lg shadow-pink-500/25 active:scale-[0.98] transition">
+                    Lưu cữ sữa ngay
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Modal Cập nhật trạng thái sữa -->
-    <div id="modal-action" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
-        <div class="modal-content w-full max-w-md glass-panel rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden max-h-[80vh]">
-            <div class="flex-shrink-0 px-6 py-4 border-b border-white/40 flex items-center justify-between bg-white/25">
-                <h3 class="font-extrabold text-lg text-slate-800">Cập nhật cữ sữa</h3>
-                <button onclick="closeModals()" class="w-8 h-8 flex items-center justify-center rounded-full bg-white/50 text-slate-600">
-                    <i class="ph-bold ph-x text-sm"></i>
-                </button>
-            </div>
-            
-            <div class="flex-1 overflow-y-auto p-4 space-y-2.5 bg-white/10" id="action-list"></div>
-
-            <div class="flex-shrink-0 p-4 bg-white/40 border-t border-white/40">
-                <button onclick="confirmDelete()" class="w-full py-3.5 bg-red-50/80 backdrop-blur-md text-red-600 font-bold rounded-2xl border border-red-200 active:scale-[0.98] transition-transform flex items-center justify-center gap-2 text-sm">
-                    <i class="ph-bold ph-trash"></i> Đổ bỏ / Hết hạn
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Xác nhận xóa -->
-    <div id="modal-confirm" class="modal-overlay fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
-        <div class="modal-content w-full max-w-[280px] glass-panel rounded-[2rem] shadow-2xl overflow-hidden text-center">
-            <div class="p-6">
-                <div class="w-14 h-14 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-3 shadow-inner">
-                    <i class="ph-fill ph-warning-circle text-2xl"></i>
-                </div>
-                <h3 class="font-extrabold text-base text-slate-800 mb-1">Xóa cữ sữa này?</h3>
-                <p class="text-xs text-slate-500">Dữ liệu sẽ được dọn sạch khỏi tủ.</p>
-            </div>
-            <div class="flex border-t border-white/40">
-                <button onclick="closeConfirm()" class="flex-1 py-3.5 font-bold text-slate-600 bg-white/40 hover:bg-white/60 transition-colors text-sm">Hủy</button>
-                <button onclick="executeDelete()" class="flex-1 py-3.5 font-bold text-white bg-red-500 hover:bg-red-600 transition-colors text-sm">Xóa</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal AI Chat kết nối thật ckey.vn -->
-    <div id="modal-ai" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
-        <div class="modal-content w-full max-w-md h-[70vh] glass-panel rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden">
-            <div class="flex-shrink-0 px-5 py-4 border-b border-white/40 flex items-center justify-between bg-white/25">
-                <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center shadow-sm">
-                        <i class="ph-fill ph-robot text-lg"></i>
-                    </div>
+    <!-- AI Assistant Modal -->
+    <div id="ai-modal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="glass-modal w-full max-w-md rounded-3xl shadow-2xl flex flex-col h-[75vh]">
+            <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-white/50 rounded-t-3xl">
+                <div class="flex items-center gap-2">
+                    <div class="w-9 h-9 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-lg">✨</div>
                     <div>
-                        <h3 class="font-extrabold text-sm text-slate-800">Bác Sĩ AI Nhi Khoa</h3>
-                        <p class="text-[9px] text-emerald-600 font-bold uppercase">Luôn sẵn sàng hỗ trợ mẹ</p>
+                        <h3 class="font-bold text-sm text-gray-800">Bác Sĩ AI Nhi Khoa</h3>
+                        <span class="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">● LUÔN SẴN SÀNG</span>
                     </div>
                 </div>
-                <button onclick="closeModals()" class="w-8 h-8 flex items-center justify-center rounded-full bg-white/50 text-slate-600">
-                    <i class="ph-bold ph-x text-sm"></i>
-                </button>
+                <button onclick="closeAiModal()" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200">✕</button>
             </div>
-            
-            <div class="flex-1 overflow-y-auto p-4 space-y-3 bg-white/10" id="ai-history">
-                <div class="flex gap-2.5">
-                    <div class="w-7 h-7 shrink-0 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mt-1 shadow-sm"><i class="ph-fill ph-robot text-sm"></i></div>
-                    <div class="bg-white/80 backdrop-blur-md p-3 rounded-2xl rounded-tl-none shadow-sm border border-white/60 text-xs font-medium text-slate-800 max-w-[85%] leading-relaxed">
+
+            <!-- Chat Message List -->
+            <div id="chat-messages" class="modal-scroll flex-1 p-4 overflow-y-auto space-y-3 bg-gray-50/50">
+                <div class="flex gap-2 max-w-[85%]">
+                    <div class="w-7 h-7 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-xs shrink-0 mt-1">🤖</div>
+                    <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-xs text-gray-700 leading-relaxed border border-gray-100">
                         Chào mẹ! Mẹ cần bác sĩ AI tư vấn gì về cách rã đông, bảo quản sữa chuẩn y khoa Việt Nam hay lịch uống thuốc cho bé không? 🍼✨
                     </div>
                 </div>
             </div>
 
-            <div class="flex-shrink-0 p-3.5 bg-white/40 border-t border-white/40">
-                <div class="flex gap-2">
-                    <input type="text" id="ai-input" placeholder="Hỏi bác sĩ AI..." class="flex-1 bg-white/70 text-xs font-medium rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500/50 shadow-inner border border-white/50" onkeypress="if(event.key === 'Enter') sendAiMsg()">
-                    <button onclick="sendAiMsg()" class="w-11 h-11 shrink-0 bg-gradient-to-br from-purple-500 to-indigo-500 text-white rounded-2xl flex items-center justify-center shadow-lg active:scale-95">
-                        <i class="ph-fill ph-paper-plane-right text-base"></i>
-                    </button>
-                </div>
+            <!-- Chat Input Bar -->
+            <div class="p-3 bg-white/80 border-t border-gray-100 rounded-b-3xl flex gap-2">
+                <input type="text" id="ai-input" onkeypress="handleAiKeyPress(event)" placeholder="Hỏi bác sĩ AI..." class="flex-1 bg-gray-100 border border-gray-200 rounded-2xl px-4 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-purple-400">
+                <button onclick="sendAiMsg()" class="bg-purple-600 text-white w-10 h-10 rounded-2xl flex items-center justify-center shadow-md hover:bg-purple-700 active:scale-95 transition shrink-0">
+                    ➤
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- Thông báo In-App Vui Nhộn -->
-    <div id="toast" class="fixed left-1/2 -translate-x-1/2 z-[100] bg-slate-900/90 text-white px-5 py-3 rounded-full shadow-2xl flex items-center gap-3 transition-all duration-300 transform -translate-y-24 opacity-0 backdrop-blur-lg border border-white/10">
-        <i id="toast-icon" class="ph-fill ph-heart text-pink-400 text-lg shrink-0"></i>
-        <span id="toast-text" class="text-xs font-semibold">Thông báo</span>
-    </div>
-
+    <!-- JavaScript Logic -->
     <script>
+        // API Key thực tế của bạn
         const API_KEY = "sk-5814cf33f4def1ae38f70d526d17dcf4424e10f3138502ca98f5e21e981439c4";
         const API_URL = "https://ckey.vn/v1/chat/completions";
 
-        const MS_MIN = 60000; 
-        const MS_HR = 60 * MS_MIN; 
-        const MS_DAY = 24 * MS_HR;
+        let milks = JSON.parse(localStorage.getItem('baby_milks')) || [];
 
-        const STATES = {
-            ROOM: { id: 'ROOM', label: 'Nhiệt độ phòng', desc: 'Tối đa 2 giờ', duration: 2 * MS_HR, color: 'text-amber-700', bg: 'bg-amber-100', icon: 'ph-thermometer', bar: 'bg-amber-400' },
-            FRIDGE: { id: 'FRIDGE', label: 'Ngăn mát', desc: 'Tối đa 24 giờ', duration: 24 * MS_HR, color: 'text-blue-700', bg: 'bg-blue-100', icon: 'ph-refrigerator', bar: 'bg-blue-400' },
-            FREEZER: { id: 'FREEZER', label: 'Trữ đông', desc: 'Tối đa 3 tháng', duration: 90 * MS_DAY, color: 'text-indigo-700', bg: 'bg-indigo-100', icon: 'ph-snowflake', bar: 'bg-indigo-400' },
-            THAWED: { id: 'THAWED', label: 'Rã đông (Ngăn mát)', desc: 'Tối đa 24 giờ', duration: 24 * MS_HR, color: 'text-cyan-700', bg: 'bg-cyan-100', icon: 'ph-drop-half-bottom', bar: 'bg-cyan-400' },
-            WARMED: { id: 'WARMED', label: 'Đã hâm nóng', desc: 'Tối đa 1 giờ', duration: 1 * MS_HR, color: 'text-orange-700', bg: 'bg-orange-100', icon: 'ph-fire', bar: 'bg-orange-400' },
-            PARTIAL: { id: 'PARTIAL', label: 'Bú dở (Còn thừa)', desc: 'Tối đa 1 giờ', duration: 1 * MS_HR, color: 'text-purple-700', bg: 'bg-purple-100', icon: 'ph-baby', bar: 'bg-purple-400' }
-        };
-
-        const ALLOWED_TRANSITIONS = {
-            ROOM: ['FRIDGE', 'FREEZER', 'WARMED', 'PARTIAL'],
-            FRIDGE: ['FREEZER', 'WARMED', 'PARTIAL'],
-            FREEZER: ['THAWED', 'WARMED'],
-            THAWED: ['WARMED', 'PARTIAL'],
-            WARMED: ['PARTIAL'],
-            PARTIAL: []
-        };
-
-        const FUN_MESSAGES = [
-            "Cố lên mẹ nhé, bé ngoan sẽ mau lớn lắm đấy! 🍼",
-            "Mẹ siêu nhân hôm nay vất vả nhiều rồi, tự thưởng cho mình một ly nước ấm nha! ❤️",
-            "Đừng quên đứng lên vươn vai, hít thở sâu để đỡ mỏi lưng nha mẹ! 🧘‍♀️",
-            "Trộm vía em bé ngoan ngoãn, bú giỏi ngủ ngoan cho mẹ thở phào nào! 🌟",
-            "Mỗi cữ sữa mẹ vắt ra là chứa đựng tình yêu to lớn vũ trụ luôn! 🥰",
-            "Mẹ ơi nhớ uống nước đầy đủ để sữa lúc nào cũng về căng tràn nhé! 💧",
-            "Hôm nay mẹ đã làm rất xuất sắc rồi, thả lỏng vai và mỉm cười cái nào! ✨",
-            "Nhắc nhỏ: Sữa đã sẵn sàng, mẹ nhớ kiểm tra hạn sử dụng trong app nha! ⏰",
-            "Bé yêu đang thầm cảm ơn 'siêu nhân sữa' của con đấy! 🦸‍♀️",
-            "Tranh thủ lúc bé ngủ, mẹ chợp mắt một xíu lấy sức chiến đấu ca đêm nhé! 🌙",
-            "Góc nhắc nhở: Sữa mẹ mát lành, tình mẹ bao la! Chúc mẹ ngày mới siêu năng lượng! 🌸",
-            "Ai là mẹ bỉm sữa xuất sắc nhất thế giới nào? Chắc chắn là bạn rồi! 🏆",
-            "Mẹ ơi, nhớ kiểm tra cữ sữa trong tủ lạnh xem có em nào sắp hết hạn chưa nhé! 🧊",
-            "Một ly sữa ấm buổi đêm sẽ giúp mẹ vơi đi mệt mỏi đấy! ☕",
-            "Tiếng khóc của con là âm thanh báo thức đỉnh cao nhất quả đất! 😂"
+        const funMessages = [
+            { icon: "💧", title: "Nhắc nhở uống nước", desc: "Mẹ uống ngay 1 cốc nước ấm để có đủ sữa cho em bé nhé!" },
+            { icon: "🍼", title: "Kiểm tra tủ sữa", desc: "Mẹ kiểm tra xem cữ sữa nào sắp hết hạn để dùng trước nha." },
+            { icon: "✨", title: "Mẹ siêu nhân", desc: "Mẹ đã vất vả rồi, tranh thủ chợp mắt 10 phút lấy sức nhé!" },
+            { icon: "🤱", title: "Giờ hút sữa", desc: "Kén sữa tới giờ gọi mẹ kìa, chuẩn bị máy hút sữa thôi!" },
+            { icon: "💖", title: "Yêu thương", desc: "Em bé trộm vía ngoan nhờ có giọt sữa tình yêu của mẹ đấy!" }
         ];
 
-        let milks = [];
-        let timerId = null;
-        let addType = 'BREAST';
-        let addState = 'FRIDGE';
-        let currentTargetId = null;
+        function showToast(customTitle, customDesc, customIcon) {
+            const toast = document.getElementById('toast');
+            if(customTitle) document.getElementById('toast-title').innerText = customTitle;
+            if(customDesc) document.getElementById('toast-desc').innerText = customDesc;
+            if(customIcon) document.getElementById('toast-icon').innerText = customIcon;
 
-        function loadData() {
-            try {
-                const saved = localStorage.getItem('viet_milk_tracker_data_v3');
-                if (saved) milks = JSON.parse(saved);
-                const medY = localStorage.getItem('med_yellow');
-                if (medY === 'true') {
-                    document.getElementById('toggle-yellow').checked = true;
-                    updateMedUI('yellow', true);
-                }
-                const medR = localStorage.getItem('med_red');
-                if (medR === 'true') {
-                    document.getElementById('toggle-red').checked = true;
-                    updateMedUI('red', true);
-                }
-            } catch (e) {
-                console.error("Lỗi đọc bộ nhớ:", e);
-            }
+            toast.classList.remove('opacity-0', 'translate-y-[-20px]');
+            toast.classList.add('opacity-100', 'translate-y-0');
+
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'translate-y-[-20px]');
+            }, 4000);
         }
 
-        function saveData() {
-            try {
-                localStorage.setItem('viet_milk_tracker_data_v3', JSON.stringify(milks));
-            } catch (e) {
-                console.error("Lỗi ghi bộ nhớ:", e);
-            }
-        }
+        // Tự động đẩy thông báo vui mỗi 12 phút
+        setInterval(() => {
+            const randomMsg = funMessages[Math.floor(Math.random() * funMessages.length)];
+            showToast(randomMsg.title, randomMsg.desc, randomMsg.icon);
+        }, 12 * 60 * 1000);
 
-        function showToast(msg, icon = 'ph-fill ph-heart text-pink-400') {
-            const el = document.getElementById('toast');
-            document.getElementById('toast-text').innerText = msg;
-            document.getElementById('toast-icon').className = icon;
-            el.classList.remove('-translate-y-24', 'opacity-0');
-            el.classList.add('translate-y-0', 'opacity-100');
-            clearTimeout(window.toastTimer);
-            window.toastTimer = setTimeout(() => {
-                el.classList.remove('translate-y-0', 'opacity-100');
-                el.classList.add('-translate-y-24', 'opacity-0');
-            }, 4500);
-
-            if ("Notification" in window && Notification.permission === "granted") {
-                try {
-                    new Notification("Sổ Sữa Của Bé 🍼", {
-                        body: msg,
-                        icon: "https://placehold.co/192x192/fbcfe8/1e293b?text=🍼"
-                    });
-                } catch(e) {}
-            }
-        }
-
-        function startAutoFunNotifications() {
-            setInterval(() => {
-                const randomMsg = FUN_MESSAGES[Math.floor(Math.random() * FUN_MESSAGES.length)];
-                showToast(randomMsg, 'ph-fill ph-sparkle text-yellow-300');
-            }, 12 * 60 * 1000);
-        }
-
-        function openModal(id) {
-            document.body.classList.add('modal-open');
-            document.getElementById(id).classList.add('active');
-        }
-
-        function closeModals() {
-            document.body.classList.remove('modal-open');
-            document.querySelectorAll('.modal-overlay').forEach(el => el.classList.remove('active'));
-        }
-
-        function toggleMed(type) {
-            const isChecked = document.getElementById(`toggle-${type}`).checked;
-            localStorage.setItem(`med_${type}`, isChecked);
-            updateMedUI(type, isChecked);
-            if (isChecked) {
-                showToast(type === 'yellow' ? 'Bé uống Chai Vàng ngoan quá! 🌟' : 'Bé đã uống Chai Đỏ siêu giỏi! ❤️', 'ph-fill ph-star text-yellow-300');
-            } else {
-                showToast('Đã hủy trạng thái uống thuốc', 'ph-fill ph-info text-slate-300');
-            }
-        }
-
-        function updateMedUI(type, isChecked) {
-            const textEl = document.getElementById(`status-${type}`);
-            if (isChecked) {
-                textEl.innerText = 'Đã cho uống';
-                textEl.className = 'text-[10px] font-bold text-emerald-600 mt-0.5';
-            } else {
-                textEl.innerText = 'Chưa cho uống';
-                textEl.className = 'text-[10px] font-bold text-slate-400 mt-0.5';
-            }
-        }
-
-        function openAddModal() {
-            const now = new Date();
-            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-            document.getElementById('input-time').value = now.toISOString().slice(0,16);
-            selectType('BREAST');
-            openModal('modal-add');
-        }
-
-        function selectType(type) {
-            addType = type;
-            const btnB = document.getElementById('btn-type-breast');
-            const btnF = document.getElementById('btn-type-formula');
-            if (type === 'BREAST') {
-                btnB.className = "flex-1 py-3 text-xs font-bold rounded-xl bg-pink-500 text-white shadow-md transition-all";
-                btnF.className = "flex-1 py-3 text-xs font-bold rounded-xl text-slate-600 hover:text-slate-800 transition-all bg-transparent shadow-none";
-            } else {
-                btnF.className = "flex-1 py-3 text-xs font-bold rounded-xl bg-blue-500 text-white shadow-md transition-all";
-                btnB.className = "flex-1 py-3 text-xs font-bold rounded-xl text-slate-600 hover:text-slate-800 transition-all bg-transparent shadow-none";
-            }
-            renderAddStates();
-        }
-
-        function renderAddStates() {
-            const grid = document.getElementById('status-grid');
-            grid.innerHTML = '';
-            const opts = addType === 'BREAST' ? ['FRIDGE', 'FREEZER', 'ROOM', 'PARTIAL'] : ['FRIDGE', 'ROOM', 'PARTIAL'];
-            if(!opts.includes(addState)) addState = 'FRIDGE';
-            
-            opts.forEach(k => {
-                const s = STATES[k];
-                const active = addState === k;
-                const div = document.createElement('div');
-                div.onclick = () => { addState = k; renderAddStates(); };
-                div.className = `cursor-pointer border border-white/60 rounded-2xl p-3 flex flex-col items-center justify-center transition-all shadow-sm ${active ? 'bg-pink-100/90 border-pink-400/80 shadow-pink-200' : 'bg-white/40 hover:bg-white/60'}`;
-                div.innerHTML = `<div class="w-7 h-7 rounded-full mb-1 flex items-center justify-center backdrop-blur-sm ${active ? 'bg-pink-500 text-white shadow-md' : 'bg-white/60 text-slate-500'}"><i class="ph-fill ${s.icon} text-sm"></i></div><span class="text-[11px] font-bold ${active ? 'text-pink-700' : 'text-slate-600'}">${s.label}</span>`;
-                grid.appendChild(div);
-            });
-        }
+        function openModal() { document.getElementById('milk-modal').classList.remove('hidden'); }
+        function closeModal() { document.getElementById('milk-modal').classList.add('hidden'); }
+        function openAiModal() { document.getElementById('ai-modal').classList.remove('hidden'); }
+        function closeAiModal() { document.getElementById('ai-modal').classList.add('hidden'); }
 
         function saveMilk() {
-            const vol = parseInt(document.getElementById('input-volume').value);
-            const timeStr = document.getElementById('input-time').value;
-            if(!vol || !timeStr) return;
-            
-            const start = new Date(timeStr).getTime();
-            milks.push({
-                id: Math.random().toString(36).substr(2, 9),
-                type: addType, volume: vol, state: addState,
-                start: start, expires: start + STATES[addState].duration,
-                warned: false, expired: false
-            });
-            milks.sort((a,b) => a.expires - b.expires);
-            saveData();
-            closeModals(); renderApp(); 
-            
-            const randomMsg = FUN_MESSAGES[Math.floor(Math.random() * FUN_MESSAGES.length)];
-            showToast(randomMsg);
-            
-            if(!timerId) timerId = setInterval(tick, 1000);
+            const type = document.getElementById('storage-type').value;
+            const amount = document.getElementById('milk-amount').value;
+            const note = document.getElementById('milk-note').value;
+
+            let hoursLimit = 24;
+            if(type === 'room') hoursLimit = 2;
+            if(type === 'freeze') hoursLimit = 2160; // 3 tháng
+            if(type === 'half') hoursLimit = 1;
+
+            const expiresAt = new Date().getTime() + (hoursLimit * 60 * 60 * 1000);
+
+            const newMilk = {
+                id: Date.now(),
+                type,
+                amount: amount || 120,
+                note: note || 'Không có ghi chú',
+                createdAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                expiresAt
+            };
+
+            milks.unshift(newMilk);
+            syncStorage();
+            closeModal();
+            renderMilks();
+            showToast("Thành công!", "Đã thêm cữ sữa mới vào tủ.", "🍼");
         }
 
-        function openActionModal(id) {
-            currentTargetId = id;
-            const item = milks.find(m => m.id === id);
-            if(!item) return;
-            
-            const list = document.getElementById('action-list');
-            list.innerHTML = '';
-            
-            let transitions = ALLOWED_TRANSITIONS[item.state] || [];
-            if(item.type === 'FORMULA') transitions = transitions.filter(t => t !== 'FREEZER' && t !== 'THAWED');
-            
-            if(transitions.length === 0) {
-                list.innerHTML = `<div class="p-4 text-center text-xs font-bold text-slate-500">Sữa bú dở không thể cất lại tủ lạnh. Mẹ nhớ bỏ đi nếu bé không dùng hết nhé!</div>`;
-            } else {
-                transitions.forEach(k => {
-                    const s = STATES[k];
-                    const btn = document.createElement('button');
-                    btn.className = "w-full flex items-center gap-3.5 p-3.5 bg-white/40 backdrop-blur-sm border border-white/60 rounded-2xl hover:bg-white/70 transition-all text-left shadow-sm";
-                    btn.onclick = () => updateMilkState(id, k);
-                    btn.innerHTML = `<div class="w-9 h-9 rounded-xl flex items-center justify-center ${s.bg} ${s.color}"><i class="ph-fill ${s.icon} text-lg"></i></div><div><div class="font-bold text-slate-800 text-xs">Chuyển sang: ${s.label}</div><div class="text-[10px] font-semibold text-slate-500">${s.desc}</div></div>`;
-                    list.appendChild(btn);
-                });
-            }
-            openModal('modal-action');
+        function deleteMilk(id) {
+            milks = milks.filter(m => m.id !== id);
+            syncStorage();
+            renderMilks();
         }
 
-        function updateMilkState(id, newState) {
-            const idx = milks.findIndex(m => m.id === id);
-            if(idx > -1) {
-                const now = Date.now();
-                milks[idx].state = newState;
-                milks[idx].start = now;
-                milks[idx].expires = now + STATES[newState].duration;
-                milks[idx].warned = false; milks[idx].expired = false;
-                milks.sort((a,b) => a.expires - b.expires);
-                saveData();
-                closeModals(); renderApp(); showToast('Đã cập nhật trạng thái mới!');
+        function clearAllMilk() {
+            if(confirm("Mẹ có chắc muốn xóa hết danh sách không?")) {
+                milks = [];
+                syncStorage();
+                renderMilks();
             }
         }
 
-        function confirmDelete() { openModal('modal-confirm'); }
-        function closeConfirm() { document.getElementById('modal-confirm').classList.remove('active'); }
-        function executeDelete() {
-            milks = milks.filter(m => m.id !== currentTargetId);
-            saveData();
-            closeModals(); renderApp(); showToast('Đã dọn dẹp cữ sữa', 'ph-fill ph-trash text-slate-400');
+        function syncStorage() {
+            localStorage.setItem('baby_milks', JSON.stringify(milks));
         }
 
-        function formatTimeLeft(ms) {
-            if (ms <= 0) return "Đã hết hạn!";
-            const d = Math.floor(ms / MS_DAY);
-            const h = Math.floor((ms % MS_DAY) / MS_HR);
-            const m = Math.floor((ms % MS_HR) / MS_MIN);
-            if (d > 0) return `${d} ngày ${h}h`;
-            if (h > 0) return `${h}h ${m}p`;
-            return `${m} phút`;
-        }
-
-        function renderApp() {
+        function renderMilks() {
             const listEl = document.getElementById('milk-list');
-            const emptyEl = document.getElementById('empty-state');
-            const now = Date.now();
-            
+            let roomCount = 0, coolCount = 0, freezeCount = 0;
+
             if (milks.length === 0) {
-                listEl.innerHTML = ''; emptyEl.classList.remove('hidden'); return;
-            }
-            emptyEl.classList.add('hidden');
-            listEl.innerHTML = '';
-
-            milks.forEach(m => {
-                const s = STATES[m.state];
-                const isExp = now >= m.expires;
-                const dObj = new Date(m.start);
-                const timeStr = `${String(dObj.getHours()).padStart(2,'0')}:${String(dObj.getMinutes()).padStart(2,'0')} - ${dObj.getDate()}/${dObj.getMonth()+1}`;
-                
-                let pct = isExp ? 0 : Math.max(0, 100 - ((now - m.start) / (m.expires - m.start) * 100));
-                let barClass = s.bar;
-                let textClass = 'text-slate-800';
-                
-                if (isExp) { barClass = 'bg-red-500'; textClass = 'text-red-600 font-extrabold animate-pulse'; }
-                else if (pct < 20) { barClass = 'bg-red-400'; textClass = 'text-red-500 font-bold'; }
-
-                const card = document.createElement('div');
-                card.className = `glass-panel rounded-3xl p-4 cursor-pointer relative overflow-hidden ${isExp ? 'border-red-300 bg-red-50/50' : ''}`;
-                card.onclick = () => openActionModal(m.id);
-                
-                card.innerHTML = `
-                    <div class="flex justify-between items-start mb-3">
-                        <div class="flex items-center gap-1.5 bg-white/70 backdrop-blur-md px-2.5 py-1 rounded-xl border border-white/60 shadow-sm">
-                            <i class="ph-fill ${s.icon} ${s.color} text-sm"></i>
-                            <span class="text-[11px] font-bold ${s.color}">${s.label}</span>
-                        </div>
-                        <span class="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-lg backdrop-blur-md border border-white/50 ${m.type === 'FORMULA' ? 'bg-blue-100/80 text-blue-700' : 'bg-pink-100/80 text-pink-700'}">
-                            ${m.type === 'FORMULA' ? 'Công thức' : 'Sữa mẹ'}
-                        </span>
-                    </div>
-                    
-                    <div class="flex items-end justify-between mb-2">
-                        <div class="font-extrabold text-2xl text-slate-800 tracking-tight">${m.volume} <span class="text-sm text-slate-500 font-bold">ml</span></div>
-                        <div class="text-[11px] font-semibold text-slate-500 flex items-center gap-1"><i class="ph-bold ph-clock"></i> ${timeStr}</div>
-                    </div>
-                    
-                    <div class="mt-3">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="text-[10px] font-bold text-slate-500">Còn lại</span>
-                            <span id="txt-${m.id}" class="text-xs ${textClass}">${formatTimeLeft(m.expires - now)}</span>
-                        </div>
-                        <div class="liquid-track">
-                            <div id="bar-${m.id}" class="liquid-fill ${barClass}" style="width: ${pct}%"></div>
-                        </div>
+                listEl.innerHTML = `
+                    <div class="glass-card rounded-3xl p-8 text-center text-gray-400">
+                        <span class="text-3xl block mb-2">📭</span>
+                        Chưa có cữ sữa nào được lưu. Bấm nút dấu cộng bên dưới để thêm nhé mẹ!
                     </div>
                 `;
-                listEl.appendChild(card);
-            });
-        }
+                document.getElementById('total-count').innerText = `0 cữ sữa`;
+                document.getElementById('stat-room').innerText = 0;
+                document.getElementById('stat-cool').innerText = 0;
+                document.getElementById('stat-freeze').innerText = 0;
+                return;
+            }
 
-        function tick() {
-            const now = Date.now();
+            listEl.innerHTML = '';
+            const now = new Date().getTime();
+
             milks.forEach(m => {
-                const isExp = now >= m.expires;
-                const msLeft = m.expires - now;
-                const txt = document.getElementById(`txt-${m.id}`);
-                const bar = document.getElementById(`bar-${m.id}`);
-                if (txt && bar && !isExp) {
-                    txt.innerText = formatTimeLeft(msLeft);
-                    let pct = Math.max(0, 100 - ((now - m.start) / (m.expires - m.start) * 100));
-                    bar.style.width = `${pct}%`;
+                if(m.type === 'room') roomCount++;
+                if(m.type === 'cool' || m.type === 'half') coolCount++;
+                if(m.type === 'freeze') freezeCount++;
+
+                const timeLeft = m.expiresAt - now;
+                let statusText = "Đang bảo quản tốt";
+                let statusColor = "text-emerald-600 bg-emerald-50 border-emerald-100";
+
+                if (timeLeft <= 0) {
+                    statusText = "Đã hết hạn!";
+                    statusColor = "text-rose-600 bg-rose-50 border-rose-100 animate-pulse";
+                } else if (timeLeft < 3600000 * 2) {
+                    statusText = "Sắp hết hạn!";
+                    statusColor = "text-amber-600 bg-amber-50 border-amber-100";
                 }
+
+                let typeLabel = "Ngăn mát";
+                if(m.type === 'room') typeLabel = "Nhiệt độ phòng";
+                if(m.type === 'freeze') typeLabel = "Trữ đông";
+                if(m.type === 'half') typeLabel = "Sữa bú dở";
+
+                const html = `
+                    <div class="glass-card rounded-2xl p-4 flex items-center justify-between border">
+                        <div>
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="font-bold text-gray-800 text-sm">${m.amount}ml</span>
+                                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">${typeLabel}</span>
+                                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full border ${statusColor}">${statusText}</span>
+                            </div>
+                            <p class="text-xs text-gray-500">Ghi chú: ${m.note} • Lưu lúc ${m.createdAt}</p>
+                        </div>
+                        <button onclick="deleteMilk(${m.id})" class="w-8 h-8 rounded-xl bg-gray-100/60 text-gray-400 hover:text-red-500 hover:bg-red-50 flex items-center justify-center transition">✕</button>
+                    </div>
+                `;
+                listEl.innerHTML += html;
             });
+
+            document.getElementById('total-count').innerText = `${milks.length} cữ sữa`;
+            document.getElementById('stat-room').innerText = roomCount;
+            document.getElementById('stat-cool').innerText = coolCount;
+            document.getElementById('stat-freeze').innerText = freezeCount;
         }
 
+        // Gọi API Thật 100% qua ckey.vn
         async function sendAiMsg() {
-            const inp = document.getElementById('ai-input');
-            const txt = inp.value.trim();
-            if(!txt) return;
-            appendAi('user', txt); inp.value = '';
-            
-            const typingId = 'typing-' + Date.now();
-            appendAi('ai', '...', typingId);
+            const inputEl = document.getElementById('ai-input');
+            const chatList = document.getElementById('chat-messages');
+            const text = inputEl.value.trim();
+            if(!text) return;
+
+            // Hiển thị tin nhắn của mẹ
+            chatList.innerHTML += `
+                <div class="flex gap-2 max-w-[85%] ml-auto justify-end">
+                    <div class="bg-purple-600 text-white p-3 rounded-2xl rounded-tr-none shadow-sm text-xs leading-relaxed">
+                        ${text}
+                    </div>
+                </div>
+            `;
+            inputEl.value = '';
+            chatList.scrollTop = chatList.scrollHeight;
+
+            // Hiển thị khung chờ AI trả lời
+            const loadingId = 'loading-' + Date.now();
+            chatList.innerHTML += `
+                <div id="${loadingId}" class="flex gap-2 max-w-[85%]">
+                    <div class="w-7 h-7 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-xs shrink-0 mt-1">🤖</div>
+                    <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-xs text-gray-500 italic border border-gray-100">
+                        Bác sĩ AI đang suy nghĩ...
+                    </div>
+                </div>
+            `;
+            chatList.scrollTop = chatList.scrollHeight;
 
             try {
                 const response = await fetch(API_URL, {
@@ -706,60 +388,48 @@
                     body: JSON.stringify({
                         model: "gpt-3.5-turbo",
                         messages: [
-                            { role: "system", content: "Bạn là một bác sĩ nhi khoa và chuyên gia tư vấn sữa mẹ tận tâm tại Việt Nam. Hãy trả lời ngắn gọn, ấm áp, chính xác theo chuẩn y khoa Việt Nam." },
-                            { role: "user", content: txt }
+                            { role: "system", content: "Bạn là Bác sĩ Nhi khoa chuyên nghiệp, thân thiện, trả lời ngắn gọn chuẩn y khoa Việt Nam về bảo quản sữa mẹ và chăm sóc em bé." },
+                            { role: "user", content: text }
                         ]
                     })
                 });
 
                 const data = await response.json();
-                const typingEl = document.getElementById(typingId);
-                if(typingEl) typingEl.remove();
+                document.getElementById(loadingId).remove();
 
-                if (data.choices && data.choices[0] && data.choices[0].message) {
-                    appendAi('ai', data.choices[0].message.content);
+                if(data.choices && data.choices.length > 0) {
+                    const aiReply = data.choices[0].message.content;
+                    chatList.innerHTML += `
+                        <div class="flex gap-2 max-w-[85%]">
+                            <div class="w-7 h-7 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-xs shrink-0 mt-1">🤖</div>
+                            <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-xs text-gray-700 leading-relaxed border border-gray-100">
+                                ${aiReply}
+                            </div>
+                        </div>
+                    `;
                 } else {
-                    throw new Error("Phản hồi từ máy chủ AI không hợp lệ");
+                    throw new Error("Phản hồi từ máy chủ không hợp lệ");
                 }
             } catch (error) {
-                const typingEl = document.getElementById(typingId);
-                if(typingEl) typingEl.remove();
-                
-                let fallback = "Mẹ ơi, theo chuẩn y khoa Việt Nam: Sữa mẹ nhiệt độ phòng dùng 2h, ngăn mát 24h, trữ đông 3 tháng. Sữa bú dở dùng trong 1h nha mẹ! 🍼✨";
-                const lower = txt.toLowerCase();
-                if(lower.includes('hạn') || lower.includes('lâu')) {
-                    fallback = "Thời gian chuẩn tại VN: Nhiệt độ phòng 2h, Ngăn mát 24h, Trữ đông 3 tháng, Sữa bú dở 1h mẹ nhé! 🌟";
-                } else if(lower.includes('rã đông')) {
-                    fallback = "Khi rã đông, mẹ hãy chuyển dần xuống ngăn mát, dùng trong 24h và tuyệt đối không cấp đông lại nha! 🧊";
-                } else if(lower.includes('thuốc')) {
-                    fallback = "Chai Vàng uống 5 giọt, Chai Đỏ uống 3 giọt mẹ nhớ gạt công tắc ở cột trái để app nhắc nhở nhé ạ! ❤️";
-                }
-                appendAi('ai', fallback);
+                document.getElementById(loadingId).remove();
+                chatList.innerHTML += `
+                    <div class="flex gap-2 max-w-[85%]">
+                        <div class="w-7 h-7 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-xs shrink-0 mt-1">🤖</div>
+                        <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-xs text-red-600 leading-relaxed border border-red-100">
+                            Bác sĩ AI đang bận chút xíu (Lỗi kết nối API). Theo chuẩn Y khoa Việt Nam: Sữa mẹ nhiệt độ phòng dùng 2h, ngăn mát 24h, trữ đông 3 tháng mẹ nhé! 🍼✨
+                        </div>
+                    </div>
+                `;
             }
+            chatList.scrollTop = chatList.scrollHeight;
         }
 
-        function appendAi(sender, text, id = '') {
-            const h = document.getElementById('ai-history');
-            const div = document.createElement('div');
-            if (id) div.id = id;
-            div.className = sender === 'user' ? "flex gap-2.5 justify-end" : "flex gap-2.5";
-            
-            if (sender === 'user') {
-                div.innerHTML = `<div class="bg-gradient-to-br from-purple-500 to-indigo-500 text-white p-3 rounded-2xl rounded-tr-none shadow-md text-xs font-medium max-w-[85%]" style="overflow-wrap: anywhere;">${text}</div>`;
-            } else {
-                let content = text === '...' 
-                    ? `<div class="flex space-x-1 items-center h-4"><div class="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce"></div><div class="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div><div class="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce" style="animation-delay: 0.4s"></div></div>`
-                    : text;
-                div.innerHTML = `<div class="w-7 h-7 shrink-0 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mt-1 shadow-sm"><i class="ph-fill ph-robot text-sm"></i></div><div class="bg-white/80 backdrop-blur-md p-3 rounded-2xl rounded-tl-none shadow-sm border border-white/60 text-xs font-medium text-slate-800 max-w-[85%] leading-relaxed" style="overflow-wrap: anywhere;">${content}</div>`;
-            }
-            h.appendChild(div);
-            h.scrollTop = h.scrollHeight;
+        function handleAiKeyPress(e) {
+            if(e.key === 'Enter') sendAiMsg();
         }
 
-        loadData();
-        renderApp();
-        timerId = setInterval(tick, 1000);
-        startAutoFunNotifications();
+        // Khởi chạy khi load trang
+        renderMilks();
     </script>
 </body>
 </html>
