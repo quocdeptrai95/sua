@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <!-- Các thẻ Meta tối ưu cho iPhone (PWA) -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Sổ Sữa">
+    <meta name="theme-color" content="#f3e7e9">
+    
+    <!-- Biểu tượng App ngoài màn hình chính -->
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/864/864458.png">
+
+    <title>Sổ Theo Dõi Sữa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.6);
+            --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+            overflow: hidden; 
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.12);
+            transform: translateZ(0); /* Tăng tốc GPU, chống giật lag */
+        }
+
+        /* 3D Cards */
+        .milk-card {
+            transform-style: preserve-3d;
+            transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.2s;
+            will-change: transform;
+        }
+        .milk-card-inner {
+            transform: translateZ(20px);
+        }
+
+        /* Liquid Bar */
+        .liquid-bar-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 9999px;
+            background: rgba(0,0,0,0.06);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .liquid-bar-fill {
+            position: absolute;
+            top: 0; left: 0; bottom: 0;
+            border-radius: 9999px;
+            transition: width 1s linear, background-color 0.5s ease;
+            background-size: 200% 200%;
+            animation: liquidFlow 3s linear infinite;
+            will-change: width, background-position;
+        }
+
+        .bg-grad-yellow { background-image: linear-gradient(45deg, #f6d365 0%, #fda085 100%); }
+        .bg-grad-blue { background-image: linear-gradient(45deg, #84fab0 0%, #8fd3f4 100%); }
+        .bg-grad-indigo { background-image: linear-gradient(45deg, #a18cd1 0%, #fbc2eb 100%); }
+        .bg-grad-cyan { background-image: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%); }
+        .bg-grad-orange { background-image: linear-gradient(45deg, #fa709a 0%, #fee140 100%); }
+        .bg-grad-red { background-image: linear-gradient(45deg, #ff0844 0%, #ffb199 100%); }
+
+        @keyframes liquidFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Modals */
+        .modal-enter {
+            opacity: 0;
+            transform: translate(-50%, -45%) scale(0.95) !important;
+        }
+        .modal-enter-active {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1) !important;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .modal-leave-active {
+            opacity: 0;
+            transform: translate(-50%, -45%) scale(0.95) !important;
+            transition: all 0.3s ease-in;
+        }
+
+        .fab-glow {
+            box-shadow: 0 0 15px rgba(236, 72, 153, 0.5), 0 0 30px rgba(236, 72, 153, 0.3);
+            animation: pulse-glow 2s infinite;
+        }
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 15px rgba(236, 72, 153, 0.5), 0 0 30px rgba(236, 72, 153, 0.3); }
+            50% { box-shadow: 0 0 25px rgba(236, 72, 153, 0.8), 0 0 50px rgba(236, 72, 153, 0.5); transform: scale(1.05); }
+            100% { box-shadow: 0 0 15px rgba(236, 72, 153, 0.5), 0 0 30px rgba(236, 72, 153, 0.3); }
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.2); }
+    </style>
+</head>
+
+<body class="text-slate-800 bg-slate-900 h-[100dvh] w-screen overflow-hidden relative">
+
+    <!-- Lớp Background Image (Đã fix tuyệt đối lỗi cắt hình) -->
+    <div class="fixed inset-0 z-0 bg-slate-900">
+        <!-- Lớp 1: Nền mờ (Blurred background) lấp đầy màn hình tạo chiều sâu -->
+        <div class="absolute inset-0 bg-cover bg-center opacity-40 blur-2xl scale-110" style="background-image: url('image.jpg');"></div>
+        
+        <!-- Lớp 2: Ảnh chính hiển thị trọn vẹn 100% không bao giờ bị cắt -->
+        <div class="absolute inset-0 bg-contain bg-center bg-no-repeat" style="background-image: url('image.jpg');"></div>
+        
+        <!-- Lớp 3: Phủ tối nhẹ để làm nổi bật khung ứng dụng -->
+        <div class="absolute inset-0 bg-black/30 backdrop-blur-[2px]"></div>
+    </div>
+
+    <!-- Khung Ứng Dụng (Giao diện Grid VIP) -->
+    <div class="relative z-10 w-full h-full overflow-y-auto overflow-x-hidden flex flex-col scroll-smooth" id="app">
+        
+        <!-- App Header (Floating Island - Không bị mất góc) -->
+        <header class="w-full max-w-6xl mx-auto px-4 shrink-0 sticky top-4 z-40 transition-all">
+            <div class="glass-panel px-6 py-4 flex items-center justify-between rounded-[2rem] shadow-md border border-white/80 backdrop-blur-3xl bg-white/60">
+                <div class="flex items-center gap-3">
+                    <div class="bg-gradient-to-tr from-pink-500 to-purple-500 text-white p-2.5 rounded-2xl shadow-lg transform rotate-3">
+                        <i class="ph-fill ph-baby text-2xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl sm:text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-pink-600 to-purple-600 tracking-tight">Sữa Của Bé</h1>
+                    </div>
+                </div>
+                <!-- Nút Thông báo -->
+                <button id="notif-toggle-btn" onclick="requestNotificationPermission()" class="w-11 h-11 rounded-full bg-white/70 flex items-center justify-center text-slate-500 hover:text-pink-500 hover:bg-white shadow-sm border border-white transition-all">
+                    <i class="ph-fill ph-bell-slash text-xl" id="notif-icon"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 w-full max-w-6xl mx-auto px-4 py-8 pb-32" id="main-container">
+            
+            <div class="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
+                
+                <!-- Cột Trái (Theo dõi thuốc) -->
+                <div class="w-full lg:w-1/3 shrink-0 lg:sticky lg:top-28">
+                    <div class="glass-panel p-6 rounded-[2rem] shadow-xl border border-white/80 backdrop-blur-2xl bg-white/50">
+                        <h2 class="text-base font-extrabold text-slate-800 mb-5 flex items-center gap-2">
+                            <i class="ph-fill ph-pill text-pink-500 text-xl"></i> Uống thuốc hôm nay
+                        </h2>
+                        <div class="space-y-4">
+                            <!-- Chai Vàng -->
+                            <div class="flex items-center justify-between bg-white/80 p-4 rounded-2xl border border-white transition-all shadow-sm">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-100 to-yellow-200 flex items-center justify-center shadow-inner">
+                                        <i class="ph-fill ph-flask text-yellow-600 text-2xl"></i>
+                                    </div>
+                                    <div>
+                                        <div class="font-bold text-slate-800 text-sm">Chai Vàng</div>
+                                        <div class="text-[11px] text-slate-600 font-medium mt-0.5"><i class="ph-fill ph-drop text-yellow-500"></i> Uống 5 giọt</div>
+                                        <div id="status-yellow" class="text-[11px] font-bold text-slate-400 mt-1 transition-colors">Chưa cho uống</div>
+                                    </div>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="toggle-yellow" class="sr-only peer" onchange="toggleMedicine('yellow')">
+                                    <div class="w-12 h-7 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-[22px] peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-yellow-400 shadow-inner"></div>
+                                </label>
+                            </div>
+                            
+                            <!-- Chai Đỏ -->
+                            <div class="flex items-center justify-between bg-white/80 p-4 rounded-2xl border border-white transition-all shadow-sm">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-red-100 to-red-200 flex items-center justify-center shadow-inner">
+                                        <i class="ph-fill ph-flask text-red-500 text-2xl"></i>
+                                    </div>
+                                    <div>
+                                        <div class="font-bold text-slate-800 text-sm">Chai Đỏ</div>
+                                        <div class="text-[11px] text-slate-600 font-medium mt-0.5"><i class="ph-fill ph-drop text-red-500"></i> Uống 3 giọt</div>
+                                        <div id="status-red" class="text-[11px] font-bold text-slate-400 mt-1 transition-colors">Chưa cho uống</div>
+                                    </div>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="toggle-red" class="sr-only peer" onchange="toggleMedicine('red')">
+                                    <div class="w-12 h-7 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-[22px] peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-red-500 shadow-inner"></div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cột Phải (Danh sách sữa) -->
+                <div class="w-full lg:w-2/3">
+                    <div id="empty-state" class="glass-panel flex flex-col items-center justify-center py-16 px-6 text-center rounded-[2.5rem] shadow-xl border border-white/80 hidden transition-all backdrop-blur-2xl bg-white/50">
+                        <div class="relative w-32 h-32 mb-6 drop-shadow-xl transform hover:scale-110 transition-transform">
+                            <div class="absolute inset-0 bg-gradient-to-tr from-pink-300 to-blue-300 rounded-full animate-ping opacity-30"></div>
+                            <i class="ph-duotone ph-baby-carriage text-7xl text-slate-700 absolute inset-0 flex items-center justify-center"></i>
+                        </div>
+                        <h2 class="text-2xl font-extrabold text-slate-800 mb-3 drop-shadow-sm">Chưa có cữ sữa nào</h2>
+                        <p class="text-slate-800 text-base max-w-[280px] leading-relaxed font-semibold">Nhấn nút (+) lấp lánh bên dưới để thêm cữ sữa nhé.</p>
+                    </div>
+
+                    <div id="milk-list" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <!-- Items list -->
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        
+        <!-- Nút Thêm Sữa (Dưới cùng bên phải) -->
+        <button onclick="openAddModal()" class="fixed bottom-8 right-6 lg:right-12 w-16 h-16 bg-gradient-to-tr from-pink-500 to-rose-400 text-white rounded-[2rem] shadow-2xl flex items-center justify-center z-30 focus:outline-none fab-glow transition-all active:scale-95 border border-pink-300/50 hover:scale-105">
+            <i class="ph ph-plus text-3xl drop-shadow-md"></i>
+        </button>
+
+        <!-- Nút AI (Nằm NGAY TRÊN nút thêm sữa, to bằng nút thêm sữa) -->
+        <button onclick="toggleAiModal()" class="fixed bottom-28 right-6 lg:right-12 w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-500 text-white rounded-[2rem] shadow-[0_0_20px_rgba(168,85,247,0.4)] flex items-center justify-center z-30 focus:outline-none transition-all active:scale-95 border border-purple-300/50 hover:scale-105 group">
+            <i class="ph-fill ph-sparkle text-3xl animate-pulse group-hover:scale-110 transition-transform drop-shadow-md"></i>
+        </button>
+
+        <!-- Overlay mờ -->
+        <div id="modal-overlay" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md z-40 hidden opacity-0 transition-opacity duration-300" onclick="closeAllModals()"></div>
+
+        <!-- In-App Alert (Thông báo thả xuống) -->
+        <div id="in-app-alert" class="fixed top-6 left-1/2 -translate-x-1/2 bg-slate-800/95 backdrop-blur-md text-white px-6 py-3.5 rounded-full shadow-2xl z-[100] flex items-center gap-3 transform -translate-y-32 transition-transform duration-300 opacity-0 w-max max-w-[90%] border border-slate-600">
+            <i id="alert-icon" class="ph-fill ph-bell-ringing text-pink-400 text-xl"></i>
+            <span id="alert-text" class="font-medium text-sm whitespace-nowrap overflow-hidden text-ellipsis">Thông báo</span>
+        </div>
+
+        <!-- BẢN FIX: Cố định vị trí Center (top-1/2 left-1/2), giới hạn chiều cao max-h-[85dvh] để không bao giờ bị cắt ở dưới -->
+        
+        <!-- Popup Thêm Sữa -->
+        <div id="add-modal" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)] max-w-md bg-white/70 backdrop-blur-2xl rounded-[2.5rem] shadow-2xl z-50 hidden modal-enter flex-col overflow-hidden border border-white/80 max-h-[85dvh]">
+            
+            <div class="px-6 py-5 border-b border-slate-300/50 flex justify-between items-center shrink-0">
+                <h3 class="font-extrabold text-xl text-slate-800 tracking-tight">Thêm sữa mới</h3>
+                <button onclick="closeAllModals()" class="text-slate-500 hover:text-pink-500 p-2 bg-white/60 rounded-full transition-colors shadow-sm">
+                    <i class="ph ph-x text-lg"></i>
+                </button>
+            </div>
+            
+            <!-- Vùng cuộn ở giữa -->
+            <div class="p-6 overflow-y-auto flex-1 min-h-0">
+                <div class="space-y-5">
+                    <div class="group">
+                        <label class="block text-sm font-bold text-slate-800 mb-2 ml-1">Lượng sữa (ml)</label>
+                        <div class="relative">
+                            <input type="number" id="milk-volume" value="100" min="10" step="10" class="w-full pl-12 pr-4 py-4 bg-white border border-white rounded-2xl focus:ring-4 focus:ring-pink-500/20 focus:border-pink-500 transition-all outline-none text-xl font-bold text-slate-800 shadow-inner">
+                            <div class="absolute left-4 top-4 bg-slate-50 shadow-sm p-1.5 rounded-xl border">
+                                <i class="ph-fill ph-drop text-blue-500 text-lg"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-slate-800 mb-2 ml-1">Thời gian vắt / pha</label>
+                        <input type="datetime-local" id="milk-time" class="w-full px-5 py-4 bg-white border border-white rounded-2xl focus:ring-4 focus:ring-pink-500/20 focus:border-pink-500 transition-all outline-none font-bold text-slate-800 shadow-inner">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-slate-800 mb-3 ml-1">Loại sữa</label>
+                        <div class="flex gap-2 p-1.5 bg-slate-100 rounded-2xl border border-white shadow-inner">
+                            <button type="button" id="type-breast-btn" onclick="setMilkType('BREAST')" class="flex-1 py-3 text-sm font-bold rounded-xl transition-all shadow-md bg-pink-500 text-white">Sữa mẹ</button>
+                            <button type="button" id="type-formula-btn" onclick="setMilkType('FORMULA')" class="flex-1 py-3 text-sm font-bold rounded-xl transition-all text-slate-500 hover:bg-white/80">Sữa công thức</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-slate-800 mb-3 ml-1">Trạng thái bảo quản</label>
+                        <div class="grid grid-cols-2 gap-3" id="status-options">
+                            <!-- JS tự nạp -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nút bấm dưới cùng LUÔN HIỂN THỊ (shrink-0) -->
+            <div class="px-6 py-5 border-t border-slate-300/50 shrink-0 bg-white/40">
+                <button onclick="saveMilk()" class="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-bold py-4 rounded-2xl shadow-lg transform hover:-translate-y-1 transition-all text-lg">
+                    Lưu cữ sữa
+                </button>
+            </div>
+        </div>
+
+        <!-- Popup Đổi Trạng Thái (Center) -->
+        <div id="action-modal" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)] max-w-sm bg-white/80 backdrop-blur-2xl rounded-[2.5rem] shadow-2xl z-50 hidden modal-enter flex-col overflow-hidden border border-white/80 max-h-[80dvh]">
+            <div class="px-6 py-5 border-b border-slate-300/50 flex justify-between items-center bg-white/30 shrink-0">
+                <h3 class="font-extrabold text-xl text-slate-800">Cập nhật trạng thái</h3>
+                <button onclick="closeAllModals()" class="text-slate-500 hover:text-pink-500 p-2 bg-white/60 rounded-full transition-colors shadow-sm">
+                    <i class="ph ph-x text-lg"></i>
+                </button>
+            </div>
+            <div class="p-5 space-y-3 overflow-y-auto flex-1 min-h-0" id="action-options">
+                <!-- Dynamically populated options -->
+            </div>
+            <div class="px-5 pb-5 bg-white/30 border-t border-slate-300/50 pt-4 shrink-0">
+                <button onclick="confirmDelete()" class="w-full bg-gradient-to-r from-red-50 to-red-100/80 text-red-600 hover:from-red-100 hover:to-red-200 font-bold py-4 rounded-2xl border border-red-200 transition-all flex items-center justify-center gap-2 shadow-sm">
+                    <i class="ph-bold ph-trash text-lg"></i> Hủy sữa này (Bỏ lỡ/Hỏng)
+                </button>
+            </div>
+        </div>
+
+        <!-- Popup Xác Nhận Xóa (Center) -->
+        <div id="confirm-modal" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)] max-w-xs bg-white/90 backdrop-blur-2xl rounded-[2.5rem] shadow-2xl z-[60] hidden modal-enter flex-col text-center border border-white/80">
+            <div class="p-8">
+                <div class="w-20 h-20 bg-gradient-to-br from-red-100 to-red-200 text-red-500 rounded-3xl flex items-center justify-center mx-auto mb-5 shadow-inner transform rotate-12">
+                    <i class="ph-fill ph-warning-circle text-4xl transform -rotate-12"></i>
+                </div>
+                <h3 class="font-extrabold text-xl text-slate-800 mb-3">Xác nhận bỏ sữa?</h3>
+                <p class="text-slate-700 text-sm leading-relaxed font-medium">Sữa đã hỏng hoặc bé không bú nữa? Dữ liệu này sẽ bị xóa.</p>
+            </div>
+            <div class="flex border-t border-slate-300/50 bg-white/40">
+                <button onclick="closeConfirmModal()" class="flex-1 py-4 text-slate-800 font-bold hover:bg-white/60 transition-colors">Hủy bỏ</button>
+                <button onclick="executeDelete()" class="flex-1 py-4 text-red-600 font-extrabold hover:bg-red-50/80 border-l border-slate-300/50 transition-colors">Bỏ đi</button>
+            </div>
+        </div>
+
+        <!-- Khung Chat AI -->
+        <div id="ai-modal" class="fixed inset-y-0 right-0 w-full max-w-[90%] sm:max-w-sm glass-panel z-[60] transform translate-x-full transition-transform duration-500 ease-in-out flex flex-col border-l border-white/60 shadow-2xl rounded-l-[2.5rem] lg:rounded-none bg-white/60">
+            <div class="px-5 py-4 flex justify-between items-center bg-white/40 border-b border-slate-300/50 shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="bg-gradient-to-tr from-purple-500 to-indigo-500 text-white w-10 h-10 rounded-xl shadow-md flex items-center justify-center">
+                        <i class="ph-fill ph-magic-wand text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-extrabold text-slate-800 text-sm">Trợ Lý AI Bỉm Sữa</h3>
+                        <p class="text-[10px] text-purple-600 font-bold uppercase tracking-wider">Trực tuyến</p>
+                    </div>
+                </div>
+                <button onclick="toggleAiModal()" class="text-slate-500 hover:text-pink-500 p-2 rounded-full bg-white/60 shadow-sm transition-colors"><i class="ph-bold ph-x text-sm"></i></button>
+            </div>
+            
+            <div id="ai-chat-history" class="flex-1 overflow-y-auto p-4 space-y-4 flex flex-col scroll-smooth">
+                <div class="flex gap-2">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center shrink-0 text-purple-500 shadow-sm border border-purple-200">
+                        <i class="ph-fill ph-robot"></i>
+                    </div>
+                    <div class="bg-white/90 backdrop-blur-sm p-3 rounded-2xl rounded-tl-none shadow-sm text-sm text-slate-800 border border-white max-w-[85%] font-medium leading-relaxed">
+                        Chào mẹ! Bác sĩ AI đây. Mẹ có câu hỏi gì về bảo quản sữa, hay chăm bé hôm nay không? 🍼
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-4 border-t border-slate-300/50 bg-white/40 shrink-0 pb-8 lg:pb-4">
+                <div class="flex gap-2 items-end">
+                    <textarea id="ai-input" rows="1" placeholder="Hỏi bác sĩ AI..." class="flex-1 bg-white border border-purple-200/50 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 shadow-inner resize-none font-medium text-slate-800" onkeypress="handleAiKeyPress(event)"></textarea>
+                    <button onclick="sendAiMessage()" id="ai-send-btn" class="bg-gradient-to-r from-purple-500 to-indigo-500 text-white w-11 h-11 rounded-2xl flex items-center justify-center shadow-lg hover:shadow-xl transform transition-all active:scale-95 shrink-0">
+                        <i class="ph-fill ph-paper-plane-right text-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const MILLISECONDS_IN_MINUTE = 60 * 1000;
+        const MILLISECONDS_IN_HOUR = 60 * MILLISECONDS_IN_MINUTE;
+        const MILLISECONDS_IN_DAY = 24 * MILLISECONDS_IN_HOUR;
+
+        // BẢN FIX: Chuẩn thời gian bảo quản sữa thực tế tại Việt Nam
+        const STATES = {
+            ROOM: { 
+                id: 'ROOM', label: 'Nhiệt độ phòng', desc: 'Tối đa 2 giờ', 
+                duration: 2 * MILLISECONDS_IN_HOUR, icon: 'ph-thermometer',
+                colorClass: 'text-yellow-700 bg-yellow-100/50 border-yellow-200',
+                progressColor: 'bg-grad-yellow'
+            },
+            FRIDGE: { 
+                id: 'FRIDGE', label: 'Ngăn mát', desc: 'Tối đa 24 giờ', 
+                duration: 24 * MILLISECONDS_IN_HOUR, icon: 'ph-refrigerator',
+                colorClass: 'text-blue-700 bg-blue-100/50 border-blue-200',
+                progressColor: 'bg-grad-blue'
+            },
+            FREEZER: { 
+                id: 'FREEZER', label: 'Trữ đông', desc: 'Tối đa 3 tháng', 
+                duration: 90 * MILLISECONDS_IN_DAY, icon: 'ph-snowflake',
+                colorClass: 'text-indigo-700 bg-indigo-100/50 border-indigo-200',
+                progressColor: 'bg-grad-indigo'
+            },
+            THAWED: { 
+                id: 'THAWED', label: 'Đã rã đông', desc: 'Tối đa 24 giờ', 
+                duration: 24 * MILLISECONDS_IN_HOUR, icon: 'ph-drop-half-bottom',
+                colorClass: 'text-cyan-700 bg-cyan-100/50 border-cyan-200',
+                progressColor: 'bg-grad-cyan'
+            },
+            WARMED: { 
+                id: 'WARMED', label: 'Đã hâm nóng', desc: 'Tối đa 1 giờ', 
+                duration: 1 * MILLISECONDS_IN_HOUR, icon: 'ph-fire',
+                colorClass: 'text-orange-700 bg-orange-100/50 border-orange-200',
+                progressColor: 'bg-grad-orange'
+            },
+            PARTIAL: {
+                id: 'PARTIAL', label: 'Bú dở (Còn thừa)', desc: 'Tối đa 1 giờ',
+                duration: 1 * MILLISECONDS_IN_HOUR, icon: 'ph-baby',
+                colorClass: 'text-purple-700 bg-purple-100/50 border-purple-200',
+                progressColor: 'bg-grad-indigo'
+            }
+        };
+
+        const TRANSITIONS = {
+            ROOM: ['FRIDGE', 'FREEZER', 'WARMED', 'PARTIAL'],
+            FRIDGE: ['FREEZER', 'WARMED', 'PARTIAL'],
+            FREEZER: ['THAWED', 'WARMED'],
+            THAWED: ['WARMED', 'PARTIAL'],
+            WARMED: ['PARTIAL'],
+            PARTIAL: []
+        };
+
+        let milkBatches = [];
+        let timerInterval = null;
+        let selectedStateForAdd = 'FRIDGE';
+        let selectedMilkType = 'BREAST';
+        let currentActionItemId = null;
+        let currentItemToDelete = null;
+        let notificationsEnabled = false;
+
+        const FUN_MESSAGES = {
+            milk: [
+                "Mẹ vất vả rồi! Bé sẽ lớn nhanh lắm đây 🥰",
+                "Tuyệt vời! Mỗi giọt sữa là một giọt vàng ✨",
+                "Mẹ nhớ uống một cốc nước ấm nhé! 💧",
+                "Lưu sữa thành công! Mẹ siêu nhân! 🦸‍♀️",
+                "Tủ sữa của bé lại đầy thêm một chút rồi! 🍼",
+                "Sữa mẹ là tốt nhất, mẹ là số một! 🥇"
+            ],
+            med: [
+                "Bé giỏi quá, uống thuốc ngoan ghê! 🌟",
+                "Mẹ đã đánh bay vi khuẩn cho bé rồi! 🥊",
+                "Uống xong rồi, mau ăn chóng lớn nhé bé ơi! 🌸"
+            ],
+            random: [
+                "Hôm nay mẹ đã làm rất tốt rồi! 💖",
+                "Đừng quên dành 5 phút hít thở sâu mẹ nhé! 🧘‍♀️",
+                "Mẹ vui vẻ thì sữa mới thơm mát! Cố lên mẹ yêu ✨"
+            ]
+        };
+
+        function showFunAlert(type) {
+            const messages = FUN_MESSAGES[type];
+            const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+            const icons = ['ph-heart text-red-400', 'ph-sparkle text-yellow-400', 'ph-star text-orange-400', 'ph-smiley text-green-400'];
+            const randomIcon = icons[Math.floor(Math.random() * icons.length)];
+            showInAppAlert(randomMsg, randomIcon);
+        }
+
+        function checkNotificationStatus() {
+            const btn = document.getElementById('notif-toggle-btn');
+            const icon = document.getElementById('notif-icon');
+            if (!("Notification" in window)) {
+                btn.style.display = 'none';
+                return;
+            }
+            if (Notification.permission === "granted") {
+                notificationsEnabled = true;
+                icon.className = 'ph-fill ph-bell-ringing text-xl text-pink-500';
+                btn.classList.add('bg-white', 'shadow-md');
+                btn.classList.remove('bg-white/70');
+            } else if (Notification.permission === "denied") {
+                icon.className = 'ph-fill ph-bell-slash text-xl text-red-400';
+            } else {
+                icon.className = 'ph-fill ph-bell text-xl text-slate-500';
+            }
+        }
+
+        function requestNotificationPermission() {
+            if (!("Notification" in window)) {
+                showInAppAlert("Trình duyệt không hỗ trợ thông báo.", "ph-warning-circle text-red-400");
+                return;
+            }
+            if (Notification.permission === "granted") {
+                showInAppAlert("Thông báo đã bật sẵn rồi mẹ nhé!", "ph-check-circle text-green-400");
+                return;
+            }
+            Notification.requestPermission().then(permission => {
+                checkNotificationStatus();
+                if (permission === "granted") {
+                    showInAppAlert("Bật thông báo thành công! 🎉", "ph-check-circle text-green-400");
+                } else {
+                    showInAppAlert("Vui lòng cấp quyền trong cài đặt.", "ph-warning-circle text-yellow-400");
+                }
+            });
+        }
+
+        function showInAppAlert(text, iconClass = 'ph-bell-ringing text-pink-400') {
+            const alertEl = document.getElementById('in-app-alert');
+            const iconEl = document.getElementById('alert-icon');
+            document.getElementById('alert-text').textContent = text;
+            iconEl.className = `ph-fill ${iconClass} text-xl`;
+            alertEl.classList.remove('opacity-0', '-translate-y-32');
+            alertEl.classList.add('opacity-100', 'translate-y-0');
+            if(window.alertTimeout) clearTimeout(window.alertTimeout);
+            window.alertTimeout = setTimeout(() => {
+                alertEl.classList.add('opacity-0', '-translate-y-32');
+                alertEl.classList.remove('opacity-100', 'translate-y-0');
+            }, 3000);
+        }
+
+        function toggleMedicine(type) {
+            const checkbox = document.getElementById(`toggle-${type}`);
+            const statusText = document.getElementById(`status-${type}`);
+            if (checkbox.checked) {
+                statusText.textContent = "Đã cho uống";
+                statusText.className = "text-[11px] font-bold text-green-600 mt-1 transition-colors";
+                showFunAlert('med');
+            } else {
+                statusText.textContent = "Chưa cho uống";
+                statusText.className = "text-[11px] font-bold text-slate-400 mt-1 transition-colors";
+            }
+        }
+
+        function setupInitialDatetime() {
+            const now = new Date();
+            const offset = now.getTimezoneOffset() * 60000;
+            const localISOTime = (new Date(Date.now() - offset)).toISOString().slice(0, 16);
+            document.getElementById('milk-time').value = localISOTime;
+        }
+
+        function setMilkType(type) {
+            selectedMilkType = type;
+            const btnBreast = document.getElementById('type-breast-btn');
+            const btnFormula = document.getElementById('type-formula-btn');
+            if (type === 'BREAST') {
+                btnBreast.className = "flex-1 py-3 text-sm font-bold rounded-xl transition-all shadow-md bg-pink-500 text-white";
+                btnFormula.className = "flex-1 py-3 text-sm font-bold rounded-xl transition-all text-slate-500 hover:bg-white";
+            } else {
+                btnFormula.className = "flex-1 py-3 text-sm font-bold rounded-xl transition-all shadow-md bg-blue-500 text-white";
+                btnBreast.className = "flex-1 py-3 text-sm font-bold rounded-xl transition-all text-slate-500 hover:bg-white";
+            }
+            renderStatusOptions();
+        }
+
+        function renderStatusOptions() {
+            const container = document.getElementById('status-options');
+            container.innerHTML = '';
+            let initialStates = selectedMilkType === 'BREAST' ? ['FRIDGE', 'FREEZER', 'ROOM', 'PARTIAL'] : ['FRIDGE', 'ROOM', 'PARTIAL'];
+            if (!initialStates.includes(selectedStateForAdd)) selectedStateForAdd = 'FRIDGE';
+            
+            initialStates.forEach(stateKey => {
+                const state = STATES[stateKey];
+                const isSelected = selectedStateForAdd === stateKey;
+                const btn = document.createElement('button');
+                btn.className = `flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all transform hover:scale-105 active:scale-95 ${isSelected ? 'border-pink-500 bg-white shadow-md' : 'border-slate-200 bg-white/70 text-slate-500 hover:border-pink-300'}`;
+                btn.onclick = () => { selectedStateForAdd = stateKey; renderStatusOptions(); };
+                btn.innerHTML = `<div class="${isSelected ? 'bg-pink-500 text-white' : 'bg-slate-200 text-slate-400'} w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-colors"><i class="${state.icon} text-xl"></i></div><span class="font-bold text-sm ${isSelected ? 'text-pink-700' : 'text-slate-600'}">${state.label}</span>`;
+                container.appendChild(btn);
+            });
+        }
+
+        function openAddModal() {
+            setupInitialDatetime();
+            setMilkType('BREAST');
+            document.getElementById('milk-volume').value = 100;
+            showModal('add-modal');
+        }
+
+        function openActionModal(id) {
+            currentActionItemId = id;
+            const item = milkBatches.find(m => m.id === id);
+            if (!item) return;
+            const container = document.getElementById('action-options');
+            container.innerHTML = '';
+            
+            let possibleTransitions = TRANSITIONS[item.currentState] || [];
+            if (item.milkType === 'FORMULA') possibleTransitions = possibleTransitions.filter(t => t !== 'FREEZER' && t !== 'THAWED');
+            
+            if (possibleTransitions.length === 0) {
+                container.innerHTML = `<div class="bg-purple-50 border border-purple-200 p-4 rounded-2xl text-center"><p class="text-sm font-bold text-purple-800">Sữa bú dở không thể cất lại.</p><p class="text-xs text-purple-600 mt-1">Vui lòng bỏ sữa khi hết giờ.</p></div>`;
+            } else {
+                possibleTransitions.forEach(targetStateKey => {
+                    const state = STATES[targetStateKey];
+                    const btn = document.createElement('button');
+                    btn.className = 'w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-transparent bg-slate-50 hover:bg-white hover:border-pink-300 shadow-sm text-left transition-all';
+                    btn.onclick = () => changeState(id, targetStateKey);
+                    btn.innerHTML = `<div class="${state.colorClass} w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border"><i class="${state.icon} text-2xl"></i></div><div><div class="font-bold text-slate-800 text-base mb-0.5">Chuyển sang: ${state.label}</div><div class="text-xs font-semibold text-slate-500"><i class="ph-fill ph-clock"></i> ${state.desc}</div></div><i class="ph-bold ph-caret-right ml-auto text-slate-300"></i>`;
+                    container.appendChild(btn);
+                });
+            }
+            showModal('action-modal');
+        }
+
+        function showModal(modalId) {
+            const overlay = document.getElementById('modal-overlay');
+            const modal = document.getElementById(modalId);
+            overlay.classList.remove('hidden');
+            setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+            modal.classList.remove('hidden');
+            modal.classList.add('modal-enter-active');
+            setTimeout(() => modal.classList.remove('modal-enter', 'modal-enter-active'), 400);
+        }
+
+        function closeAllModals() {
+            const overlay = document.getElementById('modal-overlay');
+            const modals = ['add-modal', 'action-modal', 'confirm-modal'];
+            const aiModal = document.getElementById('ai-modal');
+            if (aiModal && !aiModal.classList.contains('translate-x-full')) aiModal.classList.add('translate-x-full');
+            overlay.classList.add('opacity-0');
+            setTimeout(() => overlay.classList.add('hidden'), 300);
+            modals.forEach(id => {
+                const modal = document.getElementById(id);
+                if (!modal.classList.contains('hidden')) {
+                    modal.classList.add('modal-leave-active');
+                    setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('modal-leave', 'modal-leave-active'); }, 300);
+                }
+            });
+        }
+
+        function saveMilk() {
+            const volume = parseInt(document.getElementById('milk-volume').value) || 0;
+            const timeStr = document.getElementById('milk-time').value;
+            if (volume <= 0 || !timeStr) return;
+            const stateStartTime = new Date(timeStr).getTime();
+            const duration = STATES[selectedStateForAdd].duration;
+            
+            milkBatches.push({
+                id: Math.random().toString(36).substr(2, 9),
+                milkType: selectedMilkType, volume, currentState: selectedStateForAdd,
+                stateStartTime, expirationTime: stateStartTime + duration,
+                notifiedWarning: false, notifiedExpired: false
+            });
+            milkBatches.sort((a, b) => a.expirationTime - b.expirationTime);
+            closeAllModals(); renderApp(); showFunAlert('milk');
+            if (!timerInterval) timerInterval = setInterval(updateAllTimers, 1000);
+        }
+
+        function changeState(id, newStateKey) {
+            const idx = milkBatches.findIndex(m => m.id === id);
+            if (idx === -1) return;
+            const now = Date.now();
+            milkBatches[idx].currentState = newStateKey;
+            milkBatches[idx].stateStartTime = now;
+            milkBatches[idx].expirationTime = now + STATES[newStateKey].duration;
+            milkBatches[idx].notifiedWarning = false;
+            milkBatches[idx].notifiedExpired = false;
+            milkBatches.sort((a, b) => a.expirationTime - b.expirationTime);
+            closeAllModals(); renderApp();
+        }
+
+        function confirmDelete() { currentItemToDelete = currentActionItemId; closeAllModals(); setTimeout(() => showModal('confirm-modal'), 350); }
+        function closeConfirmModal() { currentItemToDelete = null; closeAllModals(); }
+        function executeDelete() {
+            if (currentItemToDelete) { milkBatches = milkBatches.filter(m => m.id !== currentItemToDelete); currentItemToDelete = null; renderApp(); }
+            closeAllModals();
+        }
+
+        function formatTimeLeft(msLeft) {
+            if (msLeft <= 0) return "Đã hết hạn!";
+            const days = Math.floor(msLeft / MILLISECONDS_IN_DAY);
+            const hours = Math.floor((msLeft % MILLISECONDS_IN_DAY) / MILLISECONDS_IN_HOUR);
+            const minutes = Math.floor((msLeft % MILLISECONDS_IN_HOUR) / MILLISECONDS_IN_MINUTE);
+            const seconds = Math.floor((msLeft % MILLISECONDS_IN_MINUTE) / 1000);
+            if (days > 0) return `${days} ngày ${hours} giờ`;
+            if (hours > 0) return `${hours} giờ ${minutes} phút`;
+            return `${minutes} phút ${seconds}s`; 
+        }
+
+        function renderApp() {
+            const listContainer = document.getElementById('milk-list');
+            const emptyState = document.getElementById('empty-state');
+            const now = Date.now();
+            
+            if (milkBatches.length === 0) {
+                listContainer.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            emptyState.classList.add('hidden');
+            listContainer.innerHTML = '';
+
+            milkBatches.forEach(batch => {
+                const stateDef = STATES[batch.currentState];
+                const isExpired = now >= batch.expirationTime;
+                const d = new Date(batch.stateStartTime);
+                const timeStr = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')} - ${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+                
+                const card = document.createElement('div');
+                card.className = "milk-card cursor-pointer";
+                card.onclick = () => openActionModal(batch.id);
+                
+                let progress = 100;
+                let fillColorClass = stateDef.progressColor;
+                if (!isExpired) {
+                    progress = Math.max(0, 100 - ((now - batch.stateStartTime) / (batch.expirationTime - batch.stateStartTime) * 100));
+                    if (progress < 20) fillColorClass = 'bg-grad-red shadow-[0_0_10px_rgba(255,8,68,0.6)]';
+                } else { progress = 0; fillColorClass = 'bg-grad-red'; }
+
+                card.innerHTML = `
+                    <div class="milk-card-inner glass-panel bg-white/70 backdrop-blur-2xl p-5 rounded-[2rem] flex flex-col gap-4 relative overflow-hidden ${isExpired ? 'border-red-300 bg-red-50/90' : ''}">
+                        <div class="flex justify-between items-start">
+                            <div class="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 border bg-white shadow-sm ${stateDef.colorClass}">
+                                <i class="${stateDef.icon} text-sm"></i> ${stateDef.label}
+                            </div>
+                            <div class="absolute top-5 right-5 text-[10px] font-bold px-2.5 py-1 rounded-lg border shadow-sm ${batch.milkType === 'FORMULA' ? 'bg-blue-50 text-blue-600 border-blue-200' : 'bg-pink-50 text-pink-600 border-pink-200'}">
+                                ${batch.milkType === 'FORMULA' ? 'Công thức' : 'Sữa mẹ'}
+                            </div>
+                        </div>
+                        <div class="font-extrabold text-3xl text-slate-800 drop-shadow-sm mt-6">${batch.volume} ml</div>
+                        <div class="flex justify-between text-xs font-semibold text-slate-600 bg-white/60 p-2.5 rounded-xl mt-[-5px] shadow-sm border border-white">
+                            <div class="flex items-center gap-1.5"><i class="ph-bold ph-calendar-plus text-pink-400 text-sm"></i> Ghi nhận: ${timeStr}</div>
+                        </div>
+                        <div class="mt-1">
+                            <div class="flex justify-between text-sm mb-2 font-bold text-slate-700">
+                                <span id="text-${batch.id}" class="${isExpired ? 'text-red-500 animate-pulse' : ''}">${isExpired ? 'Đã hết hạn! Hãy bỏ đi' : 'Còn: ' + formatTimeLeft(batch.expirationTime - now)}</span>
+                            </div>
+                            <div class="liquid-bar-container h-3.5 w-full bg-slate-200/80">
+                                <div id="bar-${batch.id}" class="liquid-bar-fill ${fillColorClass}" style="width: ${progress}%"></div>
+                            </div>
+                        </div>
+                    </div>`;
+                listContainer.appendChild(card);
+            });
+        }
+
+        function updateAllTimers() {
+            const now = Date.now();
+            let needsRender = false;
+            milkBatches.forEach(batch => {
+                const isExpired = now >= batch.expirationTime;
+                const msLeft = batch.expirationTime - now;
+                const stateDef = STATES[batch.currentState];
+                
+                if (isExpired && !batch.notifiedExpired) {
+                    if(notificationsEnabled) new Notification("Sữa đã hết hạn!", {body: `Cữ sữa ${batch.volume}ml (${stateDef.label}) đã quá hạn sử dụng. Hãy kiểm tra và bỏ đi.`});
+                    batch.notifiedExpired = true; needsRender = true;
+                } else if (!isExpired && msLeft > 0 && msLeft <= 30 * MILLISECONDS_IN_MINUTE && !batch.notifiedWarning) {
+                    if(notificationsEnabled) new Notification("Cảnh báo: Sữa sắp hết hạn", {body: `Cữ sữa ${batch.volume}ml (${stateDef.label}) sẽ hết hạn sau chưa tới 30 phút.`});
+                    batch.notifiedWarning = true;
+                }
+                
+                const textEl = document.getElementById(`text-${batch.id}`);
+                const barEl = document.getElementById(`bar-${batch.id}`);
+                if (textEl && barEl) {
+                    if (isExpired) {
+                        if (textEl.textContent !== 'Đã hết hạn! Hãy bỏ đi') needsRender = true;
+                    } else {
+                        textEl.textContent = `Còn: ${formatTimeLeft(msLeft)}`;
+                        const p = Math.max(0, 100 - ((now - batch.stateStartTime) / (batch.expirationTime - batch.stateStartTime) * 100));
+                        barEl.style.width = `${p}%`;
+                        if (p < 20) { barEl.className = `liquid-bar-fill bg-grad-red shadow-[0_0_10px_rgba(255,8,68,0.6)]`; textEl.className = 'text-red-500 font-bold'; } 
+                        else { barEl.className = `liquid-bar-fill ${stateDef.progressColor}`; textEl.className = 'text-slate-700 font-bold'; }
+                    }
+                }
+            });
+            if (needsRender) renderApp();
+        }
+
+        function toggleAiModal() {
+            const m = document.getElementById('ai-modal');
+            const o = document.getElementById('modal-overlay');
+            if (m.classList.contains('translate-x-full')) {
+                m.classList.remove('translate-x-full');
+                o.classList.remove('hidden');
+                setTimeout(() => o.classList.remove('opacity-0'), 10);
+            } else {
+                m.classList.add('translate-x-full');
+                o.classList.add('opacity-0');
+                setTimeout(() => o.classList.add('hidden'), 300);
+            }
+        }
+
+        function handleAiKeyPress(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAiMessage(); } }
+
+        function sendAiMessage() {
+            const i = document.getElementById('ai-input');
+            const msg = i.value.trim();
+            if (!msg) return;
+            appendAiMessage('user', msg); i.value = '';
+            const loadingId = 'ai-load-' + Date.now();
+            appendAiLoading(loadingId);
+            setTimeout(() => {
+                const el = document.getElementById(loadingId); if (el) el.remove();
+                let res = 'Dạ, mẹ nhắn cụ thể hơn nhé. Bác sĩ AI luôn ở đây để giúp mẹ! ✨';
+                const l = msg.toLowerCase();
+                if (l.includes('rã đông')) res = 'Mẹ nên rã đông sữa từ từ trong ngăn mát tủ lạnh qua đêm. Tuyệt đối không dùng lò vi sóng hoặc rã đông ở nhiệt độ phòng mẹ nhé! 🍼';
+                else if (l.includes('bảo quản') || l.includes('bao lâu')) res = 'Theo chuẩn VN: Nhiệt độ phòng 2h, Ngăn mát 24h, Trữ đông 3 tháng. Sữa bú dở chỉ dùng trong 1h nha mẹ! ❤️';
+                else if (l.includes('công thức')) res = 'Sữa công thức đã pha để ngoài được 2 tiếng. Nhưng nếu bé đã bú dở thì mẹ phải bỏ đi sau 1 tiếng để tránh vi khuẩn sinh sôi nhé! 👶';
+                appendAiMessage('ai', res);
+            }, 1200);
+        }
+
+        function appendAiMessage(sender, text) {
+            const h = document.getElementById('ai-chat-history');
+            const d = document.createElement('div');
+            d.className = sender === 'user' ? "flex gap-2 justify-end" : "flex gap-2";
+            d.innerHTML = sender === 'user' 
+                ? `<div class="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-3 rounded-2xl rounded-tr-none shadow-md text-sm max-w-[85%] font-medium">${text}</div>`
+                : `<div class="w-8 h-8 rounded-full bg-purple-100 text-purple-500 flex items-center justify-center shrink-0 border"><i class="ph-fill ph-robot"></i></div><div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-sm text-slate-700 border font-medium leading-relaxed">${text}</div>`;
+            h.appendChild(d); h.scrollTop = h.scrollHeight;
+        }
+
+        function appendAiLoading(id) {
+            const h = document.getElementById('ai-chat-history');
+            const d = document.createElement('div'); d.id = id; d.className = "flex gap-2";
+            d.innerHTML = `<div class="w-8 h-8 rounded-full bg-purple-100 text-purple-500 flex items-center justify-center shrink-0 border"><i class="ph-fill ph-robot"></i></div><div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm border flex gap-1"><div class="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce"></div><div class="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div><div class="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div></div>`;
+            h.appendChild(d); h.scrollTop = h.scrollHeight;
+        }
+
+        // Init
+        renderStatusOptions(); renderApp(); checkNotificationStatus();
+        setTimeout(() => { if(milkBatches.length > 0) showFunAlert('random'); }, 5000);
+    </script>
+</body>
+</html>
