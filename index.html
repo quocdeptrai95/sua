@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#fbcfe8">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <title>Sổ Theo Dõi Sữa</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-font-smoothing: antialiased;
+            transform: translateZ(0);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #fbcfe8 0%, #e0e7ff 50%, #f3e8ff 100%);
+            min-height: 100dvh;
+            color: #1e293b;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            border-top: 1px solid rgba(255, 255, 255, 1);
+            border-left: 1px solid rgba(255, 255, 255, 1);
+            box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.12), inset 0 0 20px rgba(255, 255, 255, 0.4);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-panel:hover {
+            background: rgba(255, 255, 255, 0.8);
+            transform: translateY(-2px);
+            box-shadow: 0 16px 48px 0 rgba(31, 38, 135, 0.18);
+        }
+        .ios-switch {
+            appearance: none;
+            width: 50px;
+            height: 30px;
+            background: rgba(203, 213, 225, 0.8);
+            border-radius: 30px;
+            position: relative;
+            cursor: pointer;
+            outline: none;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+            transition: background 0.3s;
+        }
+        .ios-switch::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .ios-switch:checked.switch-yellow { background: #fbbf24; }
+        .ios-switch:checked.switch-red { background: #ef4444; }
+        .ios-switch:checked::after { transform: translateX(20px); }
+        .liquid-track {
+            background: rgba(241, 245, 249, 0.8);
+            border-radius: 999px;
+            overflow: hidden;
+            height: 10px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .liquid-fill {
+            height: 100%;
+            border-radius: 999px;
+            transition: width 1s linear, background 0.5s ease;
+            position: relative;
+            overflow: hidden;
+            will-change: width;
+        }
+        .liquid-fill::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+            animation: shimmer 2s infinite linear;
+            background-size: 200% 100%;
+        }
+        @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+        .modal-overlay {
+            opacity: 0; visibility: hidden; transition: all 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1; visibility: visible;
+        }
+        .modal-content {
+            opacity: 0; transform: translateY(20px) scale(0.95); transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .modal-overlay.active .modal-content {
+            opacity: 1; transform: translateY(0) scale(1);
+        }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(203, 213, 225, 0.6); border-radius: 10px; }
+        body.modal-open { overflow: hidden; }
+        .sync-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: #94a3b8;
+            transition: background 0.3s;
+        }
+        .sync-dot.online { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
+        .sync-dot.offline { background: #ef4444; }
+    </style>
+</head>
+<body class="selection:bg-pink-500 selection:text-white">
+    <div class="relative z-10 flex flex-col h-[100dvh] w-full max-w-6xl mx-auto overflow-hidden p-3 sm:p-6 gap-4">
+
+        <!-- Header -->
+        <header class="flex-shrink-0">
+            <div class="flex items-center justify-between glass-panel rounded-3xl p-4 px-5 shadow-xl relative">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-pink-500 to-rose-400 flex items-center justify-center text-white shadow-lg shadow-pink-500/30 border border-white/50">
+                        <i class="ph-fill ph-baby text-2xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-extrabold text-slate-800 tracking-tight">Sổ Sữa Của Bé</h1>
+                        <div class="flex items-center gap-1.5 mt-0.5">
+                            <div id="sync-dot" class="sync-dot"></div>
+                            <span id="sync-text" class="text-[10px] font-semibold text-slate-500">Đang kết nối...</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="btn-notify" onclick="enablePush()" class="w-10 h-10 rounded-xl bg-white/60 flex items-center justify-center text-slate-600 hover:bg-pink-100 transition-colors border border-white/50" title="Bật thông báo">
+                        <i class="ph-fill ph-bell text-lg"></i>
+                    </button>
+                    <button onclick="openScheduleModal()" class="w-10 h-10 rounded-xl bg-white/60 flex items-center justify-center text-slate-600 hover:bg-pink-100 transition-colors border border-white/50" title="Lịch cữ sữa">
+                        <i class="ph-fill ph-clock text-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main -->
+        <main class="flex-1 overflow-y-auto pb-32 grid grid-cols-1 lg:grid-cols-3 gap-6 pr-1">
+
+            <!-- Cột Trái: Thuốc -->
+            <div class="lg:col-span-1 space-y-4">
+                <h2 class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-3 flex items-center gap-2">
+                    <i class="ph-fill ph-pill text-pink-500 text-base"></i> Uống thuốc hôm nay
+                </h2>
+
+                <div class="glass-panel rounded-3xl p-4 flex items-center justify-between">
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-11 h-11 rounded-2xl bg-white/70 backdrop-blur-md border border-white/60 flex items-center justify-center text-yellow-600 shadow-sm">
+                            <i class="ph-fill ph-flask text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-sm text-slate-800">Chai Vàng</h3>
+                            <p class="text-[11px] font-semibold text-slate-500">Uống 5 giọt</p>
+                            <p id="status-yellow" class="text-[10px] font-bold text-slate-400 mt-0.5">Chưa cho uống</p>
+                        </div>
+                    </div>
+                    <input type="checkbox" id="toggle-yellow" class="ios-switch switch-yellow" onchange="toggleMed('yellow')">
+                </div>
+
+                <div class="glass-panel rounded-3xl p-4 flex items-center justify-between">
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-11 h-11 rounded-2xl bg-white/70 backdrop-blur-md border border-white/60 flex items-center justify-center text-red-500 shadow-sm">
+                            <i class="ph-fill ph-flask text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-sm text-slate-800">Chai Đỏ</h3>
+                            <p class="text-[11px] font-semibold text-slate-500">Uống 3 giọt</p>
+                            <p id="status-red" class="text-[10px] font-bold text-slate-400 mt-0.5">Chưa cho uống</p>
+                        </div>
+                    </div>
+                    <input type="checkbox" id="toggle-red" class="ios-switch switch-red" onchange="toggleMed('red')">
+                </div>
+            </div>
+
+            <!-- Cột Phải: Tủ sữa -->
+            <div class="lg:col-span-2 space-y-4">
+                <h2 class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-3 flex items-center gap-2">
+                    <i class="ph-fill ph-drop text-blue-500 text-base"></i> Tủ sữa của bé
+                </h2>
+
+                <div id="empty-state" class="glass-panel rounded-3xl p-12 flex flex-col items-center justify-center text-center">
+                    <div class="w-20 h-20 bg-white/50 backdrop-blur-md border border-white/60 rounded-full flex items-center justify-center text-slate-400 mb-4 shadow-inner">
+                        <i class="ph-fill ph-baby-carriage text-4xl"></i>
+                    </div>
+                    <h3 class="font-extrabold text-lg text-slate-800 mb-1">Chưa có cữ sữa nào</h3>
+                    <p class="text-slate-500 text-xs font-medium max-w-xs">Nhấn nút dấu cộng (+) ở góc dưới bên phải để bắt đầu lưu trữ nhé mẹ.</p>
+                </div>
+
+                <div id="milk-list" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Rendered by JS -->
+                </div>
+            </div>
+        </main>
+
+        <!-- FAB -->
+        <div class="fixed bottom-6 right-6 z-40">
+            <button onclick="openAddModal()" class="w-16 h-16 bg-gradient-to-br from-pink-500 to-rose-500 rounded-full flex items-center justify-center text-white shadow-2xl shadow-pink-500/40 hover:scale-105 active:scale-95 transition-all border border-pink-300/60">
+                <i class="ph-bold ph-plus text-2xl"></i>
+            </button>
+        </div>
+
+        <!-- Modal Thêm Sữa -->
+        <div id="modal-add" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
+            <div class="modal-content w-full max-w-md glass-panel rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden max-h-[85vh]">
+                <div class="flex-shrink-0 px-6 py-4 border-b border-white/40 flex items-center justify-between bg-white/25">
+                    <h3 class="font-extrabold text-lg text-slate-800">Thêm cữ sữa mới</h3>
+                    <button onclick="closeModals()" class="w-8 h-8 flex items-center justify-center rounded-full bg-white/50 text-slate-600 hover:bg-pink-100 transition-colors">
+                        <i class="ph-bold ph-x text-sm"></i>
+                    </button>
+                </div>
+                <div class="flex-1 overflow-y-auto p-6 space-y-5">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Lượng sữa (ml)</label>
+                        <div class="relative">
+                            <input type="number" id="input-volume" value="100" class="w-full bg-white/60 backdrop-blur-md border border-white/60 text-slate-800 text-lg font-bold rounded-2xl px-5 py-3.5 pl-12 focus:outline-none focus:ring-2 focus:ring-pink-500/50 shadow-inner">
+                            <i class="ph-fill ph-drop text-blue-500 text-xl absolute left-4 top-1/2 -translate-y-1/2"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Thời gian vắt / pha</label>
+                        <input type="datetime-local" id="input-time" class="w-full bg-white/60 backdrop-blur-md border border-white/60 text-slate-800 font-bold rounded-2xl px-5 py-3.5 focus:outline-none focus:ring-2 focus:ring-pink-500/50 shadow-inner">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Loại sữa</label>
+                        <div class="flex bg-white/40 p-1 rounded-2xl backdrop-blur-md shadow-inner">
+                            <button id="btn-type-breast" onclick="selectType('BREAST')" class="flex-1 py-3 text-xs font-bold rounded-xl bg-pink-500 text-white shadow-md transition-all">Sữa mẹ</button>
+                            <button id="btn-type-formula" onclick="selectType('FORMULA')" class="flex-1 py-3 text-xs font-bold rounded-xl text-slate-600 hover:text-slate-800 transition-all">Sữa công thức</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Trạng thái bảo quản (Chuẩn Việt Nam 🇻🇳)</label>
+                        <div class="grid grid-cols-2 gap-2.5" id="status-grid"></div>
+                    </div>
+                </div>
+                <div class="flex-shrink-0 p-5 bg-white/40 backdrop-blur-md border-t border-white/40">
+                    <button onclick="saveMilk()" class="w-full py-4 bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold rounded-2xl shadow-lg shadow-pink-500/30 active:scale-[0.98] transition-transform text-base border border-pink-400/50">
+                        Lưu cữ sữa
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Cập nhật trạng thái -->
+        <div id="modal-action" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
+            <div class="modal-content w-full max-w-md glass-panel rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden max-h-[80vh]">
+                <div class="flex-shrink-0 px-6 py-4 border-b border-white/40 flex items-center justify-between bg-white/25">
+                    <h3 class="font-extrabold text-lg text-slate-800">Cập nhật cữ sữa</h3>
+                    <button onclick="closeModals()" class="w-8 h-8 flex items-center justify-center rounded-full bg-white/50 text-slate-600">
+                        <i class="ph-bold ph-x text-sm"></i>
+                    </button>
+                </div>
+                <div class="flex-1 overflow-y-auto p-4 space-y-2.5 bg-white/10" id="action-list"></div>
+                <div class="flex-shrink-0 p-4 bg-white/40 border-t border-white/40">
+                    <button onclick="confirmDelete()" class="w-full py-3.5 bg-red-50/80 backdrop-blur-md text-red-600 font-bold rounded-2xl border border-red-200 active:scale-[0.98] transition-transform flex items-center justify-center gap-2 text-sm">
+                        <i class="ph-bold ph-trash"></i> Đổ bỏ / Hết hạn
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Xác nhận xóa -->
+        <div id="modal-confirm" class="modal-overlay fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
+            <div class="modal-content w-full max-w-[280px] glass-panel rounded-[2rem] shadow-2xl overflow-hidden text-center">
+                <div class="p-6">
+                    <div class="w-14 h-14 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-3 shadow-inner">
+                        <i class="ph-fill ph-warning-circle text-2xl"></i>
+                    </div>
+                    <h3 class="font-extrabold text-base text-slate-800 mb-1">Xóa cữ sữa này?</h3>
+                    <p class="text-xs text-slate-500">Dữ liệu sẽ được dọn sạch khỏi tủ.</p>
+                </div>
+                <div class="flex border-t border-white/40">
+                    <button onclick="closeConfirm()" class="flex-1 py-3.5 font-bold text-slate-600 bg-white/40 hover:bg-white/60 transition-colors text-sm">Hủy</button>
+                    <button onclick="executeDelete()" class="flex-1 py-3.5 font-bold text-white bg-red-500 hover:bg-red-600 transition-colors text-sm">Xóa</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Lịch cữ sữa -->
+        <div id="modal-schedule" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
+            <div class="modal-content w-full max-w-md glass-panel rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden max-h-[85vh]">
+                <div class="flex-shrink-0 px-6 py-4 border-b border-white/40 flex items-center justify-between bg-white/25">
+                    <h3 class="font-extrabold text-lg text-slate-800">Lịch cữ sữa</h3>
+                    <button onclick="closeModals()" class="w-8 h-8 flex items-center justify-center rounded-full bg-white/50 text-slate-600">
+                        <i class="ph-bold ph-x text-sm"></i>
+                    </button>
+                </div>
+                <div class="flex-1 overflow-y-auto p-4 space-y-2" id="schedule-list"></div>
+                <div class="flex-shrink-0 p-4 bg-white/40 border-t border-white/40 flex gap-2">
+                    <input type="time" id="new-schedule-time" class="flex-1 bg-white/60 border border-white/60 rounded-xl px-3 py-2.5 font-bold text-sm">
+                    <button onclick="addSchedule()" class="px-4 py-2.5 bg-pink-500 text-white font-bold rounded-xl text-sm">Thêm</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast -->
+        <div id="toast" class="fixed bottom-[calc(env(safe-area-inset-bottom)+88px)] left-1/2 -translate-x-1/2 z-[100] max-w-[calc(100vw-32px)] bg-slate-900/90 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 transition-all duration-300 transform translate-y-24 opacity-0 backdrop-blur-lg border border-white/10">
+            <i id="toast-icon" class="ph-fill ph-heart text-pink-400 text-lg"></i>
+            <span id="toast-text" class="text-xs font-semibold whitespace-nowrap">Thông báo</span>
+        </div>
+    </div>
+
+<script>
+// ============================================================
+// CẤU HÌNH SUPABASE - Thay bằng key thật sau khi mày gửi
+// ============================================================
+const SUPABASE_URL = 'https://bgazoheoamsafzkzxnso.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_112rJFjGnMf3fDW6lmc_OA_cq586w14'; // <-- mày gửi key rồi tao gắn
+const FAMILY_ID = 'baby-001';
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ============================================================
+// HẰNG SỐ & STATE
+// ============================================================
+const MS_MIN = 60000;
+const MS_HR = 60 * MS_MIN;
+const MS_DAY = 24 * MS_HR;
+
+const STATES = {
+    ROOM: { id: 'ROOM', label: 'Nhiệt độ phòng', desc: 'Tối đa 2 giờ', duration: 2 * MS_HR, color: 'text-amber-700', bg: 'bg-amber-100', icon: 'ph-thermometer', bar: 'bg-amber-400' },
+    FRIDGE: { id: 'FRIDGE', label: 'Ngăn mát', desc: 'Tối đa 24 giờ', duration: 24 * MS_HR, color: 'text-blue-700', bg: 'bg-blue-100', icon: 'ph-refrigerator', bar: 'bg-blue-400' },
+    FREEZER: { id: 'FREEZER', label: 'Trữ đông', desc: 'Tối đa 3 tháng', duration: 90 * MS_DAY, color: 'text-indigo-700', bg: 'bg-indigo-100', icon: 'ph-snowflake', bar: 'bg-indigo-400' },
+    THAWED: { id: 'THAWED', label: 'Rã đông (Ngăn mát)', desc: 'Tối đa 24 giờ', duration: 24 * MS_HR, color: 'text-cyan-700', bg: 'bg-cyan-100', icon: 'ph-drop-half-bottom', bar: 'bg-cyan-400' },
+    WARMED: { id: 'WARMED', label: 'Đã hâm nóng', desc: 'Tối đa 1 giờ', duration: 1 * MS_HR, color: 'text-orange-700', bg: 'bg-orange-100', icon: 'ph-fire', bar: 'bg-orange-400' },
+    PARTIAL: { id: 'PARTIAL', label: 'Bú dở (Còn thừa)', desc: 'Tối đa 1 giờ', duration: 1 * MS_HR, color: 'text-purple-700', bg: 'bg-purple-100', icon: 'ph-baby', bar: 'bg-purple-400' }
+};
+
+const ALLOWED_TRANSITIONS = {
+    ROOM: ['FRIDGE', 'FREEZER', 'WARMED', 'PARTIAL'],
+    FRIDGE: ['FREEZER', 'WARMED', 'PARTIAL'],
+    FREEZER: ['THAWED', 'WARMED'],
+    THAWED: ['WARMED', 'PARTIAL'],
+    WARMED: ['PARTIAL'],
+    PARTIAL: []
+};
+
+const FUN_MESSAGES = [
+    "Cố lên mẹ nhé, bé ngoan sẽ mau lớn lắm đấy! 🍼",
+    "Mẹ siêu nhân hôm nay vất vả nhiều rồi, tự thưởng cho mình một ly nước ấm nha! ❤️",
+    "Đừng quên đứng lên vươn vai, hít thở sâu để đỡ mỏi lưng nha mẹ! 🧘‍♀️",
+    "Trộm vía em bé ngoan ngoãn, bú giỏi ngủ ngoan cho mẹ thở phào nào! 🌟",
+    "Mỗi cữ sữa mẹ vắt ra là chứa đựng tình yêu to lớn vũ trụ luôn! 🥰",
+    "Mẹ ơi nhớ uống nước đầy đủ để sữa lúc nào cũng về căng tràn nhé! 💧",
+    "Hôm nay mẹ đã làm rất xuất sắc rồi, thả lỏng vai và mỉm cười cái nào! ✨",
+    "Nhắc nhỏ: Sữa đã sẵn sàng, mẹ nhớ kiểm tra hạn sử dụng trong app nha! ⏰",
+    "Bé yêu đang thầm cảm ơn 'siêu nhân sữa' của con đấy! 🦸‍♀️",
+    "Tranh thủ lúc bé ngủ, mẹ chợp mắt một xíu lấy sức chiến đấu ca đêm nhé! 🌙",
+    "Góc nhắc nhở: Sữa mẹ mát lành, tình mẹ bao la! Chúc mẹ ngày mới siêu năng lượng! 🌸",
+    "Ai là mẹ bỉm sữa xuất sắc nhất thế giới nào? Chắc chắn là bạn rồi! 🏆"
+];
+
+let milks = [];
+let schedule = [];
+let timerId = null;
+let addType = 'BREAST';
+let addState = 'FRIDGE';
+let currentTargetId = null;
+let isOnline = false;
+
+// ============================================================
+// SUPABASE HELPERS
+// ============================================================
+function setSyncStatus(online, text) {
+    isOnline = online;
+    const dot = document.getElementById('sync-dot');
+    const txt = document.getElementById('sync-text');
+    if (online) {
+        dot.className = 'sync-dot online';
+        txt.textContent = text || 'Đồng bộ realtime';
+    } else {
+        dot.className = 'sync-dot offline';
+        txt.textContent = text || 'Mất kết nối';
+    }
+}
+
+async function loadMilks() {
+    const { data, error } = await supabase
+        .from('milk_entries')
+        .select('*')
+        .eq('family_id', FAMILY_ID)
+        .order('expires_ms', { ascending: true });
+    if (error) {
+        console.error('loadMilks', error);
+        setSyncStatus(false, 'Lỗi tải dữ liệu');
+        return;
+    }
+    milks = (data || []).map(r => ({
+        id: r.id,
+        type: r.type,
+        volume: r.volume,
+        state: r.state,
+        start: Number(r.start_ms),
+        expires: Number(r.expires_ms),
+        warned: r.warned,
+        expired: r.expired
+    }));
+    renderApp();
+}
+
+async function loadMeds() {
+    const { data, error } = await supabase
+        .from('meds')
+        .select('*')
+        .eq('family_id', FAMILY_ID)
+        .maybeSingle();
+    if (error) {
+        console.error('loadMeds', error);
+        return;
+    }
+    if (data) {
+        document.getElementById('toggle-yellow').checked = !!data.yellow;
+        document.getElementById('toggle-red').checked = !!data.red;
+        updateMedUI('yellow', !!data.yellow);
+        updateMedUI('red', !!data.red);
+    }
+}
+
+async function loadSchedule() {
+    const { data, error } = await supabase
+        .from('milk_schedule')
+        .select('*')
+        .eq('family_id', FAMILY_ID)
+        .order('time_hhmm');
+    if (error) {
+        console.error('loadSchedule', error);
+        return;
+    }
+    schedule = data || [];
+}
+
+async function insertMilk(entry) {
+    const { error } = await supabase.from('milk_entries').insert({
+        id: entry.id,
+        family_id: FAMILY_ID,
+        type: entry.type,
+        volume: entry.volume,
+        state: entry.state,
+        start_ms: entry.start,
+        expires_ms: entry.expires,
+        warned: false,
+        expired: false
+    });
+    if (error) {
+        console.error('insertMilk', error);
+        showToast('Lỗi lưu sữa: ' + error.message, 'ph-fill ph-warning text-red-400');
+        return false;
+    }
+    return true;
+}
+
+async function updateMilkRow(id, patch) {
+    const { error } = await supabase
+        .from('milk_entries')
+        .update(patch)
+        .eq('id', id)
+        .eq('family_id', FAMILY_ID);
+    if (error) {
+        console.error('updateMilk', error);
+        showToast('Lỗi cập nhật: ' + error.message, 'ph-fill ph-warning text-red-400');
+        return false;
+    }
+    return true;
+}
+
+async function deleteMilkRow(id) {
+    const { error } = await supabase
+        .from('milk_entries')
+        .delete()
+        .eq('id', id)
+        .eq('family_id', FAMILY_ID);
+    if (error) {
+        console.error('deleteMilk', error);
+        showToast('Lỗi xóa: ' + error.message, 'ph-fill ph-warning text-red-400');
+        return false;
+    }
+    return true;
+}
+
+async function upsertMeds(yellow, red) {
+    const { error } = await supabase
+        .from('meds')
+        .upsert({ family_id: FAMILY_ID, yellow, red }, { onConflict: 'family_id' });
+    if (error) {
+        console.error('upsertMeds', error);
+        showToast('Lỗi lưu thuốc: ' + error.message, 'ph-fill ph-warning text-red-400');
+    }
+}
+
+// ============================================================
+// REALTIME
+// ============================================================
+function subscribeRealtime() {
+    const channel = supabase
+        .channel('family-sync')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'milk_entries', filter: `family_id=eq.${FAMILY_ID}` }, (payload) => {
+            handleMilkChange(payload);
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'meds', filter: `family_id=eq.${FAMILY_ID}` }, (payload) => {
+            if (payload.new) {
+                document.getElementById('toggle-yellow').checked = !!payload.new.yellow;
+                document.getElementById('toggle-red').checked = !!payload.new.red;
+                updateMedUI('yellow', !!payload.new.yellow);
+                updateMedUI('red', !!payload.new.red);
+            }
+        })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'milk_schedule', filter: `family_id=eq.${FAMILY_ID}` }, () => {
+            loadSchedule();
+        })
+        .subscribe((status) => {
+            if (status === 'SUBSCRIBED') {
+                setSyncStatus(true, 'Đồng bộ realtime');
+            } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+                setSyncStatus(false, 'Mất realtime');
+            }
+        });
+}
+
+function handleMilkChange(payload) {
+    const ev = payload.eventType;
+    if (ev === 'INSERT') {
+        const r = payload.new;
+        const exists = milks.find(m => m.id === r.id);
+        if (!exists) {
+            milks.push({
+                id: r.id, type: r.type, volume: r.volume, state: r.state,
+                start: Number(r.start_ms), expires: Number(r.expires_ms),
+                warned: r.warned, expired: r.expired
+            });
+            milks.sort((a, b) => a.expires - b.expires);
+            renderApp();
+            showToast(`🍼 Đã thêm ${r.volume}ml (từ thiết bị khác)`, 'ph-fill ph-sparkle text-yellow-300');
+        }
+    } else if (ev === 'UPDATE') {
+        const r = payload.new;
+        const idx = milks.findIndex(m => m.id === r.id);
+        if (idx > -1) {
+            milks[idx] = {
+                id: r.id, type: r.type, volume: r.volume, state: r.state,
+                start: Number(r.start_ms), expires: Number(r.expires_ms),
+                warned: r.warned, expired: r.expired
+            };
+            milks.sort((a, b) => a.expires - b.expires);
+            renderApp();
+        }
+    } else if (ev === 'DELETE') {
+        const oldId = payload.old?.id;
+        if (oldId) {
+            milks = milks.filter(m => m.id !== oldId);
+            renderApp();
+            showToast('Đã xóa cữ sữa (từ thiết bị khác)', 'ph-fill ph-trash text-slate-400');
+        }
+    }
+}
+
+// ============================================================
+// UI HELPERS (giữ nguyên logic gốc)
+// ============================================================
+function showToast(msg, icon = 'ph-fill ph-heart text-pink-400', systemNotification = false) {
+    const el = document.getElementById('toast');
+    document.getElementById('toast-text').innerText = msg;
+    document.getElementById('toast-icon').className = icon;
+    el.classList.remove('translate-y-24', 'opacity-0');
+    el.classList.add('translate-y-0', 'opacity-100');
+    clearTimeout(window.toastTimer);
+    window.toastTimer = setTimeout(() => {
+        el.classList.remove('translate-y-0', 'opacity-100');
+        el.classList.add('translate-y-24', 'opacity-0');
+    }, 5000);
+    if (systemNotification && 'Notification' in window && Notification.permission === 'granted') {
+        try {
+            new Notification('Sổ Sữa Của Bé 🍼', {
+                body: msg,
+                icon: 'icon-192.png'
+            });
+        } catch (e) {}
+    }
+}
+
+function openModal(id) {
+    document.body.classList.add('modal-open');
+    document.getElementById(id).classList.add('active');
+}
+function closeModals() {
+    document.body.classList.remove('modal-open');
+    document.querySelectorAll('.modal-overlay').forEach(el => el.classList.remove('active'));
+}
+function closeConfirm() {
+    document.getElementById('modal-confirm').classList.remove('active');
+}
+
+function updateMedUI(type, isChecked) {
+    const textEl = document.getElementById(`status-${type}`);
+    if (isChecked) {
+        textEl.innerText = 'Đã cho uống';
+        textEl.className = 'text-[10px] font-bold text-emerald-600 mt-0.5';
+    } else {
+        textEl.innerText = 'Chưa cho uống';
+        textEl.className = 'text-[10px] font-bold text-slate-400 mt-0.5';
+    }
+}
+
+async function toggleMed(type) {
+    const isChecked = document.getElementById(`toggle-${type}`).checked;
+    updateMedUI(type, isChecked);
+    const yellow = document.getElementById('toggle-yellow').checked;
+    const red = document.getElementById('toggle-red').checked;
+    await upsertMeds(yellow, red);
+    if (isChecked) {
+        showToast(type === 'yellow' ? 'Bé uống Chai Vàng ngoan quá! 🌟' : 'Bé đã uống Chai Đỏ siêu giỏi! ❤️', 'ph-fill ph-star text-yellow-300');
+    } else {
+        showToast('Đã hủy trạng thái uống thuốc', 'ph-fill ph-info text-slate-300');
+    }
+}
+
+function openAddModal() {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    document.getElementById('input-time').value = now.toISOString().slice(0, 16);
+    selectType('BREAST');
+    openModal('modal-add');
+}
+
+function selectType(type) {
+    addType = type;
+    const btnB = document.getElementById('btn-type-breast');
+    const btnF = document.getElementById('btn-type-formula');
+    if (type === 'BREAST') {
+        btnB.className = "flex-1 py-3 text-xs font-bold rounded-xl bg-pink-500 text-white shadow-md transition-all";
+        btnF.className = "flex-1 py-3 text-xs font-bold rounded-xl text-slate-600 hover:text-slate-800 transition-all bg-transparent shadow-none";
+    } else {
+        btnF.className = "flex-1 py-3 text-xs font-bold rounded-xl bg-blue-500 text-white shadow-md transition-all";
+        btnB.className = "flex-1 py-3 text-xs font-bold rounded-xl text-slate-600 hover:text-slate-800 transition-all bg-transparent shadow-none";
+    }
+    renderAddStates();
+}
+
+function renderAddStates() {
+    const grid = document.getElementById('status-grid');
+    grid.innerHTML = '';
+    const opts = addType === 'BREAST' ? ['FRIDGE', 'FREEZER', 'ROOM', 'PARTIAL'] : ['FRIDGE', 'ROOM', 'PARTIAL'];
+    if (!opts.includes(addState)) addState = 'FRIDGE';
+    opts.forEach(k => {
+        const s = STATES[k];
+        const active = addState === k;
+        const div = document.createElement('div');
+        div.onclick = () => { addState = k; renderAddStates(); };
+        div.className = `cursor-pointer border border-white/60 rounded-2xl p-3 flex flex-col items-center justify-center transition-all shadow-sm ${active ? 'bg-pink-100/90 border-pink-400/80 shadow-pink-200' : 'bg-white/40 hover:bg-white/60'}`;
+        div.innerHTML = `<div class="w-7 h-7 rounded-full mb-1 flex items-center justify-center backdrop-blur-sm ${active ? 'bg-pink-500 text-white shadow-md' : 'bg-white/60 text-slate-500'}"><i class="ph-fill ${s.icon} text-sm"></i></div><span class="text-[11px] font-bold ${active ? 'text-pink-700' : 'text-slate-600'}">${s.label}</span>`;
+        grid.appendChild(div);
+    });
+}
+
+async function saveMilk() {
+    const vol = parseInt(document.getElementById('input-volume').value);
+    const timeStr = document.getElementById('input-time').value;
+    if (!vol || !timeStr) return;
+
+    const start = new Date(timeStr).getTime();
+    const entry = {
+        id: Math.random().toString(36).substr(2, 9),
+        type: addType,
+        volume: vol,
+        state: addState,
+        start: start,
+        expires: start + STATES[addState].duration,
+        warned: false,
+        expired: false
+    };
+
+    const ok = await insertMilk(entry);
+    if (!ok) return;
+
+    // Local optimistic update (realtime sẽ confirm)
+    milks.push(entry);
+    milks.sort((a, b) => a.expires - b.expires);
+    closeModals();
+    renderApp();
+
+    const randomMsg = FUN_MESSAGES[Math.floor(Math.random() * FUN_MESSAGES.length)];
+    showToast(randomMsg, 'ph-fill ph-sparkle text-yellow-300');
+}
+
+function openActionModal(id) {
+    currentTargetId = id;
+    const item = milks.find(m => m.id === id);
+    if (!item) return;
+
+    const list = document.getElementById('action-list');
+    list.innerHTML = '';
+
+    let transitions = ALLOWED_TRANSITIONS[item.state] || [];
+    if (item.type === 'FORMULA') transitions = transitions.filter(t => t !== 'FREEZER' && t !== 'THAWED');
+
+    if (transitions.length === 0) {
+        list.innerHTML = `<div class="p-4 text-center text-xs font-bold text-slate-500">Sữa bú dở không thể cất lại tủ lạnh. Mẹ nhớ bỏ đi nếu bé không dùng hết nhé!</div>`;
+    } else {
+        transitions.forEach(k => {
+            const s = STATES[k];
+            const btn = document.createElement('button');
+            btn.className = "w-full flex items-center gap-3.5 p-3.5 bg-white/40 backdrop-blur-sm border border-white/60 rounded-2xl hover:bg-white/70 transition-all text-left shadow-sm";
+            btn.onclick = () => updateMilkState(id, k);
+            btn.innerHTML = `<div class="w-9 h-9 rounded-xl flex items-center justify-center ${s.bg} ${s.color}"><i class="ph-fill ${s.icon} text-lg"></i></div><div><div class="font-bold text-slate-800 text-xs">Chuyển sang: ${s.label}</div><div class="text-[10px] font-semibold text-slate-500">${s.desc}</div></div>`;
+            list.appendChild(btn);
+        });
+    }
+    openModal('modal-action');
+}
+
+async function updateMilkState(id, newState) {
+    const now = Date.now();
+    const patch = {
+        state: newState,
+        start_ms: now,
+        expires_ms: now + STATES[newState].duration,
+        warned: false,
+        expired: false
+    };
+    const ok = await updateMilkRow(id, patch);
+    if (!ok) return;
+
+    const idx = milks.findIndex(m => m.id === id);
+    if (idx > -1) {
+        milks[idx].state = newState;
+        milks[idx].start = now;
+        milks[idx].expires = patch.expires_ms;
+        milks[idx].warned = false;
+        milks[idx].expired = false;
+        milks.sort((a, b) => a.expires - b.expires);
+    }
+    closeModals();
+    renderApp();
+    showToast('Đã cập nhật trạng thái mới!');
+}
+
+function confirmDelete() { openModal('modal-confirm'); }
+
+async function executeDelete() {
+    const ok = await deleteMilkRow(currentTargetId);
+    if (!ok) return;
+    milks = milks.filter(m => m.id !== currentTargetId);
+    closeModals();
+    renderApp();
+    showToast('Đã dọn dẹp cữ sữa', 'ph-fill ph-trash text-slate-400');
+}
+
+function formatTimeLeft(ms) {
+    if (ms <= 0) return "Đã hết hạn!";
+    const d = Math.floor(ms / MS_DAY);
+    const h = Math.floor((ms % MS_DAY) / MS_HR);
+    const m = Math.floor((ms % MS_HR) / MS_MIN);
+    if (d > 0) return `${d} ngày ${h}h`;
+    if (h > 0) return `${h}h ${m}p`;
+    return `${m} phút`;
+}
+
+function renderApp() {
+    const listEl = document.getElementById('milk-list');
+    const emptyEl = document.getElementById('empty-state');
+    const now = Date.now();
+
+    if (milks.length === 0) {
+        listEl.innerHTML = '';
+        emptyEl.classList.remove('hidden');
+        return;
+    }
+    emptyEl.classList.add('hidden');
+    listEl.innerHTML = '';
+
+    milks.forEach(m => {
+        const s = STATES[m.state];
+        const isExp = now >= m.expires;
+        const dObj = new Date(m.start);
+        const timeStr = `${String(dObj.getHours()).padStart(2, '0')}:${String(dObj.getMinutes()).padStart(2, '0')} - ${dObj.getDate()}/${dObj.getMonth() + 1}`;
+
+        let pct = isExp ? 0 : Math.max(0, 100 - ((now - m.start) / (m.expires - m.start) * 100));
+        let barClass = s.bar;
+        let textClass = 'text-slate-800';
+
+        if (isExp) { barClass = 'bg-red-500'; textClass = 'text-red-600 font-extrabold animate-pulse'; }
+        else if (pct < 20) { barClass = 'bg-red-400'; textClass = 'text-red-500 font-bold'; }
+
+        const card = document.createElement('div');
+        card.className = `glass-panel rounded-3xl p-4 cursor-pointer relative overflow-hidden ${isExp ? 'border-red-300 bg-red-50/50' : ''}`;
+        card.onclick = () => openActionModal(m.id);
+
+        card.innerHTML = `
+            <div class="flex justify-between items-start mb-3">
+                <div class="flex items-center gap-1.5 bg-white/70 backdrop-blur-md px-2.5 py-1 rounded-xl border border-white/60 shadow-sm">
+                    <i class="ph-fill ${s.icon} ${s.color} text-sm"></i>
+                    <span class="text-[11px] font-bold ${s.color}">${s.label}</span>
+                </div>
+                <span class="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-lg backdrop-blur-md border border-white/50 ${m.type === 'FORMULA' ? 'bg-blue-100/80 text-blue-700' : 'bg-pink-100/80 text-pink-700'}">
+                    ${m.type === 'FORMULA' ? 'Công thức' : 'Sữa mẹ'}
+                </span>
+            </div>
+            <div class="flex items-end justify-between mb-2">
+                <div class="font-extrabold text-2xl text-slate-800 tracking-tight">${m.volume} <span class="text-sm text-slate-500 font-bold">ml</span></div>
+                <div class="text-[11px] font-semibold text-slate-500 flex items-center gap-1"><i class="ph-bold ph-clock"></i> ${timeStr}</div>
+            </div>
+            <div class="mt-3">
+                <div class="flex justify-between items-center mb-1">
+                    <span class="text-[10px] font-bold text-slate-500">Còn lại</span>
+                    <span id="txt-${m.id}" class="text-xs ${textClass}">${formatTimeLeft(m.expires - now)}</span>
+                </div>
+                <div class="liquid-track">
+                    <div id="bar-${m.id}" class="liquid-fill ${barClass}" style="width: ${pct}%"></div>
+                </div>
+            </div>
+        `;
+        listEl.appendChild(card);
+    });
+}
+
+function tick() {
+    const now = Date.now();
+    milks.forEach(m => {
+        const isExp = now >= m.expires;
+        const msLeft = m.expires - now;
+        const txt = document.getElementById(`txt-${m.id}`);
+        const bar = document.getElementById(`bar-${m.id}`);
+        if (txt && bar) {
+            txt.innerText = formatTimeLeft(msLeft);
+            const total = Math.max(1, m.expires - m.start);
+            const pct = isExp ? 0 : Math.max(0, 100 - ((now - m.start) / total * 100));
+            bar.style.width = `${pct}%`;
+            if (isExp) {
+                txt.className = 'text-xs text-red-600 font-extrabold animate-pulse';
+                bar.className = 'liquid-fill bg-red-500';
+            } else if (pct < 20) {
+                txt.className = 'text-xs text-red-500 font-bold';
+                bar.className = 'liquid-fill bg-red-400';
+            }
+        }
+        // Nhắc trước 15 phút (chỉ 1 lần)
+        if (!m.warned && msLeft > 0 && msLeft <= 15 * MS_MIN) {
+            m.warned = true;
+            updateMilkRow(m.id, { warned: true });
+            showToast(`⏰ Cữ ${m.volume}ml sắp hết hạn trong ${formatTimeLeft(msLeft)}. Mẹ kiểm tra nhé!`, 'ph-fill ph-warning text-amber-300', true);
+        }
+        // Báo hết hạn
+        if (isExp && !m.expired) {
+            m.expired = true;
+            updateMilkRow(m.id, { expired: true });
+            showToast(`🚨 Cữ ${m.volume}ml (${STATES[m.state].label}) đã hết hạn. Mẹ kiểm tra và bỏ nếu không còn dùng nhé!`, 'ph-fill ph-warning-circle text-red-300', true);
+            renderApp();
+        }
+    });
+}
+
+// ============================================================
+// LỊCH CỮ SỮA
+// ============================================================
+function openScheduleModal() {
+    renderScheduleList();
+    openModal('modal-schedule');
+}
+
+function renderScheduleList() {
+    const list = document.getElementById('schedule-list');
+    list.innerHTML = '';
+    if (schedule.length === 0) {
+        list.innerHTML = '<p class="text-center text-xs text-slate-500 py-4">Chưa có lịch nào</p>';
+        return;
+    }
+    schedule.forEach(s => {
+        const div = document.createElement('div');
+        div.className = 'flex items-center justify-between bg-white/40 rounded-2xl p-3 border border-white/50';
+        div.innerHTML = `
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-pink-100 text-pink-600 flex items-center justify-center font-bold text-sm">${s.time_hhmm}</div>
+                <span class="text-sm font-semibold text-slate-700">${s.label || 'Cữ sữa'}</span>
+            </div>
+            <button onclick="deleteSchedule('${s.id}')" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 flex items-center justify-center">
+                <i class="ph-bold ph-trash text-sm"></i>
+            </button>
+        `;
+        list.appendChild(div);
+    });
+}
+
+async function addSchedule() {
+    const time = document.getElementById('new-schedule-time').value;
+    if (!time) return;
+    const id = 'sch-' + Math.random().toString(36).substr(2, 6);
+    const { error } = await supabase.from('milk_schedule').insert({
+        id, family_id: FAMILY_ID, time_hhmm: time, label: 'Cữ sữa', enabled: true
+    });
+    if (error) {
+        showToast('Lỗi thêm lịch: ' + error.message, 'ph-fill ph-warning text-red-400');
+        return;
+    }
+    await loadSchedule();
+    renderScheduleList();
+    document.getElementById('new-schedule-time').value = '';
+    showToast('Đã thêm lịch ' + time);
+}
+
+async function deleteSchedule(id) {
+    const { error } = await supabase.from('milk_schedule').delete().eq('id', id);
+    if (error) {
+        showToast('Lỗi xóa lịch', 'ph-fill ph-warning text-red-400');
+        return;
+    }
+    await loadSchedule();
+    renderScheduleList();
+}
+
+// ============================================================
+// PUSH NOTIFICATION (Web Push + Service Worker)
+// ============================================================
+const VAPID_PUBLIC_KEY = 'BIOlVOVpVULg2eXo8kJ0Km9If7ZqsZHrLnOIWoTQx_7NElBSURehAqe5a_7qP1LM7TE255WeFasA0mupovbILoE';
+let swRegistration = null;
+
+function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
+    return outputArray;
+}
+
+async function registerServiceWorker() {
+    if (!('serviceWorker' in navigator)) return;
+    try {
+        swRegistration = await navigator.serviceWorker.register('./sw.js');
+        console.log('SW registered');
+        // Nếu đã từng cho phép thì tự subscribe lại
+        if (Notification.permission === 'granted') {
+            await subscribePushSilent();
+            document.getElementById('btn-notify')?.classList.add('bg-green-100', 'text-green-600');
+        }
+    } catch (e) {
+        console.warn('SW register failed', e);
+    }
+}
+
+async function subscribePushSilent() {
+    if (!swRegistration) return null;
+    try {
+        let sub = await swRegistration.pushManager.getSubscription();
+        if (!sub) {
+            sub = await swRegistration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+            });
+        }
+        const json = sub.toJSON();
+        await supabase.from('push_subscriptions').upsert({
+            family_id: FAMILY_ID,
+            endpoint: json.endpoint,
+            p256dh: json.keys.p256dh,
+            auth: json.keys.auth,
+            user_agent: navigator.userAgent
+        }, { onConflict: 'endpoint' });
+        return sub;
+    } catch (e) {
+        console.warn('subscribePushSilent', e);
+        return null;
+    }
+}
+
+async function enablePush() {
+    if (!('Notification' in window) || !('PushManager' in window)) {
+        showToast('Trình duyệt không hỗ trợ Push', 'ph-fill ph-warning text-amber-300');
+        return;
+    }
+    if (!window.isSecureContext) {
+        showToast('Cần HTTPS (GitHub Pages) để bật Push', 'ph-fill ph-warning text-amber-300');
+        return;
+    }
+    const perm = await Notification.requestPermission();
+    if (perm !== 'granted') {
+        showToast('Cần cho phép thông báo để nhận hạn sữa', 'ph-fill ph-bell-slash text-slate-400');
+        return;
+    }
+    if (!swRegistration) {
+        await registerServiceWorker();
+    }
+    const sub = await subscribePushSilent();
+    if (sub) {
+        showToast('Đã bật thông báo! 🔔 Sẽ nhận khi sữa sắp hết hạn', 'ph-fill ph-bell text-green-400');
+        document.getElementById('btn-notify').classList.add('bg-green-100', 'text-green-600');
+    } else {
+        showToast('Không đăng ký được Push. Thử lại trên Chrome/Safari.', 'ph-fill ph-warning text-amber-300');
+    }
+}
+
+// Fun notification khi app đang mở (10 phút/lần) — chỉ toast, không spam native
+function startAutoFunNotifications() {
+    setInterval(() => {
+        const randomMsg = FUN_MESSAGES[Math.floor(Math.random() * FUN_MESSAGES.length)];
+        showToast(randomMsg, 'ph-fill ph-sparkle text-yellow-300', false);
+    }, 10 * 60 * 1000);
+}
+
+// ============================================================
+// KHỞI ĐỘNG
+// ============================================================
+async function init() {
+    setSyncStatus(false, 'Đang kết nối...');
+    await Promise.all([loadMilks(), loadMeds(), loadSchedule()]);
+    subscribeRealtime();
+    setSyncStatus(true, 'Đồng bộ realtime');
+    timerId = setInterval(tick, 1000);
+    startAutoFunNotifications();
+    registerServiceWorker();
+}
+
+init();
+</script>
+</body>
+</html>
