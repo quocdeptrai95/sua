@@ -41,7 +41,6 @@
             -webkit-backdrop-filter: blur(25px);
             border: 1px solid rgba(255, 255, 255, 1);
         }
-        /* Custom scrollbar for inner modal */
         .modal-scroll::-webkit-scrollbar {
             width: 5px;
         }
@@ -64,7 +63,7 @@
         </div>
     </div>
 
-    <!-- Header Section -->
+    <!-- Header Section (Cân đối chuẩn xác) -->
     <header class="px-5 pt-6 pb-4 flex flex-col items-center justify-center relative">
         <h1 class="text-2xl font-extrabold text-gray-800 tracking-tight flex items-center gap-2">
             <span>Sổ Sữa Của Bé</span> <span class="text-xl">🍼</span>
@@ -112,7 +111,7 @@
 
     </main>
 
-    <!-- Floating Action Buttons (Safe-area inset bottom for Home Indicator) -->
+    <!-- Floating Action Buttons (Tránh lẹm thanh Home Indicator của iPhone) -->
     <div class="fixed right-6 z-40 flex flex-col gap-3" style="bottom: calc(env(safe-area-inset-bottom) + 24px);">
         <!-- AI Assistant FAB -->
         <button onclick="openAiModal()" class="w-14 h-14 bg-white/90 backdrop-blur-md border border-white shadow-lg rounded-full flex items-center justify-center text-xl hover:scale-105 active:scale-95 transition">
@@ -197,7 +196,6 @@
 
     <!-- JavaScript Logic -->
     <script>
-        // API Key thực tế của bạn
         const API_KEY = "sk-5814cf33f4def1ae38f70d526d17dcf4424e10f3138502ca98f5e21e981439c4";
         const API_URL = "https://ckey.vn/v1/chat/completions";
 
@@ -348,14 +346,13 @@
             document.getElementById('stat-freeze').innerText = freezeCount;
         }
 
-        // Gọi API Thật 100% qua ckey.vn
+        // Gọi API Thật 100%
         async function sendAiMsg() {
             const inputEl = document.getElementById('ai-input');
             const chatList = document.getElementById('chat-messages');
             const text = inputEl.value.trim();
             if(!text) return;
 
-            // Hiển thị tin nhắn của mẹ
             chatList.innerHTML += `
                 <div class="flex gap-2 max-w-[85%] ml-auto justify-end">
                     <div class="bg-purple-600 text-white p-3 rounded-2xl rounded-tr-none shadow-sm text-xs leading-relaxed">
@@ -366,7 +363,6 @@
             inputEl.value = '';
             chatList.scrollTop = chatList.scrollHeight;
 
-            // Hiển thị khung chờ AI trả lời
             const loadingId = 'loading-' + Date.now();
             chatList.innerHTML += `
                 <div id="${loadingId}" class="flex gap-2 max-w-[85%]">
@@ -428,7 +424,6 @@
             if(e.key === 'Enter') sendAiMsg();
         }
 
-        // Khởi chạy khi load trang
         renderMilks();
     </script>
 </body>
