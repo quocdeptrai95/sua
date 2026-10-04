@@ -199,19 +199,11 @@
             </div>
         </main>
 
-        <!-- Nút nổi thao tác nhanh (FAB): AI & Add cân đối -->
-        <div class="fixed bottom-6 right-6 flex flex-col gap-3.5 z-40">
-            <!-- Nút AI (To bằng nút (+), đẩy lên trên) -->
-            <button onclick="openModal('modal-ai')" class="w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center text-white shadow-2xl shadow-purple-500/40 hover:scale-105 active:scale-95 transition-all border border-purple-300/60">
-                <i class="ph-fill ph-sparkle text-2xl animate-pulse"></i>
-            </button>
-            
-            <!-- Nút Thêm Cữ Sữa -->
-            <button onclick="openAddModal()" class="w-16 h-16 bg-gradient-to-br from-pink-500 to-rose-500 rounded-full flex items-center justify-center text-white shadow-2xl shadow-pink-500/40 hover:scale-105 active:scale-95 transition-all border border-pink-300/60">
-                <i class="ph-bold ph-plus text-2xl"></i>
-            </button>
-        </div>
-
+        <!-- Nút nổi thao tác nhanh -->
+    <div class="fixed bottom-6 right-6 z-40">
+        <button onclick="openAddModal()" class="w-16 h-16 bg-gradient-to-br from-pink-500 to-rose-500 rounded-full flex items-center justify-center text-white shadow-2xl shadow-pink-500/40 hover:scale-105 active:scale-95 transition-all border border-pink-300/60">
+            <i class="ph-bold ph-plus text-2xl"></i>
+        </button>
     </div>
 
     <!-- Modal Thêm Sữa Mới (Cố định chiều cao, thanh cuộn giữa, không bao giờ mất nút Lưu) -->
@@ -301,44 +293,6 @@
         </div>
     </div>
 
-    <!-- Modal AI Chat (Bác sĩ bỉm sữa kết nối thật) -->
-    <div id="modal-ai" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
-        <div class="modal-content w-full max-w-md h-[70vh] glass-panel rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden">
-            <div class="flex-shrink-0 px-5 py-4 border-b border-white/40 flex items-center justify-between bg-white/25">
-                <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center shadow-sm">
-                        <i class="ph-fill ph-robot text-lg"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-extrabold text-sm text-slate-800">Bác Sĩ AI Nhi Khoa</h3>
-                        <p class="text-[9px] text-emerald-600 font-bold uppercase">Luôn sẵn sàng hỗ trợ mẹ</p>
-                    </div>
-                </div>
-                <button onclick="closeModals()" class="w-8 h-8 flex items-center justify-center rounded-full bg-white/50 text-slate-600">
-                    <i class="ph-bold ph-x text-sm"></i>
-                </button>
-            </div>
-            
-            <div class="flex-1 overflow-y-auto p-4 space-y-3 bg-white/10" id="ai-history">
-                <div class="flex gap-2.5">
-                    <div class="w-7 h-7 shrink-0 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mt-1 shadow-sm"><i class="ph-fill ph-robot text-sm"></i></div>
-                    <div class="bg-white/80 backdrop-blur-md p-3 rounded-2xl rounded-tl-none shadow-sm border border-white/60 text-xs font-medium text-slate-800 max-w-[85%] leading-relaxed">
-                        Chào mẹ! Mẹ cần bác sĩ AI tư vấn gì về cách rã đông, bảo quản sữa chuẩn y khoa Việt Nam hay lịch uống thuốc cho bé không? 🍼✨
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex-shrink-0 p-3.5 bg-white/40 border-t border-white/40">
-                <div class="flex gap-2">
-                    <input type="text" id="ai-input" placeholder="Hỏi bác sĩ AI..." class="flex-1 bg-white/70 text-xs font-medium rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500/50 shadow-inner border border-white/50" onkeypress="if(event.key === 'Enter') sendAiMsg()">
-                    <button onclick="sendAiMsg()" class="w-11 h-11 shrink-0 bg-gradient-to-br from-purple-500 to-indigo-500 text-white rounded-2xl flex items-center justify-center shadow-lg active:scale-95">
-                        <i class="ph-fill ph-paper-plane-right text-base"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Thông báo In-App Vui Nhộn -->
     <div id="toast" class="fixed bottom-[calc(env(safe-area-inset-bottom)+88px)] left-1/2 -translate-x-1/2 z-[100] max-w-[calc(100vw-32px)] bg-slate-900/90 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 transition-all duration-300 transform translate-y-24 opacity-0 backdrop-blur-lg border border-white/10">
         <i id="toast-icon" class="ph-fill ph-heart text-pink-400 text-lg"></i>
@@ -347,9 +301,6 @@
 
     <script>
         // Cấu hình API Key của bạn (Dùng chung qua proxy ckey.vn)
-        const API_KEY = "sk-726e507032d2c5d184fc38e586730a4d8d664655e1261a8443121344e59fe416";
-        const API_URL = "https://api.xah.io/v1/chat/completions";
-        const AI_MODEL = "devdoclang/gemini-3.7-flash";
 
         // Chuẩn thời gian Y khoa Việt Nam 🇻🇳 (Tính bằng mili-giây)
         const MS_MIN = 60000; 
@@ -715,121 +666,6 @@
                     renderApp();
                 }
             });
-        }
-
-        // Tích hợp Bác sĩ AI thông minh kết nối thật qua ckey.vn
-        async function sendAiMsg() {
-            const inp = document.getElementById('ai-input');
-            const txt = inp.value.trim();
-            if (!txt) return;
-
-            if (!API_KEY || API_KEY === 'YOUR_CKEY_API_KEY') {
-                appendAi('ai', '⚠️ Chưa cấu hình CKEY API key. Mẹ mở code và thay YOUR_CKEY_API_KEY bằng API key CKEY của mình nhé.');
-                return;
-            }
-
-            appendAi('user', txt);
-            inp.value = '';
-
-            const typingId = 'typing-' + Date.now();
-            appendAi('ai', '...', typingId);
-
-            try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${API_KEY}`
-                    },
-                    body: JSON.stringify({
-                        model: AI_MODEL,
-                        messages: [
-                            {
-                                role: 'system',
-                                content: `Bạn là trợ lý AI về chăm sóc trẻ nhỏ và bảo quản sữa tại Việt Nam.
-- Trả lời bằng tiếng Việt, ngắn gọn, dễ hiểu, thân thiện.
-- Không tự nhận mình là bác sĩ và không thay thế bác sĩ.
-- Với câu hỏi y tế quan trọng hoặc bé có dấu hiệu bất thường, khuyên phụ huynh liên hệ bác sĩ/cơ sở y tế.
-- Không bịa thông tin và không lặp lại một câu trả lời cố định nếu câu hỏi khác nhau.
-- Có thể giải thích cách sử dụng ứng dụng Sổ Sữa Của Bé.
-- Khi người dùng hỏi về dữ liệu đang có trong app, chỉ dựa vào thông tin họ cung cấp trong câu hỏi; không tự suy đoán.`
-                            },
-                            { role: 'user', content: txt }
-                        ],
-                        temperature: 0.4,
-                        max_tokens: 600
-                    })
-                });
-
-                const raw = await response.text();
-                let data;
-                try {
-                    data = JSON.parse(raw);
-                } catch {
-                    throw new Error(`CKEY trả về dữ liệu không hợp lệ (HTTP ${response.status}).`);
-                }
-
-                console.log('CKEY status:', response.status);
-                console.log('CKEY response:', data);
-
-                if (!response.ok) {
-                    const apiError = data?.error?.message || data?.message || `HTTP ${response.status}`;
-                    throw new Error(apiError);
-                }
-
-                const answer = data?.choices?.[0]?.message?.content;
-                if (!answer || typeof answer !== 'string') {
-                    throw new Error('CKEY không trả về nội dung trong choices[0].message.content.');
-                }
-
-                const typingEl = document.getElementById(typingId);
-                if (typingEl) typingEl.remove();
-                appendAi('ai', answer.trim());
-
-            } catch (error) {
-                console.error('CKEY AI ERROR:', error);
-                const typingEl = document.getElementById(typingId);
-                if (typingEl) typingEl.remove();
-
-                appendAi('ai', `⚠️ Không gọi được AI CKEY.\n\nLỗi: ${error.message}\n\nMẹ kiểm tra API key, model ${AI_MODEL}, kết nối mạng hoặc mở F12 → Console để xem chi tiết nhé.`);
-            }
-        }
-
-        function appendAi(sender, text, id = '') {
-            const h = document.getElementById('ai-history');
-            const div = document.createElement('div');
-            if (id) div.id = id;
-            div.className = sender === 'user' ? 'flex gap-2.5 justify-end' : 'flex gap-2.5';
-
-            if (sender === 'user') {
-                const bubble = document.createElement('div');
-                bubble.className = 'bg-gradient-to-br from-purple-500 to-indigo-500 text-white p-3 rounded-2xl rounded-tr-none shadow-md text-xs font-medium max-w-[85%]';
-                bubble.style.overflowWrap = 'anywhere';
-                bubble.style.whiteSpace = 'pre-wrap';
-                bubble.textContent = text;
-                div.appendChild(bubble);
-            } else {
-                const avatar = document.createElement('div');
-                avatar.className = 'w-7 h-7 shrink-0 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mt-1 shadow-sm';
-                avatar.innerHTML = '<i class="ph-fill ph-robot text-sm"></i>';
-
-                const bubble = document.createElement('div');
-                bubble.className = 'bg-white/80 backdrop-blur-md p-3 rounded-2xl rounded-tl-none shadow-sm border border-white/60 text-xs font-medium text-slate-800 max-w-[85%] leading-relaxed';
-                bubble.style.overflowWrap = 'anywhere';
-                bubble.style.whiteSpace = 'pre-wrap';
-
-                if (text === '...') {
-                    bubble.innerHTML = '<div class="flex space-x-1 items-center h-4"><div class="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce"></div><div class="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce" style="animation-delay:0.2s"></div><div class="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce" style="animation-delay:0.4s"></div></div>';
-                } else {
-                    bubble.textContent = text;
-                }
-
-                div.appendChild(avatar);
-                div.appendChild(bubble);
-            }
-
-            h.appendChild(div);
-            h.scrollTop = h.scrollHeight;
         }
 
         // Khởi chạy ứng dụng
