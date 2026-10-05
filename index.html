@@ -299,12 +299,16 @@
             .milk-card, .med-bottle, .fab-btn i { animation: none !important; }
         }
 
-        @keyframes iconBob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
-        @keyframes iconPop { 0% { transform: scale(.8) rotate(-8deg); } 60% { transform: scale(1.08) rotate(4deg); } 100% { transform: none; } }
-        .state-ico i, .med-bottle i { animation: iconBob 2.8s ease-in-out infinite; display: inline-block; }
-        .milk-card:active .state-ico i { animation: iconPop .45s ease; }
-        .fab-btn:active { transform: scale(.92) rotate(-6deg); }
-        .modal-overlay.active .modal-content { animation: sheetIn .34s cubic-bezier(.22,1,.36,1); }
+        @keyframes iconBob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+        @keyframes iconPop { 0% { transform: scale(.92); } 70% { transform: scale(1.06); } 100% { transform: none; } }
+        .state-ico i, .med-bottle i { animation: iconBob 3.6s cubic-bezier(.45,0,.55,1) infinite; display: inline-block; }
+        .milk-card { transition: transform .35s cubic-bezier(.22,1,.36,1), box-shadow .35s ease; }
+        .milk-card:active { transform: scale(.985); }
+        .milk-card:active .state-ico i { animation: iconPop .5s cubic-bezier(.22,1,.36,1); }
+        .fab-btn { transition: transform .4s cubic-bezier(.22,1,.36,1), box-shadow .4s ease !important; }
+        .fab-btn:active { transform: scale(.94); }
+        .modal-overlay.active .modal-content { animation: sheetIn .42s cubic-bezier(.22,1,.36,1); }
+        .ios-switch, .ios-switch::after { transition: transform .45s cubic-bezier(.22,1,.36,1), background .35s ease; }
         @media (prefers-reduced-motion: reduce) {
             .state-ico i, .med-bottle i, .fab-btn { animation: none !important; }
         }
