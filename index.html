@@ -1345,12 +1345,12 @@ async function subscribePushSilent() {
     if (!swRegistration) return null;
     try {
         let sub = await swRegistration.pushManager.getSubscription();
-        if (!sub) {
-            sub = await swRegistration.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-            });
-        }
+        // Đăng ký lại để khớp khóa VAPID hiện tại
+        if (sub) { try { await sub.unsubscribe(); } catch (e) {} }
+        sub = await swRegistration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+        });
         const json = sub.toJSON();
         await sb.from('push_subscriptions').upsert({
             family_id: FAMILY_ID,
