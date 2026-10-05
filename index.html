@@ -272,6 +272,22 @@
         }
         .med-bottle { animation: none !important; width: 40px !important; height: 40px !important; border-radius: 12px !important; }
         #sync-dot, .sync-dot { box-shadow: none; }
+
+        :root { --ink:#241c22; --muted:#8a7c84; --line:#f0e6ea; --rose:#e11d48; --bg:#fff8f6; }
+        body { background: var(--bg) !important; color: var(--ink) !important; }
+        .glass-panel, .med-card, .milk-card {
+            background: #fff !important; border: 1px solid var(--line) !important;
+            box-shadow: 0 8px 24px rgba(36,28,34,.04) !important; backdrop-filter: none !important;
+        }
+        header .glass-panel { background: transparent !important; border: none !important; box-shadow: none !important; }
+        h1 { font-size: 1.35rem !important; letter-spacing: -0.03em; }
+        main h2 { color: var(--muted) !important; font-size: 11px !important; letter-spacing: .18em; }
+        .fab-btn { width: 58px !important; height: 58px !important; border-radius: 20px !important; background: linear-gradient(180deg,#fb7185,#e11d48) !important; box-shadow: 0 12px 24px rgba(225,29,72,.28) !important; }
+        .med-bottle { animation: none !important; width: 42px !important; height: 42px !important; border-radius: 14px !important; }
+        .milk-card { border-radius: 24px !important; }
+        .liquid-track { height: 7px !important; background: #f6eef1 !important; border-radius: 99px; overflow: hidden; }
+        .liquid-fill { height: 7px !important; border-radius: 99px; }
+        #empty-state { border: 1px dashed #eadde2 !important; background: transparent !important; box-shadow: none !important; }
     </style>
 </head>
 <body class="selection:bg-pink-500 selection:text-white">
@@ -286,7 +302,7 @@
                         <i class="ph-fill ph-baby text-2xl"></i>
                     </div>
                     <div class="flex items-center gap-2">
-                        <h1 class="text-xl font-extrabold text-slate-800 tracking-tight">Sổ sữa</h1>
+                        <h1 class="text-xl font-extrabold text-slate-800 tracking-tight">Sổ sữa của bé</h1>
                         <div id="sync-dot" class="sync-dot" title="Trạng thái kết nối"></div>
                     </div>
                 </div>
