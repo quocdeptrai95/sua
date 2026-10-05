@@ -288,6 +288,16 @@
         .liquid-track { height: 7px !important; background: #f6eef1 !important; border-radius: 99px; overflow: hidden; }
         .liquid-fill { height: 7px !important; border-radius: 99px; }
         #empty-state { border: 1px dashed #eadde2 !important; background: transparent !important; box-shadow: none !important; }
+
+        @keyframes cardIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+        @keyframes popIn { from { transform: scale(.86); opacity: 0; } to { transform: none; opacity: 1; } }
+        .milk-card { animation: cardIn .4s cubic-bezier(.22,1,.36,1) both; }
+        .med-bottle { animation: popIn .45s cubic-bezier(.22,1,.36,1) both !important; }
+        .state-ico { width: 34px; height: 34px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+        .fab-btn i { animation: popIn .5s .1s both; }
+        @media (prefers-reduced-motion: reduce) {
+            .milk-card, .med-bottle, .fab-btn i { animation: none !important; }
+        }
     </style>
 </head>
 <body class="selection:bg-pink-500 selection:text-white">
