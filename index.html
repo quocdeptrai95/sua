@@ -298,6 +298,16 @@
         @media (prefers-reduced-motion: reduce) {
             .milk-card, .med-bottle, .fab-btn i { animation: none !important; }
         }
+
+        @keyframes iconBob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+        @keyframes iconPop { 0% { transform: scale(.8) rotate(-8deg); } 60% { transform: scale(1.08) rotate(4deg); } 100% { transform: none; } }
+        .state-ico i, .med-bottle i { animation: iconBob 2.8s ease-in-out infinite; display: inline-block; }
+        .milk-card:active .state-ico i { animation: iconPop .45s ease; }
+        .fab-btn:active { transform: scale(.92) rotate(-6deg); }
+        .modal-overlay.active .modal-content { animation: sheetIn .34s cubic-bezier(.22,1,.36,1); }
+        @media (prefers-reduced-motion: reduce) {
+            .state-ico i, .med-bottle i, .fab-btn { animation: none !important; }
+        }
     </style>
 </head>
 <body class="selection:bg-pink-500 selection:text-white">
