@@ -312,6 +312,11 @@
         @media (prefers-reduced-motion: reduce) {
             .state-ico i, .med-bottle i, .fab-btn { animation: none !important; }
         }
+
+        .liquid-fill { transition: width .8s cubic-bezier(.22,1,.36,1), background-color .4s ease !important; }
+        #milk-list { transition: opacity .3s ease; }
+        .modal-overlay { transition: opacity .4s ease, visibility .4s ease !important; }
+        .toast, #toast { transition: transform .45s cubic-bezier(.22,1,.36,1), opacity .45s ease !important; }
     </style>
 </head>
 <body class="selection:bg-pink-500 selection:text-white">
