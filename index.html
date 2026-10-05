@@ -317,6 +317,13 @@
         #milk-list { transition: opacity .3s ease; }
         .modal-overlay { transition: opacity .4s ease, visibility .4s ease !important; }
         .toast, #toast { transition: transform .45s cubic-bezier(.22,1,.36,1), opacity .45s ease !important; }
+
+        button, .vol-chip, .fab-btn { transition: transform .25s cubic-bezier(.22,1,.36,1), background .25s ease, box-shadow .25s ease, border-color .25s ease; }
+        @media (hover: hover) {
+            .fab-btn:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 16px 28px rgba(225,29,72,.32) !important; }
+            .vol-chip:hover { transform: translateY(-1px); border-color: #fda4af; background: #fff1f2; }
+            #action-list button:hover, #status-grid button:hover, .modal-content button:hover { transform: translateY(-1px); background: #fff7f8; }
+        }
     </style>
 </head>
 <body class="selection:bg-pink-500 selection:text-white">
