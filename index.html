@@ -257,6 +257,21 @@
         .liquid-fill { height: 6px !important; border-radius: 99px; }
         h2.section-kicker, main h2 { color: #a8a29e !important; letter-spacing: .16em; }
         header .glass-panel { box-shadow: none !important; border: none !important; background: transparent !important; padding-left: 4px !important; }
+
+        body { background: #f6f5f4 !important; color: #1f1d1b; }
+        .glass-panel, .med-card, .milk-card {
+            background: #fff !important;
+            border: 1px solid #ece7e4 !important;
+            box-shadow: none !important;
+            backdrop-filter: none !important;
+        }
+        header .glass-panel { background: transparent !important; border: none !important; }
+        .fab-btn {
+            width: 56px !important; height: 56px !important; border-radius: 16px !important;
+            background: #1f1d1b !important; box-shadow: none !important;
+        }
+        .med-bottle { animation: none !important; width: 40px !important; height: 40px !important; border-radius: 12px !important; }
+        #sync-dot, .sync-dot { box-shadow: none; }
     </style>
 </head>
 <body class="selection:bg-pink-500 selection:text-white">
@@ -271,7 +286,7 @@
                         <i class="ph-fill ph-baby text-2xl"></i>
                     </div>
                     <div class="flex items-center gap-2">
-                        <h1 class="text-xl font-extrabold text-slate-800 tracking-tight">Sổ Sữa Của Bé</h1>
+                        <h1 class="text-xl font-extrabold text-slate-800 tracking-tight">Sổ sữa</h1>
                         <div id="sync-dot" class="sync-dot" title="Trạng thái kết nối"></div>
                     </div>
                 </div>
@@ -285,7 +300,7 @@
             <!-- Cột Trái: Thuốc -->
             <div class="med-col lg:col-span-1">
                 <h2 class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-3 flex items-center gap-2">
-                    <i class="ph-fill ph-pill text-pink-500 text-base"></i> Uống thuốc hôm nay
+                    <i class="ph-fill ph-pill text-pink-500 text-base"></i> Thuốc hôm nay
                 </h2>
 
                 <div id="card-yellow" class="glass-panel med-card rounded-3xl p-4 flex items-center justify-between">
@@ -320,7 +335,7 @@
             <!-- Cột Phải: Tủ sữa -->
             <div class="lg:col-span-2 space-y-4">
                 <h2 class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-3 flex items-center gap-2">
-                    <i class="ph-fill ph-drop text-blue-500 text-base"></i> Tủ sữa của bé
+                    <i class="ph-fill ph-drop text-blue-500 text-base"></i> Tủ sữa
                 </h2>
 
                 <div id="empty-state" class="rounded-3xl p-8 flex flex-col items-center justify-center text-center">
@@ -789,7 +804,7 @@ function showToast(msg, icon = 'ph-fill ph-sparkle text-amber-400', systemNotifi
     }, 4500);
     if (systemNotification && 'Notification' in window && Notification.permission === 'granted') {
         try {
-            new Notification('Sổ Sữa Của Bé 🍼', {
+            new Notification('Sổ sữa 🍼', {
                 body: msg,
                 icon: 'icon-192.png'
             });
@@ -1353,14 +1368,14 @@ async function autoEnableNotifications() {
         // Test local notification để xác nhận quyền OK
         try {
             const reg = await navigator.serviceWorker.ready;
-            await reg.showNotification('Sổ Sữa Của Bé 🍼', {
+            await reg.showNotification('Sổ sữa 🍼', {
                 body: 'Thông báo đã bật! Mẹ sẽ nhận nhắc hạn sữa và tin vui.',
                 icon: './icon-192.png',
                 tag: 'welcome'
             });
         } catch (e) {
             try {
-                new Notification('Sổ Sữa Của Bé 🍼', {
+                new Notification('Sổ sữa 🍼', {
                     body: 'Thông báo đã bật! Mẹ sẽ nhận nhắc hạn sữa và tin vui.',
                     icon: './icon-192.png'
                 });
