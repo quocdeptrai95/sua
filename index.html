@@ -1331,7 +1331,7 @@ function urlBase64ToUint8Array(base64String) {
 async function registerServiceWorker() {
     if (!('serviceWorker' in navigator)) return null;
     try {
-        swRegistration = await navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' });
+        swRegistration = await navigator.serviceWorker.register('./sw.js?v=3', { updateViaCache: 'none' });
         await navigator.serviceWorker.ready;
         console.log('SW ready');
         return swRegistration;
