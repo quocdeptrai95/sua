@@ -20,14 +20,11 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        * {
-            -webkit-tap-highlight-color: transparent;
-            -webkit-font-smoothing: antialiased;
-            transform: translateZ(0);
-        }
+        * { -webkit-tap-highlight-color: transparent; -webkit-font-smoothing: antialiased; }
+        html { scroll-behavior: smooth; }
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(160deg, #fce7f3 0%, #e0e7ff 45%, #f3e8ff 100%);
+            background: radial-gradient(1200px 500px at 10% -10%, #fbcfe8 0%, transparent 50%), radial-gradient(900px 420px at 100% 0%, #ddd6fe 0%, transparent 46%), linear-gradient(180deg, #fff7fb 0%, #eef2ff 55%, #f5f3ff 100%);
             min-height: 100dvh;
             color: #1e293b;
             overflow-x: hidden;
@@ -182,6 +179,77 @@
         }
         .sync-dot.online { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
         .sync-dot.offline { background: #ef4444; }
+
+        .app-shell { max-width: 980px; }
+        header .glass-panel { border-radius: 28px; }
+        .milk-card { border-radius: 28px; }
+        .fab-btn {
+            width: 64px; height: 64px; border-radius: 22px;
+            background: linear-gradient(160deg, #fb7185, #ec4899);
+            box-shadow: 0 14px 30px rgba(236, 72, 153, 0.38);
+        }
+        .fab-btn:active { transform: scale(0.94); }
+        #toast { border-radius: 18px !important; }
+        .section-kicker { letter-spacing: .14em; }
+        @media (max-width: 640px) {
+            .glass-panel { box-shadow: 0 8px 24px rgba(148,163,184,.1); }
+        }
+
+        /* Responsive */
+        .med-col { display: grid; grid-template-columns: 1fr; gap: 12px; }
+        @media (max-width: 1023px) {
+            .med-col { grid-template-columns: 1fr 1fr; }
+            .med-col > h2 { grid-column: 1 / -1; }
+        }
+        @media (min-width: 1024px) {
+            .med-col { position: sticky; top: 0; align-self: start; }
+        }
+        @media (max-width: 639px) {
+            h1 { font-size: 1.05rem !important; }
+            .modal-overlay { align-items: flex-end !important; padding: 0 !important; }
+            .modal-content { width: 100% !important; max-width: 100% !important; border-radius: 28px 28px 0 0 !important; max-height: 92dvh !important; }
+            #modal-confirm .modal-content { width: min(92vw, 320px) !important; border-radius: 24px !important; margin-bottom: 24px; }
+            #empty-state { padding: 2.25rem 1rem !important; }
+        }
+        @media (min-width: 640px) and (max-width: 1023px) {
+            #milk-list { grid-template-columns: 1fr 1fr; }
+        }
+        @media (min-width: 1280px) {
+            #milk-list { grid-template-columns: 1fr 1fr; }
+        }
+
+        @keyframes riseIn {
+            from { opacity: 0; transform: translateY(10px) scale(0.98); }
+            to { opacity: 1; transform: none; }
+        }
+        @keyframes sheetIn {
+            from { opacity: 0; transform: translateY(28px); }
+            to { opacity: 1; transform: none; }
+        }
+        .milk-card { animation: riseIn .35s cubic-bezier(.22,1,.36,1) both; }
+        .med-card { transition: transform .25s ease, box-shadow .25s ease; }
+        .modal-overlay { transition: opacity .25s ease, visibility .25s ease; }
+        .modal-overlay.active .modal-content { animation: sheetIn .32s cubic-bezier(.22,1,.36,1); }
+        .fab-btn { transition: transform .2s cubic-bezier(.22,1,.36,1), box-shadow .2s ease; }
+        .fab-btn:hover { transform: translateY(-2px); }
+        #toast { transition: transform .35s cubic-bezier(.22,1,.36,1), opacity .35s ease !important; }
+        .liquid-fill { transition: width .6s cubic-bezier(.22,1,.36,1), background .4s ease; }
+        @media (prefers-reduced-motion: reduce) {
+            .milk-card, .modal-overlay.active .modal-content, .med-bottle { animation: none !important; }
+        }
+
+        body { background: #f7f4f2 !important; color: #1c1917; }
+        .glass-panel {
+            background: #fff !important;
+            border: 1px solid #f1e7e4 !important;
+            box-shadow: 0 1px 2px rgba(28,25,23,.04), 0 10px 28px rgba(28,25,23,.04) !important;
+            backdrop-filter: none !important;
+        }
+        .med-bottle { animation: none !important; border-radius: 14px !important; }
+        .sync-dot { width: 8px; height: 8px; }
+        #empty-state { background: transparent !important; border: 1px dashed #eadfdc !important; box-shadow: none !important; }
+        .vol-chip { border: 1px solid #f1e7e4; background: #fff; border-radius: 999px; padding: 8px 0; font-weight: 700; font-size: 13px; color: #44403c; }
+        .vol-chip.on { background: #fb7185; color: #fff; border-color: #fb7185; }
     </style>
 </head>
 <body class="selection:bg-pink-500 selection:text-white">
@@ -205,10 +273,10 @@
         </header>
 
         <!-- Main -->
-        <main class="flex-1 overflow-y-auto pb-32 grid grid-cols-1 lg:grid-cols-3 gap-6 pr-1">
+        <main class="flex-1 overflow-y-auto pb-28 sm:pb-32 grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 pr-1">
 
             <!-- Cột Trái: Thuốc -->
-            <div class="lg:col-span-1 space-y-4">
+            <div class="med-col lg:col-span-1">
                 <h2 class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-3 flex items-center gap-2">
                     <i class="ph-fill ph-pill text-pink-500 text-base"></i> Uống thuốc hôm nay
                 </h2>
@@ -248,22 +316,19 @@
                     <i class="ph-fill ph-drop text-blue-500 text-base"></i> Tủ sữa của bé
                 </h2>
 
-                <div id="empty-state" class="glass-panel rounded-3xl p-12 flex flex-col items-center justify-center text-center">
-                    <div class="w-20 h-20 bg-white/50 backdrop-blur-md border border-white/60 rounded-full flex items-center justify-center text-slate-400 mb-4 shadow-inner">
-                        <i class="ph-fill ph-baby-carriage text-4xl"></i>
-                    </div>
-                    <h3 class="font-extrabold text-lg text-slate-800 mb-1">Chưa có cữ sữa nào</h3>
-                    <p class="text-slate-500 text-xs font-medium max-w-xs">Nhấn nút dấu cộng (+) ở góc dưới bên phải để bắt đầu lưu trữ nhé mẹ.</p>
+                <div id="empty-state" class="rounded-3xl p-8 flex flex-col items-center justify-center text-center">
+                    <h3 class="font-extrabold text-base text-stone-800 mb-1">Tủ sữa đang trống</h3>
+                    <p class="text-stone-500 text-xs font-medium max-w-xs">Bấm dấu cộng để lưu cữ sữa đầu tiên.</p>
                 </div>
 
-                <div id="milk-list" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div id="milk-list" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-3 sm:gap-4">
                     <!-- Rendered by JS -->
                 </div>
             </div>
         </main>
 
         <!-- FAB -->
-        <div class="fixed bottom-6 right-6 z-40">
+        <div class="fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-4 z-40">
             <button onclick="openAddModal()" class="w-16 h-16 bg-gradient-to-br from-pink-500 to-rose-500 rounded-full flex items-center justify-center text-white shadow-2xl shadow-pink-500/40 hover:scale-105 active:scale-95 transition-all border border-pink-300/60">
                 <i class="ph-bold ph-plus text-2xl"></i>
             </button>
@@ -281,6 +346,12 @@
                 <div class="flex-1 overflow-y-auto p-6 space-y-5">
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Lượng sữa (ml)</label>
+                        <div id="vol-chips" class="grid grid-cols-4 gap-2 mb-2">
+                            <button type="button" class="vol-chip" onclick="setVol(60)">60</button>
+                            <button type="button" class="vol-chip" onclick="setVol(90)">90</button>
+                            <button type="button" class="vol-chip" onclick="setVol(120)">120</button>
+                            <button type="button" class="vol-chip" onclick="setVol(150)">150</button>
+                        </div>
                         <div class="relative">
                             <input type="number" id="input-volume" value="100" class="w-full bg-white/60 backdrop-blur-md border border-white/60 text-slate-800 text-lg font-bold rounded-2xl px-5 py-3.5 pl-12 focus:outline-none focus:ring-2 focus:ring-pink-500/50 shadow-inner">
                             <i class="ph-fill ph-drop text-blue-500 text-xl absolute left-4 top-1/2 -translate-y-1/2"></i>
@@ -398,8 +469,27 @@ const STATES = {
     FREEZER: { id: 'FREEZER', label: 'Trữ đông', desc: 'Tối đa 3 tháng', duration: 90 * MS_DAY, color: 'text-indigo-700', bg: 'bg-indigo-100', icon: 'ph-snowflake', bar: 'bg-indigo-400' },
     THAWED: { id: 'THAWED', label: 'Rã đông (Ngăn mát)', desc: 'Tối đa 24 giờ', duration: 24 * MS_HR, color: 'text-cyan-700', bg: 'bg-cyan-100', icon: 'ph-drop-half-bottom', bar: 'bg-cyan-400' },
     WARMED: { id: 'WARMED', label: 'Đã hâm nóng', desc: 'Tối đa 1 giờ', duration: 1 * MS_HR, color: 'text-orange-700', bg: 'bg-orange-100', icon: 'ph-fire', bar: 'bg-orange-400' },
-    PARTIAL: { id: 'PARTIAL', label: 'Bú dở (Còn thừa)', desc: 'Tối đa 1 giờ', duration: 1 * MS_HR, color: 'text-purple-700', bg: 'bg-purple-100', icon: 'ph-baby', bar: 'bg-purple-400' }
+    PARTIAL: { id: 'PARTIAL', label: 'Bú dở (Còn thừa)', desc: 'Tối đa 1 giờ', duration: 1 * MS_HR, color: 'text-purple-700', bg: 'bg-purple-100', icon: 'ph-baby', bar: 'bg-purple-400' },
+    FED: { id: 'FED', label: 'Đã bú', desc: 'Bé đã bú xong', duration: 0, color: 'text-emerald-700', bg: 'bg-emerald-100', icon: 'ph-check-circle', bar: 'bg-emerald-400' }
 };
+
+
+// Hạn dùng: bú dở / hâm nóng — sữa mẹ 1h30 (khoảng 1–2 giờ), sữa công thức 1 giờ.
+const MS_FEED_BREAST = 90 * MS_MIN;
+const MS_FEED_FORMULA = 60 * MS_MIN;
+function durationFor(type, state) {
+    if (state === 'FED') return 0;
+    if (state === 'WARMED' || state === 'PARTIAL') {
+        return type === 'FORMULA' ? MS_FEED_FORMULA : MS_FEED_BREAST;
+    }
+    return STATES[state].duration;
+}
+function durationLabel(type, state) {
+    const ms = durationFor(type, state);
+    if (ms === MS_FEED_BREAST) return 'Tối đa 1 giờ 30';
+    if (ms === MS_FEED_FORMULA) return 'Tối đa 1 giờ';
+    return STATES[state].desc;
+}
 
 const ALLOWED_TRANSITIONS = {
     ROOM: ['FRIDGE', 'FREEZER', 'WARMED', 'PARTIAL'],
@@ -780,6 +870,11 @@ async function toggleMed(type) {
     }
 }
 
+function setVol(n) {
+    const input = document.getElementById('input-volume');
+    if (input) input.value = n;
+    document.querySelectorAll('.vol-chip').forEach(b => b.classList.toggle('on', b.textContent == n));
+}
 function openAddModal() {
     const now = new Date();
     now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
@@ -813,7 +908,7 @@ function renderAddStates() {
         const div = document.createElement('div');
         div.onclick = () => { addState = k; renderAddStates(); };
         div.className = `cursor-pointer border border-white/60 rounded-2xl p-3 flex flex-col items-center justify-center transition-all shadow-sm ${active ? 'bg-pink-100/90 border-pink-400/80 shadow-pink-200' : 'bg-white/40 hover:bg-white/60'}`;
-        div.innerHTML = `<div class="w-7 h-7 rounded-full mb-1 flex items-center justify-center backdrop-blur-sm ${active ? 'bg-pink-500 text-white shadow-md' : 'bg-white/60 text-slate-500'}"><i class="ph-fill ${s.icon} text-sm"></i></div><span class="text-[11px] font-bold ${active ? 'text-pink-700' : 'text-slate-600'}">${s.label}</span>`;
+        div.innerHTML = `<div class="w-7 h-7 rounded-full mb-1 flex items-center justify-center backdrop-blur-sm ${active ? 'bg-pink-500 text-white shadow-md' : 'bg-white/60 text-slate-500'}"><i class="ph-fill ${s.icon} text-sm"></i></div><span class="text-[11px] font-bold ${active ? 'text-pink-700' : 'text-slate-600'}">${s.label}</span><span class="text-[9px] text-slate-400 mt-0.5">${durationLabel(addType, k)}</span>`;
         grid.appendChild(div);
     });
 }
@@ -830,7 +925,7 @@ async function saveMilk() {
         volume: vol,
         state: addState,
         start: start,
-        expires: start + STATES[addState].duration,
+        expires: start + durationFor(addType, addState),
         warned: false,
         expired: false
     };
@@ -856,30 +951,75 @@ function openActionModal(id) {
     const list = document.getElementById('action-list');
     list.innerHTML = '';
 
+    const volBox = document.createElement('div');
+    volBox.className = 'p-3 bg-white/50 border border-white/60 rounded-2xl mb-1';
+    volBox.innerHTML = `<label class="block text-[10px] font-bold text-slate-500 uppercase mb-1.5">Sửa lượng sữa (ml)</label>
+        <div class="flex gap-2">
+            <input id="edit-volume" type="number" inputmode="numeric" value="${item.volume}" class="flex-1 bg-white/80 border border-white/70 rounded-xl px-3 py-2.5 font-bold text-slate-800">
+            <button id="btn-save-vol" class="px-3 py-2.5 bg-pink-500 text-white font-bold rounded-xl text-xs">Lưu ml</button>
+        </div>`;
+    list.appendChild(volBox);
+    volBox.querySelector('#btn-save-vol').onclick = () => saveVolume(id);
+
+    if (item.state !== 'PARTIAL' && item.state !== 'FED') {
+        const partialBtn = document.createElement('button');
+        partialBtn.className = 'w-full flex items-center gap-3.5 p-3.5 bg-purple-50 border border-purple-200 rounded-2xl text-left';
+        partialBtn.onclick = () => updateMilkState(id, 'PARTIAL');
+        partialBtn.innerHTML = '<div class="w-9 h-9 rounded-xl flex items-center justify-center bg-purple-100 text-purple-600"><i class="ph-fill ph-baby text-lg"></i></div><div><div class="font-bold text-purple-700 text-xs">Bú dở</div><div class="text-[10px] font-semibold text-purple-600">' + durationLabel(item.type, 'PARTIAL') + ' — sữa còn thừa</div></div>';
+        list.appendChild(partialBtn);
+    }
+    if (item.state !== 'FED') {
+        const fedBtn = document.createElement('button');
+        fedBtn.className = 'w-full flex items-center gap-3.5 p-3.5 bg-emerald-50 border border-emerald-200 rounded-2xl text-left';
+        fedBtn.onclick = () => updateMilkState(id, 'FED');
+        fedBtn.innerHTML = '<div class="w-9 h-9 rounded-xl flex items-center justify-center bg-emerald-100 text-emerald-600"><i class="ph-fill ph-check-circle text-lg"></i></div><div><div class="font-bold text-emerald-700 text-xs">Đã bú</div><div class="text-[10px] font-semibold text-emerald-600">Bé uống xong cữ này</div></div>';
+        list.appendChild(fedBtn);
+    }
+
     let transitions = ALLOWED_TRANSITIONS[item.state] || [];
     if (item.type === 'FORMULA') transitions = transitions.filter(t => t !== 'FREEZER' && t !== 'THAWED');
 
     if (transitions.length === 0) {
-        list.innerHTML = `<div class="p-4 text-center text-xs font-bold text-slate-500">Sữa bú dở không thể cất lại tủ lạnh. Mẹ nhớ bỏ đi nếu bé không dùng hết nhé!</div>`;
+        const note = document.createElement('div');
+        note.className = 'p-4 text-center text-xs font-bold text-slate-500';
+        note.textContent = 'Sữa bú dở không thể cất lại tủ lạnh. Mẹ nhớ bỏ đi nếu bé không dùng hết nhé!';
+        list.appendChild(note);
     } else {
         transitions.forEach(k => {
             const s = STATES[k];
             const btn = document.createElement('button');
             btn.className = "w-full flex items-center gap-3.5 p-3.5 bg-white/40 backdrop-blur-sm border border-white/60 rounded-2xl hover:bg-white/70 transition-all text-left shadow-sm";
             btn.onclick = () => updateMilkState(id, k);
-            btn.innerHTML = `<div class="w-9 h-9 rounded-xl flex items-center justify-center ${s.bg} ${s.color}"><i class="ph-fill ${s.icon} text-lg"></i></div><div><div class="font-bold text-slate-800 text-xs">Chuyển sang: ${s.label}</div><div class="text-[10px] font-semibold text-slate-500">${s.desc}</div></div>`;
+            btn.innerHTML = `<div class="w-9 h-9 rounded-xl flex items-center justify-center ${s.bg} ${s.color}"><i class="ph-fill ${s.icon} text-lg"></i></div><div><div class="font-bold text-slate-800 text-xs">Chuyển sang: ${s.label}</div><div class="text-[10px] font-semibold text-slate-500">${durationLabel(item.type, k)}</div></div>`;
             list.appendChild(btn);
         });
     }
     openModal('modal-action');
 }
 
+async function saveVolume(id) {
+    const input = document.getElementById('edit-volume');
+    const vol = parseInt(input && input.value, 10);
+    if (!vol || vol <= 0) {
+        showToast('Nhập số ml hợp lệ', 'ph-fill ph-warning text-amber-300');
+        return;
+    }
+    const ok = await updateMilkRow(id, { volume: vol });
+    if (!ok) return;
+    const item = milks.find(m => m.id === id);
+    if (item) item.volume = vol;
+    renderApp();
+    showToast('Đã cập nhật ' + vol + ' ml');
+}
+
 async function updateMilkState(id, newState) {
+    const item = milks.find(m => m.id === id);
+    if (!item) return;
     const now = Date.now();
     const patch = {
         state: newState,
         start_ms: now,
-        expires_ms: now + STATES[newState].duration,
+        expires_ms: now + durationFor(item.type, newState),
         warned: false,
         expired: false
     };
@@ -947,8 +1087,9 @@ function renderApp() {
     listEl.innerHTML = '';
 
     milks.forEach(m => {
-        const s = STATES[m.state];
-        const isExp = now >= m.expires;
+        const s = STATES[m.state] || STATES.FRIDGE;
+        const isFed = m.state === 'FED';
+        const isExp = !isFed && now >= m.expires;
         const dObj = new Date(m.start);
         const timeStr = `${String(dObj.getHours()).padStart(2, '0')}:${String(dObj.getMinutes()).padStart(2, '0')} - ${dObj.getDate()}/${dObj.getMonth() + 1}`;
 
@@ -960,7 +1101,7 @@ function renderApp() {
         else if (pct < 20) { barClass = 'bg-red-400'; textClass = 'text-red-500 font-bold'; }
 
         const card = document.createElement('div');
-        card.className = `glass-panel rounded-3xl p-4 cursor-pointer relative overflow-hidden ${isExp ? 'border-red-300 bg-red-50/50' : ''}`;
+        card.className = `glass-panel milk-card p-4 cursor-pointer relative overflow-hidden ${isExp ? 'border-red-200 bg-red-50/70' : ''}`;
         card.onclick = () => openActionModal(m.id);
 
         card.innerHTML = `
@@ -980,7 +1121,7 @@ function renderApp() {
             <div class="mt-3">
                 <div class="flex justify-between items-center mb-1">
                     <span class="text-[10px] font-bold text-slate-500">Còn lại</span>
-                    <span id="txt-${m.id}" class="text-xs ${textClass}">${formatTimeLeft(m.expires - now)}</span>
+                    <span id="txt-${m.id}" class="text-xs ${textClass}">${isFed ? 'Đã bú' : formatTimeLeft(m.expires - now)}</span>
                 </div>
                 <div class="liquid-track">
                     <div id="bar-${m.id}" class="liquid-fill ${barClass}" style="width: ${pct}%"></div>
@@ -1114,17 +1255,15 @@ function urlBase64ToUint8Array(base64String) {
 }
 
 async function registerServiceWorker() {
-    if (!('serviceWorker' in navigator)) return;
+    if (!('serviceWorker' in navigator)) return null;
     try {
-        swRegistration = await navigator.serviceWorker.register('./sw.js');
-        console.log('SW registered');
-        // Nếu đã từng cho phép thì tự subscribe lại
-        if (Notification.permission === 'granted') {
-            await subscribePushSilent();
-            
-        }
+        swRegistration = await navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' });
+        await navigator.serviceWorker.ready;
+        console.log('SW ready');
+        return swRegistration;
     } catch (e) {
         console.warn('SW register failed', e);
+        return null;
     }
 }
 
@@ -1199,8 +1338,28 @@ async function autoEnableNotifications() {
         if (Notification.permission === 'default') {
             await Notification.requestPermission();
         }
-        if (Notification.permission === 'granted') {
-            await subscribePushSilent();
+        if (Notification.permission !== 'granted') {
+            console.warn('Notification permission:', Notification.permission);
+            return;
+        }
+        await subscribePushSilent();
+        // Test local notification để xác nhận quyền OK
+        try {
+            const reg = await navigator.serviceWorker.ready;
+            await reg.showNotification('Sổ Sữa Của Bé 🍼', {
+                body: 'Thông báo đã bật! Mẹ sẽ nhận nhắc hạn sữa và tin vui.',
+                icon: './icon-192.png',
+                tag: 'welcome'
+            });
+        } catch (e) {
+            try {
+                new Notification('Sổ Sữa Của Bé 🍼', {
+                    body: 'Thông báo đã bật! Mẹ sẽ nhận nhắc hạn sữa và tin vui.',
+                    icon: './icon-192.png'
+                });
+            } catch (e2) {
+                console.warn('local notif fail', e2);
+            }
         }
     } catch (e) {
         console.warn('autoEnableNotifications', e);
