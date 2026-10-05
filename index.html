@@ -1155,8 +1155,8 @@ function renderApp() {
         card.innerHTML = `
             <div class="flex justify-between items-start mb-3">
                 <div class="flex items-center gap-1.5 bg-white/70 backdrop-blur-md px-2.5 py-1 rounded-xl border border-white/60 shadow-sm">
-                    <i class="ph-fill ${s.icon} ${s.color} text-sm"></i>
-                    <span class="text-[11px] font-bold ${s.color}">${s.label}</span>
+                    <span class="state-ico ${s.bg} ${s.color}"><i class="ph-fill ${s.icon}"></i></span>
+                    <span class="text-[12px] font-bold ${s.color}">${s.label}</span>
                 </div>
                 <span class="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-lg backdrop-blur-md border border-white/50 ${m.type === 'FORMULA' ? 'bg-blue-100/80 text-blue-700' : 'bg-pink-100/80 text-pink-700'}">
                     ${m.type === 'FORMULA' ? 'Công thức' : 'Sữa mẹ'}
