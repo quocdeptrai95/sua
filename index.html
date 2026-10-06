@@ -363,10 +363,10 @@
         .fab-btn, button.w-16 { width: 56px !important; height: 56px !important; border-radius: 18px !important; box-shadow: none !important; }
 
 
-        main { display: flex !important; flex-direction: column !important; gap: 20px !important; grid-template-columns: none !important; }
-        .med-col { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 12px !important; width: 100%; }
+        main { display: flex !important; flex-direction: column !important; gap: 28px !important; grid-template-columns: none !important; }
+        .med-col { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 16px !important; width: 100%; }
         .milk-col { width: 100%; }
-        #milk-list { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 14px !important; width: 100%; }
+        #milk-list { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 16px !important; width: 100%; }
         @media (max-width: 800px) { #milk-list { grid-template-columns: 1fr !important; } .med-col { grid-template-columns: 1fr 1fr !important; } }
         .milk-card, .med-card { height: auto; }
 
@@ -380,11 +380,13 @@
         .med-card { padding: 14px 16px !important; }
         main h2 { margin-bottom: 8px !important; }
         header { margin-bottom: 4px; }
+        .med-col, .milk-col { margin-top: 8px; }
+        .milk-card { margin: 0 !important; }
     </style>
 </head>
 <body class="selection:bg-pink-500 selection:text-white">
     <div id="ios-push-hint" class="hidden fixed bottom-24 left-3 right-3 z-40 bg-white border border-rose-100 text-slate-700 text-xs font-semibold rounded-2xl px-4 py-3 shadow-lg">iPhone không nhận push trong tab Safari. Bấm Chia sẻ, Thêm vào Màn hình chính, bật Mở dưới dạng ứng dụng web, rồi mở từ icon đó và bấm Cho phép.</div>
-    <div class="shell relative z-10 flex flex-col min-h-[100dvh] w-full max-w-6xl mx-auto px-5 pb-8 gap-4">
+    <div class="shell relative z-10 flex flex-col min-h-[100dvh] w-full max-w-6xl mx-auto px-5 pb-8 gap-6">
 
         <!-- Header -->
         <header class="flex-shrink-0">
@@ -454,7 +456,7 @@
                     <p class="text-stone-500 text-xs font-medium max-w-xs">Bấm dấu cộng để lưu cữ sữa đầu tiên.</p>
                 </div>
 
-                <div id="milk-list" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-3 sm:gap-4">
+                <div id="milk-list" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-3 sm:gap-6">
                     <!-- Rendered by JS -->
                 </div>
             </div>
