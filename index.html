@@ -430,6 +430,7 @@
                 <div class="overflow-y-auto p-5 space-y-4">
                     <div>
                         <label class="block text-xs font-extrabold text-slate-500 uppercase mb-2">Chọn mũi trong lịch</label>
+                        <input id="vac-search" type="search" placeholder="Tìm tên mũi..." oninput="renderVacPicks()" class="w-full mb-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300">
                         <div id="vac-picks" class="max-h-40 overflow-y-auto grid grid-cols-1 gap-1.5 pr-1"></div>
                     </div>
                     <div>
@@ -946,6 +947,7 @@ function openAddVaccineModal() {
     document.getElementById('vac-delete').classList.add('hidden');
     document.querySelector('#modal-vaccine h3').textContent = 'Lên lịch tiêm chủng';
     document.getElementById('vac-name').value = '';
+    const s = document.getElementById('vac-search'); if (s) s.value = '';
     renderVacPicks();
     document.getElementById('vac-date').value = new Date().toISOString().slice(0, 10);
     document.getElementById('vac-note').value = '';
@@ -1050,7 +1052,11 @@ const VAC_PICKS = [
 function renderVacPicks() {
     const el = document.getElementById('vac-picks');
     if (!el) return;
-    el.innerHTML = VAC_PICKS.map(name => `<button type="button" onclick="setVacName('${name}')" class="text-left px-3 py-2 rounded-xl bg-purple-50 text-purple-800 text-sm font-semibold border border-purple-100">${name}</button>`).join('');
+    const q = (document.getElementById('vac-search')?.value || '').trim().toLowerCase();
+    const list = VAC_PICKS.filter(name => name.toLowerCase().includes(q));
+    el.innerHTML = list.length
+        ? list.map(name => `<button type="button" onclick="setVacName('${name}')" class="text-left px-3 py-2 rounded-xl bg-purple-50 text-purple-800 text-sm font-semibold border border-purple-100">${name}</button>`).join('')
+        : '<p class="text-xs text-slate-400 px-1">Không thấy tên này. Gõ thẳng ở ô bên dưới cũng được.</p>';
 }
 
 function setVacName(name) {
