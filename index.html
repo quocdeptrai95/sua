@@ -1491,7 +1491,7 @@ function showToast(msg, icon = 'ph-fill ph-sparkle text-amber-300', systemNotifi
 
     if (systemNotification && 'Notification' in window && Notification.permission === 'granted') {
         try {
-            new Notification('Sổ Theo Dõi Của Pép Pi 🍼', {
+            new Notification('Pép Pi', {
                 body: msg,
                 icon: 'icon-192.png'
             });
@@ -2006,7 +2006,7 @@ async function testLocalNotif() {
     try {
         if (!swRegistration) await registerServiceWorker();
         const sub = await subscribePushSilent();
-        const n = new Notification('Sổ Theo Dõi Của Pép Pi 🍼', { body: sub ? 'Chuông thông báo hoạt động tốt!' : 'Đã gửi thông báo thử.', tag: 'local-test' });
+        const n = new Notification('Pép Pi', { body: sub ? 'Chuông thông báo hoạt động tốt!' : 'Đã gửi thông báo thử.', tag: 'local-test' });
         n.onshow = () => { shown = true; };
         n.onerror = () => { shown = false; };
     } catch (e) {
