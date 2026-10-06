@@ -924,13 +924,7 @@ async function loadVaccines() {
         renderVaccines();
         return;
     }
-    if (!data.length) {
-        const rows = DEFAULT_VACCINES.map(v => ({ id: v.id, family_id: FAMILY_ID, name: v.name, vac_date: v.date || null, done: v.done, note: v.note }));
-        await sb.from('vaccines').insert(rows);
-        vaccines = DEFAULT_VACCINES.slice();
-    } else {
-        vaccines = data.map(vacFromRow);
-    }
+    vaccines = (data || []).map(vacFromRow);
     vaccines.sort((a, b) => !a.date ? 1 : !b.date ? -1 : new Date(a.date) - new Date(b.date));
     renderVaccines();
     checkVaccineAlerts();
