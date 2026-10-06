@@ -407,6 +407,7 @@
                 <div class="p-5 space-y-3">
                     <input id="med-name" placeholder="Tên thuốc" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3">
                     <input id="med-dose" placeholder="Liều, ví dụ 2 giọt" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3">
+                    <input id="med-time" type="datetime-local" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3">
                     <button onclick="saveOtherMed()" class="w-full py-3.5 bg-slate-900 text-white rounded-2xl font-semibold">Lưu thuốc</button>
                     <button id="med-delete" onclick="deleteEditingMed()" class="hidden w-full py-3 text-rose-600 font-semibold">Xóa thuốc</button>
                 </div>
@@ -1130,6 +1131,7 @@ function openAddMedModal() {
     document.querySelector('#modal-med h3').textContent = 'Thêm thuốc';
     document.getElementById('med-name').value = '';
     document.getElementById('med-dose').value = '';
+    document.getElementById('med-time').value = '';
     document.getElementById('med-delete').classList.add('hidden');
     openModal('modal-med');
 }
@@ -1140,6 +1142,7 @@ function openEditOtherMed(id) {
     document.querySelector('#modal-med h3').textContent = 'Sửa thuốc';
     document.getElementById('med-name').value = m.name;
     document.getElementById('med-dose').value = m.dose || '';
+    document.getElementById('med-time').value = m.remind_at ? m.remind_at.slice(0,16) : '';
     document.getElementById('med-delete').classList.remove('hidden');
     openModal('modal-med');
 }
@@ -1150,6 +1153,7 @@ function openEditBuiltin(color) {
     document.querySelector('#modal-med h3').textContent = 'Sửa thuốc';
     document.getElementById('med-name').value = title;
     document.getElementById('med-dose').value = dose;
+    document.getElementById('med-time').value = '';
     document.getElementById('med-delete').classList.remove('hidden');
     openModal('modal-med');
 }
@@ -1204,30 +1208,35 @@ function renderOtherMeds() {
                 </div>
                 <div>
                     <h3 class="font-extrabold text-base text-slate-900 tracking-tight">${m.name}</h3>
-                    <p class="text-sm font-bold text-amber-700">${m.dose || 'Uống theo chỉ định'}</p>
+                    <p class="text-sm font-bold text-amber-700">${m.dose || 'Uống theo chỉ định'}${m.remind_at ? ' · ' + new Date(m.remind_at).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' }) : ''}</p>
                     <p class="text-xs font-extrabold ${m.taken ? 'text-emerald-600' : 'text-slate-400'} mt-0.5">${m.taken ? 'Đã cho uống' : 'Chưa cho uống'}</p>
                 </div>
             </div>
             <input type="checkbox" class="ios-switch switch-yellow" ${m.taken ? 'checked' : ''} onclick="event.stopPropagation()" onchange="toggleOtherMed('${m.id}', this.checked)">
         </div>`).join('');
 }
+function medTimeValue() {
+    const raw = document.getElementById('med-time').value;
+    return raw ? new Date(raw).toISOString() : null;
+}
 async function saveOtherMed() {
     const name = document.getElementById('med-name').value.trim();
     const dose = document.getElementById('med-dose').value.trim();
+    const remind_at = medTimeValue();
     if (!name) return showToast('Nhập tên thuốc', 'ph-fill ph-warning text-amber-300');
     if (editingMedId && editingMedId.startsWith('builtin-')) {
         const color = editingMedId.slice(8);
         document.getElementById('card-' + color).querySelector('h3').textContent = name;
         document.getElementById('card-' + color).querySelector('p').textContent = dose || 'Uống theo chỉ định';
-        const { error } = await sb.from('other_meds').upsert({ id: editingMedId, family_id: FAMILY_ID, name, dose, taken: false }, { onConflict: 'id' });
+        const { error } = await sb.from('other_meds').upsert({ id: editingMedId, family_id: FAMILY_ID, name, dose, taken: false, remind_at }, { onConflict: 'id' });
         if (error) return showToast('Lỗi sửa thuốc: ' + error.message, 'ph-fill ph-warning text-red-400');
         editingMedId = null;
         closeModals();
         return;
     }
     const row = editingMedId
-        ? { id: editingMedId, family_id: FAMILY_ID, name, dose }
-        : { id: 'med-' + uid(), family_id: FAMILY_ID, name, dose, taken: false };
+        ? { id: editingMedId, family_id: FAMILY_ID, name, dose, remind_at }
+        : { id: 'med-' + uid(), family_id: FAMILY_ID, name, dose, taken: false, remind_at };
     const { error } = await sb.from('other_meds').upsert(row, { onConflict: 'id' });
     if (error) return showToast('Lỗi lưu thuốc: ' + error.message, 'ph-fill ph-warning text-red-400');
     editingMedId = null;
@@ -1684,8 +1693,23 @@ function renderApp() {
     });
 }
 
+
+function checkMedDue() {
+    const now = Date.now();
+    otherMeds.forEach(m => {
+        if (!m.remind_at || m.taken || m.dose === '__hidden') return;
+        const due = new Date(m.remind_at).getTime();
+        if (now < due || now - due > 60 * 60 * 1000) return;
+        const key = 'med-due-' + m.id + '-' + m.remind_at;
+        if (localStorage.getItem(key)) return;
+        localStorage.setItem(key, '1');
+        showToast('Đến giờ uống ' + m.name + '. Mẹ cho Pép Pi uống nhé.', 'ph-fill ph-pill text-rose-400', true);
+    });
+}
+
 function tick() {
     checkDailyMedReset();
+    checkMedDue();
     if (document.hidden || !milks.length) return;
     const now = Date.now();
     milks.forEach(m => {
