@@ -432,6 +432,7 @@
                         <label class="block text-xs font-extrabold text-slate-500 uppercase mb-2">Chọn mũi trong lịch</label>
                         <input id="vac-search" type="search" placeholder="Tìm tên mũi..." oninput="renderVacPicks()" class="w-full mb-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300">
                         <div id="vac-picks" class="max-h-40 overflow-y-auto grid grid-cols-1 gap-1.5 pr-1"></div>
+                        <p id="vac-info" class="hidden text-xs text-slate-500 bg-purple-50 rounded-xl px-3 py-2 leading-relaxed"></p>
                     </div>
                     <div>
                         <label class="block text-xs font-extrabold text-slate-500 uppercase mb-2">Tên mũi tiêm</label>
@@ -1059,8 +1060,54 @@ function renderVacPicks() {
         : '<p class="text-xs text-slate-400 px-1">Không thấy tên này. Gõ thẳng ở ô bên dưới cũng được.</p>';
 }
 
+const VAC_INFO = {
+    'Lao (BCG)': 'Phòng lao. Tiêm cho trẻ sơ sinh, tốt nhất trong tháng đầu.',
+    'Viêm gan B sơ sinh': 'Phòng viêm gan B. Tiêm trong 24 giờ đầu sau sinh.',
+    'Ivactuber': 'Phòng lao cho trẻ sơ sinh.',
+    'Gene Hbvax': 'Phòng viêm gan B cho trẻ sơ sinh và trẻ nhỏ.',
+    'Heberbiovac': 'Phòng viêm gan B cho trẻ sơ sinh và trẻ nhỏ.',
+    'Hexaxim': '6 trong 1: bạch hầu, ho gà, uốn ván, bại liệt, Hib, viêm gan B. Từ 2 tháng.',
+    'Infanrix Hexa': '6 trong 1 cho trẻ từ 2 tháng: bạch hầu, ho gà, uốn ván, bại liệt, Hib, viêm gan B.',
+    'Infanrix': 'Phòng bạch hầu, ho gà, uốn ván. Dùng cho trẻ nhỏ.',
+    'Rotarix': 'Uống phòng tiêu chảy do Rota. Trẻ nhỏ từ 6 tuần.',
+    'Rotateq': 'Uống phòng tiêu chảy do Rota. Trẻ nhỏ từ 6 tuần.',
+    'Rotavin': 'Uống phòng tiêu chảy do Rota. Trẻ nhỏ từ 6 tuần.',
+    'Prevenar 13': 'Phòng phế cầu: viêm phổi, viêm màng não. Từ 2 tháng.',
+    'Prevenar 20': 'Phòng phế cầu nhiều týp hơn. Từ 6 tuần.',
+    'Synflorix': 'Phòng phế cầu cho trẻ từ 6 tuần.',
+    'Vaxneuvance': 'Phòng phế cầu cho trẻ từ 6 tuần.',
+    'Bexsero': 'Phòng não mô cầu nhóm B. Từ 2 tháng.',
+    'MenQuadfi': 'Phòng não mô cầu A, C, Y, W. Trẻ nhỏ theo chỉ định.',
+    'Nimenrix': 'Phòng não mô cầu A, C, Y, W. Từ 6 tuần.',
+    'Envacgen': 'Phòng tay chân miệng do EV71. Từ 2 tháng đến dưới 6 tuổi.',
+    'Vaxigrip': 'Phòng cúm. Trẻ từ 6 tháng.',
+    'Influvac': 'Phòng cúm. Trẻ từ 6 tháng.',
+    'MVVac': 'Phòng sởi. Từ 9 tháng.',
+    'Imojev': 'Phòng viêm não Nhật Bản. Từ 9 tháng.',
+    'Jeev': 'Phòng viêm não Nhật Bản. Trẻ từ 1 tuổi.',
+    'Jevax': 'Phòng viêm não Nhật Bản. Trẻ từ 1 tuổi.',
+    'Varilrix': 'Phòng thủy đậu. Từ 9 tháng.',
+    'Varivax': 'Phòng thủy đậu. Từ 12 tháng.',
+    'Priorix': 'Phòng sởi, quai bị, rubella. Từ 9–12 tháng.',
+    'MMR II': 'Phòng sởi, quai bị, rubella. Từ 12 tháng.',
+    'ProQuad': 'Phòng sởi, quai bị, rubella và thủy đậu. Từ 12 tháng.',
+    'Twinrix': 'Phòng viêm gan A và B. Trẻ lớn theo chỉ định.',
+    'Avaxim': 'Phòng viêm gan A. Từ 12 tháng.',
+    'Havax': 'Phòng viêm gan A. Từ 24 tháng.',
+    'Typhoid VI': 'Phòng thương hàn. Từ 24 tháng.',
+    'mORCVAX': 'Uống phòng tả. Từ 2 tuổi.',
+    'Beyfortus': 'Kháng thể phòng RSV. Trẻ sơ sinh trong mùa RSV.',
+    'Qdenga': 'Phòng sốt xuất huyết. Trẻ từ 4 tuổi.',
+    'Tetraxim': '4 trong 1: bạch hầu, ho gà, uốn ván, bại liệt. Trẻ nhỏ và nhắc lại.',
+    'Quimi-Hib': 'Phòng Hib: viêm phổi, viêm màng não. Trẻ nhỏ.'
+};
 function setVacName(name) {
     document.getElementById('vac-name').value = name;
+    const info = document.getElementById('vac-info');
+    if (!info) return;
+    const text = VAC_INFO[name] || 'Mũi cho trẻ nhỏ. Hỏi VNVC hoặc bác sĩ về độ tuổi phù hợp trước khi tiêm.';
+    info.textContent = text;
+    info.classList.remove('hidden');
 }
 
 async function saveVaccine() {
@@ -1130,11 +1177,17 @@ function checkVaccineAlerts() {
         target.setHours(0, 0, 0, 0);
         const diffDays = Math.round((target - today) / (1000 * 60 * 60 * 24));
 
-        if (diffDays === 0) {
-            showToast(`💉 Hôm nay có lịch tiêm vắc-xin cho Pép Pi: ${v.name}`, 'ph-fill ph-syringe text-purple-400', true);
-        } else if (diffDays > 0 && diffDays <= 3) {
-            showToast(`⏰ Còn ${diffDays} ngày nữa là đến lịch tiêm: ${v.name}`, 'ph-fill ph-calendar text-amber-400', true);
-        }
+        if (diffDays > 3) return;
+        const key = 'vac-alert-' + v.id;
+        const last = Number(localStorage.getItem(key) || 0);
+        if (Date.now() - last < 15 * 60 * 1000) return;
+        localStorage.setItem(key, String(Date.now()));
+        const msg = diffDays === 0
+            ? `Hôm nay Pép Pi có hẹn tiêm ${v.name}. Bé dũng cảm là mẹ có thưởng.`
+            : diffDays < 0
+            ? `Mũi ${v.name} hơi trễ hẹn rồi. Mẹ sắp xếp khi rảnh nha.`
+            : `Còn ${diffDays} ngày nữa tới mũi ${v.name}. Mẹ để sẵn lịch giúp bé.`;
+        showToast(msg, 'ph-fill ph-syringe text-purple-400', true);
     });
 }
 
