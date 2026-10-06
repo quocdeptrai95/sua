@@ -1385,7 +1385,9 @@ async function testLocalNotif() {
     }
     let shown = false;
     try {
-        const n = new Notification('Thử chuông máy', { body: 'Nếu thấy ô này thì Windows đang cho hiện.', tag: 'local-test' });
+        if (!swRegistration) await registerServiceWorker();
+        const sub = await subscribePushSilent();
+        const n = new Notification('Sổ sữa', { body: sub ? 'Đã đăng ký push trên máy này.' : 'Chưa đăng ký được push.', tag: 'local-test' });
         n.onshow = () => { shown = true; };
         n.onerror = () => { shown = false; };
     } catch (e) {
