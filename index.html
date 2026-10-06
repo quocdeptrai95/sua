@@ -1123,6 +1123,13 @@ function subscribeRealtime() {
             if (status === 'SUBSCRIBED') setSyncStatus(true, 'Đồng bộ realtime');
             else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') setSyncStatus(false, 'Mất realtime');
         });
+    if (!window.syncPoll) {
+        window.syncPoll = setInterval(() => { if (!document.hidden) syncAll(); }, 2000);
+        document.addEventListener('visibilitychange', () => { if (!document.hidden) syncAll(); });
+    }
+}
+async function syncAll() {
+    await Promise.all([loadMilks(), loadMeds(), loadVaccines(), loadOtherMeds()]);
 }
 
 function handleMilkChange(payload) {
