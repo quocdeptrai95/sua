@@ -1717,6 +1717,13 @@ async function checkNoonMeds() {
     if (any) return;
     localStorage.setItem(key, '1');
     showToast('Đã qua 12 giờ mà chưa gạt thuốc nào. Mẹ kiểm tra Pép Pi đã uống chưa nhé.', 'ph-fill ph-warning text-amber-300', true);
+    if (hour >= 18) {
+        const key2 = 'evening-med-' + todayVN();
+        if (!localStorage.getItem(key2)) {
+            localStorage.setItem(key2, '1');
+            showToast('Tối rồi mà vẫn chưa gạt thuốc nào. Mẹ kiểm tra lại trước khi đi ngủ nhé.', 'ph-fill ph-warning text-amber-300', true);
+        }
+    }
 }
 
 function tick() {
