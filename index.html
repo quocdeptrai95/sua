@@ -369,6 +369,17 @@
         #milk-list { display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 14px !important; width: 100%; }
         @media (max-width: 800px) { #milk-list { grid-template-columns: 1fr !important; } .med-col { grid-template-columns: 1fr 1fr !important; } }
         .milk-card, .med-card { height: auto; }
+
+        body { background: #f7f2ef !important; }
+        .glass-panel, .med-card, .milk-card {
+            border-radius: 18px !important;
+            border: 1px solid #f0e6e2 !important;
+            box-shadow: 0 1px 2px rgba(40,20,20,.04) !important;
+        }
+        .milk-card { padding: 18px !important; }
+        .med-card { padding: 14px 16px !important; }
+        main h2 { margin-bottom: 8px !important; }
+        header { margin-bottom: 4px; }
     </style>
 </head>
 <body class="selection:bg-pink-500 selection:text-white">
