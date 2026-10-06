@@ -305,7 +305,10 @@
                     <h2 class="text-sm font-extrabold text-slate-600 uppercase tracking-wider flex items-center gap-2">
                         <i class="ph-fill ph-pill text-rose-500 text-base"></i> Thuốc hôm nay
                     </h2>
-                    <button onclick="openAddMedModal()" class="text-xs font-semibold text-rose-700 bg-rose-50 px-3 py-1.5 rounded-full border border-rose-100">Thêm thuốc</button>
+                    <div class="flex gap-2">
+                        <button id="btn-no-med" onclick="skipMedsToday()" class="text-xs font-semibold text-slate-500 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200">Hôm nay không uống</button>
+                        <button onclick="openAddMedModal()" class="text-xs font-semibold text-rose-700 bg-rose-50 px-3 py-1.5 rounded-full border border-rose-100">Thêm thuốc</button>
+                    </div>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5" id="med-grid">
                     <!-- Chai Vàng -->
@@ -1181,7 +1184,7 @@ async function loadOtherMeds() {
             await sb.from('other_meds').update({ taken: false, updated_at: new Date().toISOString() }).eq('id', m.id);
         }
     }
-    otherMeds = otherMeds.filter(m => !String(m.id).startsWith('builtin-'));
+    otherMeds = otherMeds.filter(m => !String(m.id).startsWith('builtin-') && m.id !== 'no-med-today');
     renderOtherMeds();
     for (const color of ['yellow', 'red']) {
         const card = document.getElementById('card-' + color);
@@ -1240,14 +1243,17 @@ async function saveOtherMed() {
     editingMedId = null;
     closeModals();
     await loadOtherMeds();
+        loadMedSkip();
 }
 async function toggleOtherMed(id, taken) {
     await sb.from('other_meds').update({ taken, updated_at: new Date().toISOString() }).eq('id', id);
     await loadOtherMeds();
+        loadMedSkip();
 }
 async function deleteOtherMed(id) {
     await sb.from('other_meds').delete().eq('id', id);
     await loadOtherMeds();
+        loadMedSkip();
 }
 
 function subscribeRealtime() {
@@ -1258,7 +1264,8 @@ function subscribeRealtime() {
     sb.channel('family-sync')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'milk_entries' }, (payload) => { if (mine(payload)) handleMilkChange(payload); })
         .on('postgres_changes', { event: '*', schema: 'public', table: 'vaccines' }, (payload) => { if (mine(payload)) loadVaccines(); })
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'other_meds' }, (payload) => { if (mine(payload)) loadOtherMeds(); })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'other_meds' }, (payload) => { if (mine(payload)) loadOtherMeds();
+        loadMedSkip(); })
         .on('postgres_changes', { event: '*', schema: 'public', table: 'meds' }, (payload) => {
             if (!mine(payload) || !payload.new) return;
             document.getElementById('toggle-yellow').checked = !!payload.new.yellow;
@@ -1706,10 +1713,24 @@ function checkMedDue() {
 }
 
 
+let skipMedToday = false;
+async function loadMedSkip() {
+    const { data } = await sb.from('other_meds').select('dose').eq('id', 'no-med-today').maybeSingle();
+    skipMedToday = !!(data && data.dose === todayVN());
+    const btn = document.getElementById('btn-no-med');
+    if (btn) btn.textContent = skipMedToday ? 'Đã tắt nhắc hôm nay' : 'Hôm nay không uống';
+}
+async function skipMedsToday() {
+    skipMedToday = !skipMedToday;
+    await sb.from('other_meds').upsert({ id: 'no-med-today', family_id: FAMILY_ID, name: 'Không uống', dose: skipMedToday ? todayVN() : '', taken: false }, { onConflict: 'id' });
+    await loadMedSkip();
+    showToast(skipMedToday ? 'Hôm nay không nhắc thuốc nữa.' : 'Đã bật lại nhắc thuốc.', 'ph-fill ph-check text-emerald-400');
+}
 async function checkNoonMeds() {
     const hour = Number(new Date().toLocaleString('en-GB', { timeZone: 'Asia/Ho_Chi_Minh', hour: '2-digit', hour12: false }));
-    if (hour < 12) return;
-    const key = 'noon-med-' + todayVN();
+    if (hour < 12 || skipMedToday) return;
+    const bucket = todayVN() + '-' + hour + '-' + (new Date().getMinutes() >= 30 ? '30' : '00');
+    const key = 'noon-med-' + bucket;
     if (localStorage.getItem(key)) return;
     const yellow = document.getElementById('toggle-yellow');
     const red = document.getElementById('toggle-red');
@@ -1717,13 +1738,6 @@ async function checkNoonMeds() {
     if (any) return;
     localStorage.setItem(key, '1');
     showToast('Đã qua 12 giờ mà chưa gạt thuốc nào. Mẹ kiểm tra Pép Pi đã uống chưa nhé.', 'ph-fill ph-warning text-amber-300', true);
-    if (hour >= 18) {
-        const key2 = 'evening-med-' + todayVN();
-        if (!localStorage.getItem(key2)) {
-            localStorage.setItem(key2, '1');
-            showToast('Tối rồi mà vẫn chưa gạt thuốc nào. Mẹ kiểm tra lại trước khi đi ngủ nhé.', 'ph-fill ph-warning text-amber-300', true);
-        }
-    }
 }
 
 function tick() {
@@ -1890,6 +1904,7 @@ async function init() {
         await Promise.all([loadMilks(), loadMeds(), loadSchedule()]);
         loadVaccines();
         loadOtherMeds();
+        loadMedSkip();
         subscribeRealtime();
         setSyncStatus(true, 'Đồng bộ realtime');
     } catch (e) {
