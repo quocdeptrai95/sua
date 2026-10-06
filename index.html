@@ -327,7 +327,7 @@
     </style>
 </head>
 <body class="selection:bg-pink-500 selection:text-white">
-    <div id="offline-bar" class="hidden fixed top-0 left-0 right-0 z-[200] bg-red-50 text-red-600 text-center text-xs font-semibold py-2 px-3 shadow-sm">⚠️ Không có mạng — dữ liệu tạm thời không đồng bộ</div>
+    <div id="ios-push-hint" class="hidden fixed bottom-24 left-3 right-3 z-40 bg-white border border-rose-100 text-slate-700 text-xs font-semibold rounded-2xl px-4 py-3 shadow-lg">iPhone chỉ nhận push khi mở từ icon màn hình chính. Trong Safari bấm Chia sẻ, rồi Thêm vào Màn hình chính.</div>
     <div class="relative z-10 flex flex-col h-[100dvh] w-full max-w-6xl mx-auto overflow-hidden p-3 sm:p-6 gap-4">
 
         <!-- Header -->
@@ -1438,6 +1438,10 @@ function startAutoFunNotifications() {
 // ============================================================
 
 async function autoEnableNotifications() {
+    const ios = /iPhone|iPad|iPod/.test(navigator.userAgent);
+    const standalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+    const hint = document.getElementById('ios-push-hint');
+    if (hint && ios && !standalone) hint.classList.remove('hidden');
     if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
     try {
         await registerServiceWorker();
