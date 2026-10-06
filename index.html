@@ -970,6 +970,7 @@ function openEditVaccine(id) {
     const save = document.querySelector('#modal-vaccine button[onclick="saveVaccine()"]');
     if (save) save.classList.remove('hidden');
     setVacFieldsLocked(false);
+    renderVacPicks();
 
     const item = vaccines.find(v => v.id === id);
     if (!item) return;
