@@ -839,10 +839,25 @@ function saveVaccinesLocally() {
     localStorage.setItem('peppi_vaccines', JSON.stringify(vaccines));
 }
 
+let editingVaccineId = null;
+
 function openAddVaccineModal() {
+    editingVaccineId = null;
+    document.querySelector('#modal-vaccine h3').textContent = 'Lên lịch tiêm chủng';
     document.getElementById('vac-name').value = '';
     document.getElementById('vac-date').value = new Date().toISOString().slice(0, 10);
     document.getElementById('vac-note').value = '';
+    openModal('modal-vaccine');
+}
+
+function openEditVaccine(id) {
+    const item = vaccines.find(v => v.id === id);
+    if (!item) return;
+    editingVaccineId = id;
+    document.querySelector('#modal-vaccine h3').textContent = 'Sửa mũi tiêm';
+    document.getElementById('vac-name').value = item.name;
+    document.getElementById('vac-date').value = item.date || '';
+    document.getElementById('vac-note').value = item.note || '';
     openModal('modal-vaccine');
 }
 
@@ -860,13 +875,24 @@ function saveVaccine() {
         return;
     }
 
-    vaccines.push({
-        id: 'vac-' + uid(),
-        name,
-        date: date || '',
-        done: false,
-        note: note || ''
-    });
+    const wasEdit = !!editingVaccineId;
+    if (editingVaccineId) {
+        const item = vaccines.find(v => v.id === editingVaccineId);
+        if (item) {
+            item.name = name;
+            item.date = date || '';
+            item.note = note || '';
+        }
+        editingVaccineId = null;
+    } else {
+        vaccines.push({
+            id: 'vac-' + uid(),
+            name,
+            date: date || '',
+            done: false,
+            note: note || ''
+        });
+    }
 
     vaccines.sort((a, b) => {
         if (!a.date) return 1;
@@ -877,7 +903,7 @@ function saveVaccine() {
     saveVaccinesLocally();
     renderVaccines();
     closeModals();
-    showToast(`Đã thêm mũi ${name}`, 'ph-fill ph-syringe text-purple-400');
+    showToast(wasEdit ? `Đã sửa mũi ${name}` : `Đã thêm mũi ${name}`, 'ph-fill ph-syringe text-purple-400');
     checkVaccineAlerts();
 }
 
@@ -939,17 +965,17 @@ function renderVaccines() {
         let isDueSoon = false;
 
         if (v.done) {
-            statusBadge = '<span class="text-xs font-extrabold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full flex items-center gap-1"><i class="ph-bold ph-check"></i> Đã tiêm</span>';
+            statusBadge = '<span class="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">Đã tiêm</span>';
         } else if (v.date) {
             const target = new Date(v.date);
             target.setHours(0, 0, 0, 0);
             const diffDays = Math.round((target - today) / (1000 * 60 * 60 * 24));
 
             if (diffDays < 0) {
-                statusBadge = '<span class="text-xs font-extrabold text-rose-700 bg-rose-100 px-2.5 py-0.5 rounded-full animate-pulse">Quá hạn</span>';
+                statusBadge = '<span class="text-xs font-extrabold text-rose-700 bg-rose-100 px-2.5 py-0.5 rounded-full ">Quá hạn</span>';
             } else if (diffDays === 0) {
                 isDueSoon = true;
-                statusBadge = '<span class="text-xs font-extrabold text-purple-700 bg-purple-100 px-2.5 py-0.5 rounded-full animate-bounce">Hôm nay!</span>';
+                statusBadge = '<span class="text-xs font-extrabold text-purple-700 bg-purple-100 px-2.5 py-0.5 rounded-full ">Hôm nay!</span>';
             } else if (diffDays <= 3) {
                 isDueSoon = true;
                 statusBadge = `<span class="text-xs font-extrabold text-amber-700 bg-amber-100 px-2.5 py-0.5 rounded-full">Còn ${diffDays} ngày</span>`;
@@ -963,7 +989,7 @@ function renderVaccines() {
         const dateDisplay = v.date ? new Date(v.date).toLocaleDateString('vi-VN') : 'Chưa đặt ngày';
 
         const card = document.createElement('div');
-        card.className = `glass-card p-4 flex items-center justify-between gap-3.5 ${v.done ? 'opacity-70 bg-white/60' : (isDueSoon ? 'border-purple-300 bg-purple-50/40' : '')}`;
+        card.className = `glass-card p-4 flex items-center justify-between gap-3 ${v.done ? 'border-emerald-100' : (isDueSoon ? 'border-purple-200' : '')}`;
         card.innerHTML = `
             <div class="flex items-center gap-3.5 min-w-0">
                 <button onclick="toggleVaccineDone('${v.id}')" class="w-10 h-10 rounded-2xl flex-shrink-0 flex items-center justify-center transition-all ${v.done ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/30' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}" title="${v.done ? 'Đánh dấu chưa tiêm' : 'Đánh dấu đã tiêm'}">
@@ -971,7 +997,7 @@ function renderVaccines() {
                 </button>
                 <div class="min-w-0">
                     <div class="flex items-center gap-2 flex-wrap">
-                        <h4 class="font-extrabold text-sm sm:text-base text-slate-900 tracking-tight truncate ${v.done ? 'line-through text-slate-400' : ''}">${v.name}</h4>
+                        <h4 class="font-semibold text-sm text-slate-800 truncate">${v.name}</h4>
                         ${statusBadge}
                     </div>
                     <div class="flex items-center gap-2.5 text-xs font-bold text-slate-400 mt-1">
@@ -980,9 +1006,14 @@ function renderVaccines() {
                     </div>
                 </div>
             </div>
-            <button onclick="deleteVaccine('${v.id}')" class="w-8 h-8 flex-shrink-0 rounded-xl flex items-center justify-center text-slate-300 hover:text-rose-500 transition-colors">
-                <i class="ph-bold ph-trash text-sm"></i>
-            </button>
+            <div class="flex items-center gap-1 flex-shrink-0">
+                <button onclick="openEditVaccine('${v.id}')" class="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-700" title="Sửa">
+                    <i class="ph-bold ph-pencil-simple text-sm"></i>
+                </button>
+                <button onclick="deleteVaccine('${v.id}')" class="w-8 h-8 rounded-xl flex items-center justify-center text-slate-300 hover:text-rose-500" title="Xóa">
+                    <i class="ph-bold ph-trash text-sm"></i>
+                </button>
+            </div>
         `;
         listEl.appendChild(card);
     });
@@ -1378,7 +1409,7 @@ function renderApp() {
 
         if (isExp) { 
             barClass = 'bg-rose-500'; 
-            textClass = 'text-sm text-rose-600 font-extrabold animate-pulse'; 
+            textClass = 'text-sm text-rose-600 font-extrabold '; 
         } else if (pct < 20) { 
             barClass = 'bg-amber-400'; 
             textClass = 'text-sm text-amber-600 font-extrabold'; 
@@ -1437,7 +1468,7 @@ function tick() {
             const pct = isExp ? 0 : Math.max(0, 100 - ((now - m.start) / total * 100));
             bar.style.width = `${pct}%`;
             if (isExp) {
-                txt.className = 'text-sm text-rose-600 font-extrabold animate-pulse';
+                txt.className = 'text-sm text-rose-600 font-extrabold ';
                 bar.className = 'liquid-fill bg-rose-500';
             } else if (pct < 20) {
                 txt.className = 'text-sm text-amber-600 font-extrabold';
