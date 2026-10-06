@@ -17,7 +17,7 @@
     <!-- Plus Jakarta Sans: Font chuẩn quốc tế hỗ trợ 100% tiếng Việt bo tròn cao cấp -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -39,7 +39,7 @@
         }
 
         body {
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--app-bg);
             background-attachment: fixed;
             min-height: 100dvh;
@@ -78,7 +78,7 @@
         }
 
         .font-num {
-            font-family: 'JetBrains Mono', monospace;
+            font-family: 'Be Vietnam Pro', sans-serif; font-variant-numeric: tabular-nums;
             font-feature-settings: "tnum" 1;
             font-variant-numeric: tabular-nums;
             letter-spacing: -0.04em;
@@ -256,6 +256,10 @@
             top: calc(env(safe-area-inset-top) + 14px);
             transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
         }
+    
+        body { font-weight: 500; letter-spacing: -0.011em; }
+        .uppercase { letter-spacing: 0.04em !important; font-weight: 600 !important; }
+        h1, h2, h3, .font-extrabold { font-weight: 700 !important; letter-spacing: -0.02em; }
     </style>
 </head>
 <body class="selection:bg-rose-500 selection:text-white relative">
