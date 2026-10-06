@@ -325,7 +325,12 @@
             #action-list button:hover, #status-grid button:hover, .modal-content button:hover { transform: translateY(-1px); background: #fff7f8; }
         }
         .shell { padding-top: max(59px, calc(env(safe-area-inset-top, 0px) + 16px)); }
-        body { background: radial-gradient(900px 420px at 0% -10%, #ffe4e8 0%, transparent 55%), #fff8f6 !important; color: #2a2226 !important; }
+        body { background: #fff7f8 !important; color: #241c22 !important; }
+        .shell { padding-top: max(62px, calc(env(safe-area-inset-top, 0px) + 18px)) !important; }
+        .med-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .med-col h2, .milk-col h2 { grid-column: 1 / -1; margin: 0 0 2px 2px; }
+        .med-card { padding: 12px !important; }
+        .milk-card { padding: 16px !important; }
         .glass-panel, .med-card, .milk-card {
             background: #fff !important;
             border: 1px solid #f3e4e8 !important;
@@ -363,7 +368,7 @@
                     </div>
                     <div>
                         <div class="flex items-center gap-2">
-                            <h1 class="text-xl font-extrabold text-slate-800 tracking-tight">Sổ sữa của bé</h1>
+                            <h1 class="text-xl font-extrabold text-slate-800 tracking-tight">Sổ sữa</h1>
                             <div id="sync-dot" class="sync-dot" title="Trạng thái kết nối"></div>
                         </div>
                         <button type="button" onclick="testLocalNotif()" class="text-[11px] font-bold text-rose-600">Thử chuông máy</button>
