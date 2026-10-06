@@ -4,7 +4,7 @@ self.addEventListener('activate', (event) => { event.waitUntil(clients.claim());
 
 self.addEventListener('push', (event) => {
   event.waitUntil((async () => {
-    let title = 'Sổ sữa';
+    let title = 'Sổ Sữa Của Pép Pi';
     let body = 'Có thông báo mới';
     let tag = 'milk-' + Date.now();
     try {
@@ -12,7 +12,7 @@ self.addEventListener('push', (event) => {
         const raw = await event.data.text();
         try {
           const data = JSON.parse(raw);
-          title = data.title || title;
+          title = 'Sổ Sữa Của Pép Pi';
           body = data.body || data.message || body;
           tag = data.tag || tag;
         } catch (_) { if (raw) body = raw; }
