@@ -8,145 +8,155 @@
     <meta name="theme-color" content="#fff5f7">
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="apple-touch-icon" href="icon-192.png">
-    <title>Sổ Sữa Của Pép Pi</title>
+    <title>Sổ Theo Dõi Của Pép Pi</title>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <!-- Premium Modern Fonts: Outfit & Be Vietnam Pro -->
+    <!-- Apple-grade Humanist Typography: Plus Jakarta Sans (Hỗ trợ 100% tiếng Việt chuẩn, không lỗi dấu) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@700&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet">
     <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         :root {
-            --app-bg: linear-gradient(135deg, #fff1f4 0%, #fef4e8 35%, #f2ecfe 70%, #ecfdf5 100%);
-            --glass-surface: rgba(255, 255, 255, 0.72);
-            --glass-card: rgba(255, 255, 255, 0.82);
+            --app-bg: linear-gradient(145deg, #fff2f5 0%, #fef8f0 30%, #f6f0ff 70%, #edfcf6 100%);
+            --glass-card: rgba(255, 255, 255, 0.84);
+            --glass-card-hover: rgba(255, 255, 255, 0.94);
             --glass-border: rgba(255, 255, 255, 0.9);
-            --glass-subtle: rgba(244, 63, 94, 0.04);
-            --rose-accent: #f43f5e;
-            --rose-glow: rgba(244, 63, 94, 0.28);
+            --glass-border-subtle: rgba(226, 232, 240, 0.7);
+            --shadow-ios: 0 14px 34px -10px rgba(225, 29, 72, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.04);
+            --shadow-float: 0 20px 40px -12px rgba(225, 29, 72, 0.28);
         }
 
         * {
             -webkit-tap-highlight-color: transparent;
             -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
             box-sizing: border-box;
         }
 
         body {
-            font-family: 'Outfit', 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+            /* Hệ font chuẩn iOS hiện đại: Plus Jakarta Sans kết hợp Apple SF Pro */
+            font-family: -apple-system, BlinkMacSystemFont, 'Plus Jakarta Sans', 'SF Pro Rounded', 'Segoe UI', Roboto, sans-serif;
             background: var(--app-bg);
             background-attachment: fixed;
             min-height: 100dvh;
-            color: #1e293b;
+            color: #0f172a;
             overflow-x: hidden;
             padding-top: max(12px, env(safe-area-inset-top));
-            padding-bottom: max(16px, env(safe-area-inset-bottom));
+            padding-bottom: max(24px, env(safe-area-inset-bottom));
         }
 
         /* 3D Frosted Glass Container */
         .glass-card {
             background: var(--glass-card);
-            backdrop-filter: blur(28px) saturate(180%);
-            -webkit-backdrop-filter: blur(28px) saturate(180%);
+            backdrop-filter: blur(28px) saturate(190%);
+            -webkit-backdrop-filter: blur(28px) saturate(190%);
             border: 1px solid var(--glass-border);
             border-top: 1.5px solid rgba(255, 255, 255, 0.98);
-            box-shadow: 0 16px 32px -8px rgba(225, 29, 72, 0.06), 0 4px 16px -2px rgba(15, 23, 42, 0.03);
-            border-radius: 28px;
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: var(--shadow-ios);
+            border-radius: 26px;
+            transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .glass-card:active {
-            transform: scale(0.988);
+            transform: scale(0.985);
         }
 
         /* Ambient Glow Blobs */
         .ambient-glow {
             position: fixed;
             border-radius: 9999px;
-            filter: blur(90px);
+            filter: blur(85px);
             pointer-events: none;
             z-index: 0;
-            opacity: 0.55;
-            animation: pulseGlow 10s ease-in-out infinite alternate;
+            opacity: 0.6;
+            animation: pulseAmbient 9s ease-in-out infinite alternate;
         }
-        @keyframes pulseGlow {
+        @keyframes pulseAmbient {
             0% { transform: scale(1) translate(0, 0); opacity: 0.45; }
-            100% { transform: scale(1.15) translate(20px, 25px); opacity: 0.7; }
+            100% { transform: scale(1.18) translate(25px, 20px); opacity: 0.7; }
         }
 
-        /* iOS Toggle Switch */
+        /* Font số Tabular cực kỳ sắc nét */
+        .font-num {
+            font-family: 'JetBrains Mono', -apple-system, monospace;
+            font-feature-settings: "tnum" 1;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: -0.04em;
+        }
+
+        /* iOS Toggle Switch tinh tế */
         .ios-switch {
             appearance: none;
-            width: 50px;
-            height: 30px;
-            background: rgba(226, 232, 240, 0.85);
+            width: 52px;
+            height: 32px;
+            background: rgba(226, 232, 240, 0.9);
             border-radius: 999px;
             position: relative;
             cursor: pointer;
             outline: none;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
-            transition: background 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+            transition: background 0.32s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.32s ease;
             flex-shrink: 0;
         }
         .ios-switch::after {
             content: '';
             position: absolute;
-            top: 2.5px;
-            left: 2.5px;
-            width: 25px;
-            height: 25px;
+            top: 3px;
+            left: 3px;
+            width: 26px;
+            height: 26px;
             background: #ffffff;
             border-radius: 50%;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.14);
-            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.16);
+            transition: transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         .ios-switch:checked.switch-yellow {
-            background: linear-gradient(135deg, #f59e0b, #eab308);
-            box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            box-shadow: 0 4px 14px rgba(245, 158, 11, 0.45);
         }
         .ios-switch:checked.switch-red {
-            background: linear-gradient(135deg, #f43f5e, #ef4444);
-            box-shadow: 0 4px 14px rgba(239, 68, 68, 0.38);
+            background: linear-gradient(135deg, #f43f5e, #e11d48);
+            box-shadow: 0 4px 14px rgba(244, 63, 94, 0.42);
         }
         .ios-switch:checked::after {
             transform: translateX(20px);
         }
 
-        /* Tactile 3D Medicine Icon Container */
+        /* 3D Medicine Icon */
         .med-icon-3d {
-            width: 48px;
-            height: 48px;
-            border-radius: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
-            box-shadow: 0 10px 20px -4px rgba(0, 0, 0, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.9);
-            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 10px 18px -4px rgba(0, 0, 0, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.9);
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         .med-yellow {
-            background: linear-gradient(145deg, #fffbeb 0%, #fef08a 60%, #fde047 100%);
+            background: linear-gradient(145deg, #fffbeb 0%, #fef08a 50%, #fde047 100%);
             color: #b45309;
-            border: 1px solid rgba(250, 204, 21, 0.5);
+            border: 1px solid rgba(250, 204, 21, 0.55);
         }
         .med-red {
-            background: linear-gradient(145deg, #fff1f2 0%, #fecdd3 60%, #fda4af 100%);
+            background: linear-gradient(145deg, #fff1f2 0%, #fecdd3 50%, #fda4af 100%);
             color: #be123c;
-            border: 1px solid rgba(251, 113, 133, 0.5);
+            border: 1px solid rgba(251, 113, 133, 0.55);
         }
         .med-icon-3d.pop {
-            animation: bottlePop 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
+            animation: bottlePop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         @keyframes bottlePop {
             0% { transform: scale(1); }
-            35% { transform: scale(1.22) rotate(-8deg) translateY(-4px); }
-            70% { transform: scale(0.96) rotate(4deg); }
+            40% { transform: scale(1.22) rotate(-8deg) translateY(-4px); }
+            75% { transform: scale(0.96) rotate(4deg); }
             100% { transform: scale(1); }
         }
 
@@ -155,62 +165,56 @@
             background: rgba(226, 232, 240, 0.65);
             border-radius: 999px;
             overflow: hidden;
-            height: 8px;
-            box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+            height: 7px;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
             position: relative;
         }
         .liquid-fill {
             height: 100%;
             border-radius: 999px;
-            transition: width 0.75s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.35s ease;
+            transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.35s ease;
             position: relative;
         }
         .liquid-fill::after {
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.6) 50%, transparent 100%);
-            animation: shimmer 2.2s infinite linear;
+            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.65) 50%, transparent 100%);
+            animation: shimmerBar 2.2s infinite linear;
             background-size: 200% 100%;
         }
-        @keyframes shimmer {
+        @keyframes shimmerBar {
             0% { transform: translateX(-100%); }
             100% { transform: translateX(100%); }
         }
 
-        .font-num {
-            font-family: 'JetBrains Mono', monospace;
-            font-feature-settings: "tnum";
-            font-variant-numeric: tabular-nums;
-        }
-
-        /* Chips */
+        /* Volume Chips */
         .vol-chip {
-            padding: 9px 0;
+            padding: 10px 0;
             border-radius: 16px;
             font-weight: 800;
-            font-size: 13px;
-            color: #64748b;
-            background: rgba(255, 255, 255, 0.75);
-            border: 1px solid rgba(226, 232, 240, 0.85);
+            font-size: 13.5px;
+            color: #475569;
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(226, 232, 240, 0.9);
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .vol-chip:active {
-            transform: scale(0.96);
+            transform: scale(0.95);
         }
         .vol-chip.on {
             background: linear-gradient(135deg, #f43f5e, #fb7185);
             color: #ffffff;
             border-color: #f43f5e;
-            box-shadow: 0 6px 16px -2px rgba(244, 63, 94, 0.35);
+            box-shadow: 0 6px 16px -2px rgba(244, 63, 94, 0.38);
         }
 
-        /* Modals */
+        /* Bottom Sheet & Modal */
         .modal-overlay {
             opacity: 0;
             visibility: hidden;
-            transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.28s ease;
+            transition: opacity 0.26s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.26s ease;
         }
         .modal-overlay.active {
             opacity: 1;
@@ -218,8 +222,8 @@
         }
         .modal-content {
             opacity: 0;
-            transform: translateY(28px) scale(0.97);
-            transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+            transform: translateY(24px) scale(0.98);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.24s ease;
         }
         .modal-overlay.active .modal-content {
             opacity: 1;
@@ -244,120 +248,140 @@
 
         /* FAB Button */
         .main-fab {
-            width: 60px;
-            height: 60px;
+            width: 62px;
+            height: 62px;
             border-radius: 22px;
             background: linear-gradient(135deg, #fb7185, #e11d48);
             color: #ffffff;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 16px 32px -4px rgba(225, 29, 72, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.6);
-            transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease;
+            box-shadow: var(--shadow-float), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+            transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
         }
         .main-fab:active {
             transform: scale(0.92);
         }
 
-        /* Toast */
+        /* Safe Dynamic Island Toast */
         #toast {
-            top: calc(env(safe-area-inset-top) + 16px);
-            transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+            top: calc(env(safe-area-inset-top) + 14px);
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
         }
     </style>
 </head>
 <body class="selection:bg-rose-500 selection:text-white relative">
 
-    <!-- Ambient glowing backgrounds -->
-    <div class="ambient-glow w-80 h-80 bg-rose-200/80 top-[-60px] left-[-40px]"></div>
-    <div class="ambient-glow w-80 h-80 bg-purple-200/70 top-[25%] right-[-60px]"></div>
-    <div class="ambient-glow w-80 h-80 bg-amber-100 bottom-10 left-[15%]"></div>
+    <!-- Ambient luminous backgrounds -->
+    <div class="ambient-glow w-96 h-96 bg-rose-200/70 top-[-60px] left-[-60px]"></div>
+    <div class="ambient-glow w-96 h-96 bg-purple-200/60 top-[28%] right-[-70px]"></div>
+    <div class="ambient-glow w-96 h-96 bg-amber-100/80 bottom-10 left-[20%]"></div>
 
-    <!-- Container -->
-    <div class="relative z-10 flex flex-col min-h-[100dvh] w-full max-w-4xl mx-auto px-4 sm:px-6 pb-28 gap-4 sm:gap-5">
+    <!-- App Shell Container: Tối ưu hoàn hảo cho iPhone & Desktop -->
+    <div class="relative z-10 flex flex-col min-h-[100dvh] w-full max-w-3xl mx-auto px-4 sm:px-6 pb-28 gap-4 sm:gap-5">
 
-        <!-- Top Header Navigation -->
-        <header class="pt-2 sm:pt-3">
-            <div class="glass-card px-5 py-3 flex items-center justify-between shadow-sm">
-                <!-- Brand & Title -->
+        <!-- Top Navigation Bar -->
+        <header class="pt-2 sm:pt-4">
+            <div class="glass-card px-4 sm:px-5 py-3.5 flex items-center justify-between">
+                <!-- App Identity -->
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-500 to-pink-400 flex items-center justify-center text-white shadow-md shadow-rose-500/25 border border-white/60">
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-rose-500 via-pink-500 to-rose-400 flex items-center justify-center text-white shadow-md shadow-rose-500/25 border border-white/70">
                         <i class="ph-fill ph-baby text-2xl"></i>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <h1 class="text-xl sm:text-2xl font-black text-slate-800 tracking-tight">Sổ Sữa Của Pép Pi</h1>
-                        <div id="sync-dot" class="w-2.5 h-2.5 rounded-full bg-slate-300 transition-all duration-300" title="Trạng thái kết nối"></div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h1 class="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight leading-none">Sổ Theo Dõi Của Pép Pi</h1>
+                            <div id="sync-dot" class="w-2.5 h-2.5 rounded-full bg-slate-300 transition-all duration-300" title="Trạng thái kết nối"></div>
+                        </div>
+                        <p class="text-[11px] font-bold text-slate-400 mt-0.5">Nhật ký sữa, thuốc & tiêm chủng bé yêu</p>
                     </div>
                 </div>
 
-                <!-- Right Action: Icon Chuông Rút Gọn -->
-                <div class="flex items-center">
-                    <button type="button" onclick="testLocalNotif()" class="w-10 h-10 rounded-2xl bg-white/80 hover:bg-white text-rose-500 flex items-center justify-center border border-white shadow-sm transition-all active:scale-90" title="Thử chuông máy">
-                        <i class="ph-fill ph-bell text-xl"></i>
-                    </button>
-                </div>
+                <!-- Right Action: Nút chuông rút gọn -->
+                <button type="button" onclick="testLocalNotif()" class="w-10 h-10 rounded-2xl bg-white/90 hover:bg-white text-rose-500 flex items-center justify-center border border-white shadow-sm transition-transform active:scale-90" title="Thử chuông máy">
+                    <i class="ph-fill ph-bell text-xl"></i>
+                </button>
             </div>
         </header>
 
-        <!-- Main Content Area -->
-        <main class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 items-start">
+        <!-- Main Body -->
+        <main class="space-y-4 sm:space-y-5">
 
-            <!-- Cột Trái: Thuốc uống hôm nay -->
-            <section class="lg:col-span-1 space-y-3">
+            <!-- Card Thuốc Hôm Nay -->
+            <section class="space-y-2.5">
                 <div class="flex items-center justify-between px-1">
-                    <h2 class="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                    <h2 class="text-xs font-extrabold text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
                         <i class="ph-fill ph-pill text-rose-500 text-sm"></i> Thuốc hôm nay
                     </h2>
-                    <span class="text-[10px] font-extrabold text-slate-400 bg-white/60 px-2 py-0.5 rounded-full border border-white">Hằng ngày</span>
+                    <span class="text-[10px] font-extrabold text-slate-500 bg-white/70 px-2 py-0.5 rounded-full border border-white">Hằng ngày</span>
                 </div>
 
-                <!-- Chai Vàng -->
-                <div id="card-yellow" class="glass-card p-4 flex items-center justify-between">
-                    <div class="flex items-center gap-3.5">
-                        <div id="bottle-yellow" class="med-icon-3d med-yellow">
-                            <i class="ph-fill ph-flask text-2xl"></i>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <!-- Chai Vàng -->
+                    <div id="card-yellow" class="glass-card p-4 flex items-center justify-between">
+                        <div class="flex items-center gap-3.5">
+                            <div id="bottle-yellow" class="med-icon-3d med-yellow">
+                                <i class="ph-fill ph-flask text-2xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-extrabold text-sm text-slate-800 tracking-tight">Chai Vàng</h3>
+                                <p class="text-xs font-bold text-amber-700/90">Uống 5 giọt</p>
+                                <p id="status-yellow" class="text-[11px] font-extrabold text-slate-400 mt-0.5">Chưa cho uống</p>
+                            </div>
                         </div>
-                        <div>
-                            <h3 class="font-black text-sm text-slate-800 tracking-tight">Chai Vàng</h3>
-                            <p class="text-xs font-bold text-amber-700/80">Uống 5 giọt</p>
-                            <p id="status-yellow" class="text-[11px] font-extrabold text-slate-400 mt-0.5">Chưa cho uống</p>
-                        </div>
+                        <input type="checkbox" id="toggle-yellow" class="ios-switch switch-yellow" onchange="toggleMed('yellow')">
                     </div>
-                    <input type="checkbox" id="toggle-yellow" class="ios-switch switch-yellow" onchange="toggleMed('yellow')">
-                </div>
 
-                <!-- Chai Đỏ -->
-                <div id="card-red" class="glass-card p-4 flex items-center justify-between">
-                    <div class="flex items-center gap-3.5">
-                        <div id="bottle-red" class="med-icon-3d med-red">
-                            <i class="ph-fill ph-flask text-2xl"></i>
+                    <!-- Chai Đỏ -->
+                    <div id="card-red" class="glass-card p-4 flex items-center justify-between">
+                        <div class="flex items-center gap-3.5">
+                            <div id="bottle-red" class="med-icon-3d med-red">
+                                <i class="ph-fill ph-flask text-2xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-extrabold text-sm text-slate-800 tracking-tight">Chai Đỏ</h3>
+                                <p class="text-xs font-bold text-rose-700/90">Uống 3 giọt</p>
+                                <p id="status-red" class="text-[11px] font-extrabold text-slate-400 mt-0.5">Chưa cho uống</p>
+                            </div>
                         </div>
-                        <div>
-                            <h3 class="font-black text-sm text-slate-800 tracking-tight">Chai Đỏ</h3>
-                            <p class="text-xs font-bold text-rose-700/80">Uống 3 giọt</p>
-                            <p id="status-red" class="text-[11px] font-extrabold text-slate-400 mt-0.5">Chưa cho uống</p>
-                        </div>
+                        <input type="checkbox" id="toggle-red" class="ios-switch switch-red" onchange="toggleMed('red')">
                     </div>
-                    <input type="checkbox" id="toggle-red" class="ios-switch switch-red" onchange="toggleMed('red')">
                 </div>
             </section>
 
-            <!-- Cột Phải: Tủ sữa của Pép Pi -->
-            <section class="lg:col-span-2 space-y-3">
+            <!-- Lịch Tiêm Vắc-xin Của Pép Pi -->
+            <section class="space-y-2.5">
                 <div class="flex items-center justify-between px-1">
-                    <h2 class="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-                        <i class="ph-fill ph-drop text-blue-500 text-sm"></i> Tủ sữa của Pép Pi
+                    <h2 class="text-xs font-extrabold text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
+                        <i class="ph-fill ph-syringe text-purple-500 text-sm"></i> Lịch tiêm vắc-xin
                     </h2>
-                    <span class="text-[10px] font-extrabold text-slate-400 bg-white/60 px-2 py-0.5 rounded-full border border-white">Tự động báo hạn</span>
+                    <button onclick="openAddVaccineModal()" class="text-[11px] font-extrabold text-purple-600 bg-purple-50 hover:bg-purple-100 px-2.5 py-1 rounded-full border border-purple-200 flex items-center gap-1 transition-all active:scale-95">
+                        <i class="ph-bold ph-plus"></i> Thêm mũi tiêm
+                    </button>
                 </div>
 
-                <!-- Trạng thái trống -->
+                <!-- Danh sách vắc-xin -->
+                <div id="vaccine-list" class="space-y-2.5">
+                    <!-- Rendered by JS -->
+                </div>
+            </section>
+
+            <!-- Tủ Sữa Của Pép Pi -->
+            <section class="space-y-2.5">
+                <div class="flex items-center justify-between px-1">
+                    <h2 class="text-xs font-extrabold text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
+                        <i class="ph-fill ph-drop text-blue-500 text-sm"></i> Tủ sữa của Pép Pi
+                    </h2>
+                    <span class="text-[10px] font-extrabold text-slate-500 bg-white/70 px-2 py-0.5 rounded-full border border-white">Tự động báo hạn</span>
+                </div>
+
+                <!-- Empty State -->
                 <div id="empty-state" class="glass-card p-10 flex flex-col items-center justify-center text-center border-dashed border-slate-300">
                     <div class="w-16 h-16 rounded-3xl bg-rose-50 text-rose-500 flex items-center justify-center text-3xl mb-3 shadow-inner">
                         <i class="ph-fill ph-baby-carriage"></i>
                     </div>
-                    <h3 class="font-black text-base text-slate-800 mb-1">Tủ sữa đang trống</h3>
-                    <p class="text-slate-500 text-xs font-semibold max-w-xs leading-relaxed">
+                    <h3 class="font-extrabold text-base text-slate-800 mb-1">Tủ sữa đang trống</h3>
+                    <p class="text-slate-500 text-xs font-medium max-w-xs leading-relaxed">
                         Chưa có cữ sữa nào. Hãy bấm nút dấu cộng <b>(+)</b> bên dưới để ghi lại cữ sữa mới cho bé nhé!
                     </p>
                 </div>
@@ -369,22 +393,65 @@
             </section>
         </main>
 
-        <!-- Floating Action Button (FAB) -->
+        <!-- Floating Action Button (FAB): Tránh vạch Home Indicator của iPhone -->
         <div class="fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-5 z-40">
             <button onclick="openAddModal()" class="main-fab" title="Thêm cữ sữa mới">
                 <i class="ph-bold ph-plus text-2xl"></i>
             </button>
         </div>
 
-        <!-- Modal Thêm Sữa Mới -->
+        <!-- Modal Thêm Vắc-xin Mới -->
+        <div id="modal-vaccine" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
+            <div class="modal-content w-full max-w-md glass-card bg-white/95 shadow-2xl flex flex-col overflow-hidden max-h-[88vh]">
+                <div class="flex-shrink-0 px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                    <div>
+                        <h3 class="font-extrabold text-base text-slate-800">Lên lịch tiêm chủng</h3>
+                        <p class="text-[11px] font-semibold text-slate-400">Theo dõi mũi tiêm phòng cho Pép Pi</p>
+                    </div>
+                    <button onclick="closeModals()" class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500">
+                        <i class="ph-bold ph-x text-xs"></i>
+                    </button>
+                </div>
+                <div class="flex-1 overflow-y-auto p-5 space-y-4">
+                    <!-- Mũi tiêm gợi ý nhanh -->
+                    <div>
+                        <label class="block text-xs font-extrabold text-slate-400 uppercase mb-2 tracking-wider">Mũi tiêm phổ biến</label>
+                        <div class="flex flex-wrap gap-1.5 mb-2.5">
+                            <button type="button" onclick="setVacName('6 trong 1 (Hexaxim/Infanrix)')" class="text-[11px] font-bold px-2.5 py-1 rounded-xl bg-purple-50 text-purple-700 border border-purple-200">6 trong 1</button>
+                            <button type="button" onclick="setVacName('Phế cầu khuẩn (Synflorix/Prevenar 13)')" class="text-[11px] font-bold px-2.5 py-1 rounded-xl bg-purple-50 text-purple-700 border border-purple-200">Phế cầu</button>
+                            <button type="button" onclick="setVacName('Uống Rota (Rotavin/Rotateq)')" class="text-[11px] font-bold px-2.5 py-1 rounded-xl bg-purple-50 text-purple-700 border border-purple-200">Rota</button>
+                            <button type="button" onclick="setVacName('Cúm mùa')" class="text-[11px] font-bold px-2.5 py-1 rounded-xl bg-purple-50 text-purple-700 border border-purple-200">Cúm</button>
+                            <button type="button" onclick="setVacName('Sởi - Quai bị - Rubella (MMR)')" class="text-[11px] font-bold px-2.5 py-1 rounded-xl bg-purple-50 text-purple-700 border border-purple-200">Sởi - MMR</button>
+                            <button type="button" onclick="setVacName('Viêm não Nhật Bản')" class="text-[11px] font-bold px-2.5 py-1 rounded-xl bg-purple-50 text-purple-700 border border-purple-200">Viêm não NB</button>
+                        </div>
+                        <input type="text" id="vac-name" placeholder="Nhập tên vắc-xin hoặc mũi tiêm..." class="w-full bg-slate-50 border border-slate-200 text-slate-800 font-bold rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-extrabold text-slate-400 uppercase mb-2 tracking-wider">Ngày hẹn tiêm</label>
+                        <input type="date" id="vac-date" class="w-full bg-slate-50 border border-slate-200 text-slate-800 font-bold rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-extrabold text-slate-400 uppercase mb-2 tracking-wider">Ghi chú (Cơ sở tiêm, số lô...)</label>
+                        <input type="text" id="vac-note" placeholder="Ví dụ: VNVC, Trung tâm y tế dự phòng..." class="w-full bg-slate-50 border border-slate-200 text-slate-800 font-medium rounded-2xl px-4 py-3 text-xs focus:outline-none focus:ring-2 focus:ring-purple-400">
+                    </div>
+                </div>
+                <div class="flex-shrink-0 p-4 bg-slate-50 border-t border-slate-100">
+                    <button onclick="saveVaccine()" class="w-full py-3.5 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-extrabold rounded-2xl shadow-lg shadow-purple-500/30 active:scale-[0.98] transition-transform text-sm flex items-center justify-center gap-2">
+                        <i class="ph-bold ph-check text-base"></i> Lưu mũi tiêm
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Thêm Sữa Mới (Bottom Sheet trên Mobile) -->
         <div id="modal-add" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
             <div class="modal-content w-full max-w-md glass-card bg-white/95 shadow-2xl flex flex-col overflow-hidden max-h-[88vh]">
                 
                 <!-- Modal Header -->
                 <div class="flex-shrink-0 px-6 py-4 border-b border-slate-100 flex items-center justify-between">
                     <div>
-                        <h3 class="font-black text-base text-slate-800">Thêm cữ sữa mới</h3>
-                        <p class="text-[11px] font-bold text-slate-400">Ghi nhận cữ sữa cho bé Pép Pi</p>
+                        <h3 class="font-extrabold text-base text-slate-800">Thêm cữ sữa mới</h3>
+                        <p class="text-[11px] font-semibold text-slate-400">Ghi nhận cữ sữa cho bé Pép Pi</p>
                     </div>
                     <button onclick="closeModals()" class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors">
                         <i class="ph-bold ph-x text-xs"></i>
@@ -395,7 +462,7 @@
                 <div class="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4">
                     <!-- Lượng sữa & Chips -->
                     <div>
-                        <label class="block text-xs font-black text-slate-400 uppercase mb-2 tracking-wider">Lượng sữa (ml)</label>
+                        <label class="block text-xs font-extrabold text-slate-400 uppercase mb-2 tracking-wider">Lượng sữa (ml)</label>
                         <div id="vol-chips" class="grid grid-cols-4 gap-2 mb-2.5">
                             <button type="button" class="vol-chip" onclick="setVol(60)">60</button>
                             <button type="button" class="vol-chip" onclick="setVol(90)">90</button>
@@ -403,36 +470,36 @@
                             <button type="button" class="vol-chip" onclick="setVol(150)">150</button>
                         </div>
                         <div class="relative">
-                            <input type="number" id="input-volume" value="120" class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-lg font-black rounded-2xl px-5 py-3 pl-12 focus:outline-none focus:ring-2 focus:ring-rose-400 font-num shadow-inner">
+                            <input type="number" id="input-volume" value="120" class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-lg font-extrabold rounded-2xl px-5 py-3 pl-12 focus:outline-none focus:ring-2 focus:ring-rose-400 font-num shadow-inner">
                             <i class="ph-fill ph-drop text-rose-500 text-xl absolute left-4 top-1/2 -translate-y-1/2"></i>
                         </div>
                     </div>
 
                     <!-- Thời gian vắt / pha -->
                     <div>
-                        <label class="block text-xs font-black text-slate-400 uppercase mb-2 tracking-wider">Thời gian vắt / pha</label>
-                        <input type="datetime-local" id="input-time" class="w-full bg-slate-50 border border-slate-200 text-slate-800 font-bold rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400 shadow-inner">
+                        <label class="block text-xs font-extrabold text-slate-400 uppercase mb-2 tracking-wider">Thời gian vắt / pha</label>
+                        <input type="datetime-local" id="input-time" class="w-full bg-slate-50 border border-slate-200 text-slate-800 font-semibold rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400 shadow-inner">
                     </div>
 
                     <!-- Loại sữa -->
                     <div>
-                        <label class="block text-xs font-black text-slate-400 uppercase mb-2 tracking-wider">Loại sữa</label>
+                        <label class="block text-xs font-extrabold text-slate-400 uppercase mb-2 tracking-wider">Loại sữa</label>
                         <div class="flex bg-slate-100 p-1 rounded-2xl">
-                            <button id="btn-type-breast" onclick="selectType('BREAST')" class="flex-1 py-2.5 text-xs font-black rounded-xl bg-white text-rose-600 shadow-sm transition-all">Sữa mẹ</button>
-                            <button id="btn-type-formula" onclick="selectType('FORMULA')" class="flex-1 py-2.5 text-xs font-black rounded-xl text-slate-500 transition-all">Sữa công thức</button>
+                            <button id="btn-type-breast" onclick="selectType('BREAST')" class="flex-1 py-2.5 text-xs font-extrabold rounded-xl bg-white text-rose-600 shadow-sm transition-all">Sữa mẹ</button>
+                            <button id="btn-type-formula" onclick="selectType('FORMULA')" class="flex-1 py-2.5 text-xs font-extrabold rounded-xl text-slate-500 transition-all">Sữa công thức</button>
                         </div>
                     </div>
 
                     <!-- Trạng thái bảo quản -->
                     <div>
-                        <label class="block text-xs font-black text-slate-400 uppercase mb-2 tracking-wider">Vị trí bảo quản</label>
+                        <label class="block text-xs font-extrabold text-slate-400 uppercase mb-2 tracking-wider">Vị trí bảo quản</label>
                         <div class="grid grid-cols-2 gap-2" id="status-grid"></div>
                     </div>
                 </div>
 
                 <!-- Modal Footer -->
                 <div class="flex-shrink-0 p-4 bg-slate-50/80 border-t border-slate-100">
-                    <button onclick="saveMilk()" class="w-full py-3.5 bg-gradient-to-r from-rose-500 to-pink-500 text-white font-black rounded-2xl shadow-lg shadow-rose-500/30 active:scale-[0.98] transition-transform text-sm flex items-center justify-center gap-2">
+                    <button onclick="saveMilk()" class="w-full py-3.5 bg-gradient-to-r from-rose-500 to-pink-500 text-white font-extrabold rounded-2xl shadow-lg shadow-rose-500/30 active:scale-[0.98] transition-transform text-sm flex items-center justify-center gap-2">
                         <i class="ph-bold ph-check text-base"></i> Lưu cữ sữa ngay
                     </button>
                 </div>
@@ -443,7 +510,7 @@
         <div id="modal-action" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
             <div class="modal-content w-full max-w-md glass-card bg-white/95 shadow-2xl flex flex-col overflow-hidden max-h-[82vh]">
                 <div class="flex-shrink-0 px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-                    <h3 class="font-black text-base text-slate-800">Cập nhật cữ sữa</h3>
+                    <h3 class="font-extrabold text-base text-slate-800">Cập nhật cữ sữa</h3>
                     <button onclick="closeModals()" class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500">
                         <i class="ph-bold ph-x text-xs"></i>
                     </button>
@@ -465,7 +532,7 @@
                 <div class="w-12 h-12 bg-red-100 text-red-500 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-inner">
                     <i class="ph-fill ph-warning-circle text-2xl"></i>
                 </div>
-                <h3 class="font-black text-sm text-slate-800 mb-1">Xóa cữ sữa này?</h3>
+                <h3 class="font-extrabold text-sm text-slate-800 mb-1">Xóa cữ sữa này?</h3>
                 <p class="text-xs text-slate-500 mb-4 font-semibold">Cữ sữa sẽ được xóa khỏi tủ và không thể khôi phục.</p>
                 <div class="flex gap-2">
                     <button onclick="closeConfirm()" class="flex-1 py-2.5 font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs transition-colors">Hủy</button>
@@ -474,8 +541,8 @@
             </div>
         </div>
 
-        <!-- Toast Floating Notification (Dynamic Island Safe) -->
-        <div id="toast" class="fixed left-1/2 -translate-x-1/2 z-[9999] w-[min(92vw,360px)] px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3 pointer-events-none -translate-y-24 opacity-0 bg-slate-900/90 text-white backdrop-blur-md border border-white/20">
+        <!-- Safe Dynamic Island Toast -->
+        <div id="toast" class="fixed left-1/2 -translate-x-1/2 z-[9999] w-[min(92vw,360px)] px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3 pointer-events-none -translate-y-24 opacity-0 bg-slate-900/95 text-white backdrop-blur-md border border-white/20">
             <i id="toast-icon" class="ph-fill ph-sparkle text-amber-300 text-lg flex-shrink-0"></i>
             <span id="toast-text" class="text-xs font-semibold leading-snug break-words">Thông báo</span>
         </div>
@@ -484,7 +551,7 @@
 
 <script>
 // ============================================================
-// CẤU HÌNH SUPABASE (GIỮ NGUYÊN 100%)
+// CẤU HÌNH SUPABASE & DỮ LIỆU GỐC (GIỮ NGUYÊN 100%)
 // ============================================================
 const SUPABASE_URL = 'https://bgazoheoamsafzkzxnso.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_112rJFjGnMf3fDW6lmc_OA_cq586w14';
@@ -567,12 +634,14 @@ const FUN_MESSAGES = [
 
 let milks = [];
 let schedule = [];
+let vaccines = [];
 let timerId = null;
 let addType = 'BREAST';
 let addState = 'FRIDGE';
 let currentTargetId = null;
 let isOnline = false;
 let tickRunning = false;
+let lastMedCheckDate = '';
 
 // ============================================================
 // SUPABASE HELPERS
@@ -616,6 +685,9 @@ async function loadMilks() {
 }
 
 async function loadMeds() {
+    const todayStr = new Date().toISOString().slice(0, 10);
+    lastMedCheckDate = todayStr;
+
     const { data, error } = await sb
         .from('meds')
         .select('*')
@@ -625,80 +697,230 @@ async function loadMeds() {
         console.error('loadMeds', error);
         return;
     }
+
     if (data) {
-        document.getElementById('toggle-yellow').checked = !!data.yellow;
-        document.getElementById('toggle-red').checked = !!data.red;
-        updateMedUI('yellow', !!data.yellow);
-        updateMedUI('red', !!data.red);
+        // Kiểm tra xem dữ liệu có phải của ngày hôm nay không
+        const isToday = data.date === todayStr;
+        if (!isToday && (data.yellow || data.red)) {
+            // Đã sang ngày mới: Tự động reset thuốc hôm nay
+            document.getElementById('toggle-yellow').checked = false;
+            document.getElementById('toggle-red').checked = false;
+            updateMedUI('yellow', false);
+            updateMedUI('red', false);
+            await upsertMeds(false, false, todayStr);
+        } else {
+            const y = isToday ? !!data.yellow : false;
+            const r = isToday ? !!data.red : false;
+            document.getElementById('toggle-yellow').checked = y;
+            document.getElementById('toggle-red').checked = r;
+            updateMedUI('yellow', y);
+            updateMedUI('red', r);
+        }
+    }
+}
+
+// Kiểm tra reset thuốc khi sang 00:00 ngày mới
+function checkDailyMedReset() {
+    const todayStr = new Date().toISOString().slice(0, 10);
+    if (lastMedCheckDate && lastMedCheckDate !== todayStr) {
+        lastMedCheckDate = todayStr;
+        document.getElementById('toggle-yellow').checked = false;
+        document.getElementById('toggle-red').checked = false;
+        updateMedUI('yellow', false);
+        updateMedUI('red', false);
+        upsertMeds(false, false, todayStr);
+        showToast('🌅 Đã bước sang ngày mới! Thuốc hôm nay đã được làm mới.', 'ph-fill ph-sun text-amber-400');
     }
 }
 
 async function loadSchedule() {
-    const { data, error } = await sb
-        .from('milk_schedule')
-        .select('*')
-        .eq('family_id', FAMILY_ID)
-        .order('time_hhmm');
-    if (error) return;
-    schedule = data || [];
-}
-
-async function insertMilk(entry) {
-    const { error } = await sb.from('milk_entries').insert({
-        id: entry.id,
-        family_id: FAMILY_ID,
-        type: entry.type,
-        volume: entry.volume,
-        state: entry.state,
-        start_ms: entry.start,
-        expires_ms: entry.expires,
-        warned: false,
-        expired: false
-    });
-    if (error) {
-        console.error('insertMilk', error);
-        showToast('Lỗi lưu sữa: ' + error.message, 'ph-fill ph-warning text-red-400');
-        return false;
-    }
-    return true;
-}
-
-async function updateMilkRow(id, patch) {
-    const { error } = await sb
-        .from('milk_entries')
-        .update(patch)
-        .eq('id', id)
-        .eq('family_id', FAMILY_ID);
-    if (error) {
-        console.error('updateMilk', error);
-        showToast('Lỗi cập nhật: ' + error.message, 'ph-fill ph-warning text-red-400');
-        return false;
-    }
-    return true;
-}
-
-async function deleteMilkRow(id) {
-    const { error } = await sb
-        .from('milk_entries')
-        .delete()
-        .eq('id', id)
-        .eq('family_id', FAMILY_ID);
-    if (error) {
-        console.error('deleteMilk', error);
-        showToast('Lỗi xóa: ' + error.message, 'ph-fill ph-warning text-red-400');
-        return false;
-    }
-    return true;
-}
-
-async function upsertMeds(yellow, red) {
+async function upsertMeds(yellow, red, dateStr = null) {
+    const date = dateStr || new Date().toISOString().slice(0, 10);
     const { error } = await sb
         .from('meds')
-        .upsert({ family_id: FAMILY_ID, yellow, red }, { onConflict: 'family_id' });
+        .upsert({ family_id: FAMILY_ID, yellow, red, date }, { onConflict: 'family_id' });
     if (error) {
         console.error('upsertMeds', error);
         showToast('Lỗi lưu thuốc: ' + error.message, 'ph-fill ph-warning text-red-400');
     }
+}
+
+// ============================================================
+// VACCINE LOGIC
+// ============================================================
+const DEFAULT_VACCINES = [
+    { id: 'vac-1', name: 'Lao (BCG) & Viêm gan B (Sơ sinh)', date: '', done: true, note: 'Bệnh viện phụ sản' },
+    { id: 'vac-2', name: '6 trong 1 (Mũi 1) + Rota 1 + Phế cầu 1', date: '', done: false, note: 'Khoảng 2 tháng tuổi' },
+    { id: 'vac-3', name: '6 trong 1 (Mũi 2) + Rota 2 + Phế cầu 2', date: '', done: false, note: 'Khoảng 3-4 tháng tuổi' }
+];
+
+function loadVaccines() {
+    try {
+        const stored = localStorage.getItem('peppi_vaccines');
+        if (stored) {
+            vaccines = JSON.parse(stored);
+        } else {
+            vaccines = DEFAULT_VACCINES;
+            saveVaccinesLocally();
+        }
+    } catch (e) {
+        vaccines = DEFAULT_VACCINES;
+    }
+    renderVaccines();
+    checkVaccineAlerts();
+}
+
+function saveVaccinesLocally() {
+    localStorage.setItem('peppi_vaccines', JSON.stringify(vaccines));
+}
+
+function openAddVaccineModal() {
+    document.getElementById('vac-name').value = '';
+    document.getElementById('vac-date').value = new Date().toISOString().slice(0, 10);
+    document.getElementById('vac-note').value = '';
+    openModal('modal-vaccine');
+}
+
+function setVacName(name) {
+    document.getElementById('vac-name').value = name;
+}
+
+function saveVaccine() {
+    const name = document.getElementById('vac-name').value.trim();
+    const date = document.getElementById('vac-date').value;
+    const note = document.getElementById('vac-note').value.trim();
+
+    if (!name) {
+        showToast('Vui lòng nhập tên vắc-xin', 'ph-fill ph-warning text-amber-300');
+        return;
+    }
+
+    vaccines.push({
+        id: 'vac-' + uid(),
+        name,
+        date: date || '',
+        done: false,
+        note: note || ''
+    });
+
+    vaccines.sort((a, b) => {
+        if (!a.date) return 1;
+        if (!b.date) return -1;
+        return new Date(a.date) - new Date(b.date);
+    });
+
+    saveVaccinesLocally();
+    renderVaccines();
+    closeModals();
+    showToast(`Đã thêm mũi ${name}`, 'ph-fill ph-syringe text-purple-400');
+    checkVaccineAlerts();
+}
+
+function toggleVaccineDone(id) {
+    const item = vaccines.find(v => v.id === id);
+    if (!item) return;
+    item.done = !item.done;
+    saveVaccinesLocally();
+    renderVaccines();
+    if (item.done) {
+        showToast(`🎉 Bé Pép Pi đã tiêm xong mũi: ${item.name}! Siêu dũng cảm!`, 'ph-fill ph-heart text-rose-400', true);
+    }
+}
+
+function deleteVaccine(id) {
+    vaccines = vaccines.filter(v => v.id !== id);
+    saveVaccinesLocally();
+    renderVaccines();
+    showToast('Đã xóa mũi tiêm', 'ph-fill ph-trash text-slate-400');
+}
+
+function checkVaccineAlerts() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    vaccines.forEach(v => {
+        if (v.done || !v.date) return;
+        const target = new Date(v.date);
+        target.setHours(0, 0, 0, 0);
+        const diffDays = Math.round((target - today) / (1000 * 60 * 60 * 24));
+
+        if (diffDays === 0) {
+            showToast(`💉 Hôm nay đến lịch tiêm: ${v.name}. Mẹ nhớ đưa bé đi nhé!`, 'ph-fill ph-syringe text-purple-400', true);
+        } else if (diffDays > 0 && diffDays <= 3) {
+            showToast(`📅 Còn ${diffDays} ngày nữa là đến lịch tiêm: ${v.name}.`, 'ph-fill ph-bell text-amber-400');
+        }
+    });
+}
+
+function renderVaccines() {
+    const listEl = document.getElementById('vaccine-list');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+
+    if (vaccines.length === 0) {
+        listEl.innerHTML = `
+            <div class="glass-card p-6 text-center text-xs text-slate-400 font-semibold border-dashed border-slate-300">
+                Chưa có mũi tiêm nào. Bấm <b>Thêm mũi tiêm</b> để lưu sổ tiêm chủng của bé!
+            </div>
+        `;
+        return;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    vaccines.forEach(v => {
+        let statusBadge = '';
+        let isDueSoon = false;
+
+        if (v.done) {
+            statusBadge = '<span class="text-[10px] font-extrabold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full flex items-center gap-1"><i class="ph-bold ph-check"></i> Đã tiêm</span>';
+        } else if (v.date) {
+            const target = new Date(v.date);
+            target.setHours(0, 0, 0, 0);
+            const diffDays = Math.round((target - today) / (1000 * 60 * 60 * 24));
+
+            if (diffDays < 0) {
+                statusBadge = '<span class="text-[10px] font-extrabold text-rose-700 bg-rose-100 px-2 py-0.5 rounded-full animate-pulse">Quá hạn</span>';
+            } else if (diffDays === 0) {
+                isDueSoon = true;
+                statusBadge = '<span class="text-[10px] font-extrabold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full animate-bounce">Hôm nay!</span>';
+            } else if (diffDays <= 3) {
+                isDueSoon = true;
+                statusBadge = `<span class="text-[10px] font-extrabold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">Còn ${diffDays} ngày</span>`;
+            } else {
+                statusBadge = `<span class="text-[10px] font-extrabold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">Dự kiến</span>`;
+            }
+        } else {
+            statusBadge = '<span class="text-[10px] font-extrabold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">Chưa có ngày</span>';
+        }
+
+        const dateDisplay = v.date ? new Date(v.date).toLocaleDateString('vi-VN') : 'Chưa đặt ngày';
+
+        const card = document.createElement('div');
+        card.className = `glass-card p-3.5 flex items-center justify-between gap-3 ${v.done ? 'opacity-70 bg-white/60' : (isDueSoon ? 'border-purple-300 bg-purple-50/40' : '')}`;
+        card.innerHTML = `
+            <div class="flex items-center gap-3 min-w-0">
+                <button onclick="toggleVaccineDone('${v.id}')" class="w-9 h-9 rounded-xl flex-shrink-0 flex items-center justify-center transition-all ${v.done ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/30' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}" title="${v.done ? 'Đánh dấu chưa tiêm' : 'Đánh dấu đã tiêm'}">
+                    <i class="ph-bold ${v.done ? 'ph-check' : 'ph-syringe'} text-base"></i>
+                </button>
+                <div class="min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <h4 class="font-extrabold text-xs text-slate-800 tracking-tight truncate ${v.done ? 'line-through text-slate-400' : ''}">${v.name}</h4>
+                        ${statusBadge}
+                    </div>
+                    <div class="flex items-center gap-2 text-[10px] font-semibold text-slate-400 mt-0.5">
+                        <span class="flex items-center gap-0.5"><i class="ph-bold ph-calendar"></i> ${dateDisplay}</span>
+                        ${v.note ? `<span class="truncate max-w-[150px]">• ${v.note}</span>` : ''}
+                    </div>
+                </div>
+            </div>
+            <button onclick="deleteVaccine('${v.id}')" class="w-7 h-7 flex-shrink-0 rounded-lg flex items-center justify-center text-slate-300 hover:text-rose-500 transition-colors">
+                <i class="ph-bold ph-trash text-xs"></i>
+            </button>
+        `;
+        listEl.appendChild(card);
+    });
 }
 
 function subscribeRealtime() {
@@ -806,12 +1028,12 @@ function updateMedUI(type, isChecked) {
     const card = document.getElementById('card-' + type);
     if (isChecked) {
         textEl.innerText = 'Đã cho uống';
-        textEl.className = 'text-[11px] font-black text-emerald-600 mt-0.5 flex items-center gap-1';
+        textEl.className = 'text-[11px] font-extrabold text-emerald-600 mt-0.5 flex items-center gap-1';
         textEl.innerHTML = '<i class="ph-bold ph-check text-xs"></i> Đã cho uống';
         if (card) card.classList.add('border-emerald-200', 'bg-emerald-50/50');
     } else {
         textEl.innerText = 'Chưa cho uống';
-        textEl.className = 'text-[11px] font-extrabold text-slate-400 mt-0.5';
+        textEl.className = 'text-[11px] font-bold text-slate-400 mt-0.5';
         if (card) card.classList.remove('border-emerald-200', 'bg-emerald-50/50');
     }
 }
@@ -822,7 +1044,7 @@ function animateMedBottle(type) {
     bottle.classList.remove('pop');
     void bottle.offsetWidth;
     bottle.classList.add('pop');
-    setTimeout(() => bottle.classList.remove('pop'), 700);
+    setTimeout(() => bottle.classList.remove('pop'), 650);
 }
 
 async function toggleMed(type) {
@@ -870,11 +1092,11 @@ function selectType(type) {
     const btnB = document.getElementById('btn-type-breast');
     const btnF = document.getElementById('btn-type-formula');
     if (type === 'BREAST') {
-        btnB.className = "flex-1 py-2.5 text-xs font-black rounded-xl bg-white text-rose-600 shadow-sm transition-all";
-        btnF.className = "flex-1 py-2.5 text-xs font-bold rounded-xl text-slate-500 transition-all";
+        btnB.className = "flex-1 py-2.5 text-xs font-extrabold rounded-xl bg-white text-rose-600 shadow-sm transition-all";
+        btnF.className = "flex-1 py-2.5 text-xs font-semibold rounded-xl text-slate-500 transition-all";
     } else {
-        btnF.className = "flex-1 py-2.5 text-xs font-black rounded-xl bg-white text-blue-600 shadow-sm transition-all";
-        btnB.className = "flex-1 py-2.5 text-xs font-bold rounded-xl text-slate-500 transition-all";
+        btnF.className = "flex-1 py-2.5 text-xs font-extrabold rounded-xl bg-white text-blue-600 shadow-sm transition-all";
+        btnB.className = "flex-1 py-2.5 text-xs font-semibold rounded-xl text-slate-500 transition-all";
     }
     renderAddStates();
 }
@@ -894,8 +1116,8 @@ function renderAddStates() {
             <div class="w-7 h-7 rounded-full mb-1 flex items-center justify-center ${active ? 'bg-rose-500 text-white shadow-sm' : 'bg-white text-slate-500 shadow-sm'}">
                 <i class="ph-fill ${s.icon} text-sm"></i>
             </div>
-            <span class="text-[11px] font-black ${active ? 'text-rose-700' : 'text-slate-700'}">${s.label}</span>
-            <span class="text-[9px] font-bold text-slate-400 mt-0.5">${durationLabel(addType, k)}</span>
+            <span class="text-[11px] font-extrabold ${active ? 'text-rose-700' : 'text-slate-700'}">${s.label}</span>
+            <span class="text-[9px] font-semibold text-slate-400 mt-0.5">${durationLabel(addType, k)}</span>
         `;
         grid.appendChild(div);
     });
@@ -941,10 +1163,10 @@ function openActionModal(id) {
     const volBox = document.createElement('div');
     volBox.className = 'p-3.5 bg-slate-50 border border-slate-200 rounded-2xl mb-1';
     volBox.innerHTML = `
-        <label class="block text-[11px] font-black text-slate-400 uppercase tracking-wider mb-1.5">Sửa lượng sữa (ml)</label>
+        <label class="block text-[11px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">Sửa lượng sữa (ml)</label>
         <div class="flex gap-2">
-            <input id="edit-volume" type="number" inputmode="numeric" value="${item.volume}" class="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 font-num font-black text-slate-800">
-            <button id="btn-save-vol" class="px-4 py-2 bg-rose-500 text-white font-black rounded-xl text-xs active:scale-95">Lưu ml</button>
+            <input id="edit-volume" type="number" inputmode="numeric" value="${item.volume}" class="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 font-num font-extrabold text-slate-800">
+            <button id="btn-save-vol" class="px-4 py-2 bg-rose-500 text-white font-extrabold rounded-xl text-xs active:scale-95">Lưu ml</button>
         </div>`;
     list.appendChild(volBox);
     volBox.querySelector('#btn-save-vol').onclick = () => saveVolume(id);
@@ -953,14 +1175,14 @@ function openActionModal(id) {
         const partialBtn = document.createElement('button');
         partialBtn.className = 'w-full flex items-center gap-3.5 p-3.5 bg-purple-50/80 border border-purple-200 rounded-2xl text-left hover:bg-purple-100/70 transition-all';
         partialBtn.onclick = () => updateMilkState(id, 'PARTIAL');
-        partialBtn.innerHTML = '<div class="w-9 h-9 rounded-xl flex items-center justify-center bg-purple-100 text-purple-600"><i class="ph-fill ph-baby text-lg"></i></div><div><div class="font-black text-purple-700 text-xs">Bú dở</div><div class="text-[10px] font-bold text-purple-600">' + durationLabel(item.type, 'PARTIAL') + ' — sữa còn thừa</div></div>';
+        partialBtn.innerHTML = '<div class="w-9 h-9 rounded-xl flex items-center justify-center bg-purple-100 text-purple-600"><i class="ph-fill ph-baby text-lg"></i></div><div><div class="font-extrabold text-purple-700 text-xs">Bú dở</div><div class="text-[10px] font-semibold text-purple-600">' + durationLabel(item.type, 'PARTIAL') + ' — sữa còn thừa</div></div>';
         list.appendChild(partialBtn);
     }
     if (item.state !== 'FED') {
         const fedBtn = document.createElement('button');
         fedBtn.className = 'w-full flex items-center gap-3.5 p-3.5 bg-emerald-50/80 border border-emerald-200 rounded-2xl text-left hover:bg-emerald-100/70 transition-all';
         fedBtn.onclick = () => updateMilkState(id, 'FED');
-        fedBtn.innerHTML = '<div class="w-9 h-9 rounded-xl flex items-center justify-center bg-emerald-100 text-emerald-600"><i class="ph-fill ph-check-circle text-lg"></i></div><div><div class="font-black text-emerald-700 text-xs">Đã bú</div><div class="text-[10px] font-bold text-emerald-600">Pép Pi đã uống xong cữ này</div></div>';
+        fedBtn.innerHTML = '<div class="w-9 h-9 rounded-xl flex items-center justify-center bg-emerald-100 text-emerald-600"><i class="ph-fill ph-check-circle text-lg"></i></div><div><div class="font-extrabold text-emerald-700 text-xs">Đã bú</div><div class="text-[10px] font-semibold text-emerald-600">Pép Pi đã uống xong cữ này</div></div>';
         list.appendChild(fedBtn);
     }
 
@@ -969,7 +1191,7 @@ function openActionModal(id) {
 
     if (transitions.length === 0) {
         const note = document.createElement('div');
-        note.className = 'p-4 text-center text-xs font-bold text-slate-500';
+        note.className = 'p-4 text-center text-xs font-semibold text-slate-500';
         note.textContent = 'Sữa bú dở không thể cất lại tủ lạnh. Mẹ nhớ bỏ đi nếu bé không dùng hết nhé!';
         list.appendChild(note);
     } else {
@@ -978,7 +1200,7 @@ function openActionModal(id) {
             const btn = document.createElement('button');
             btn.className = "w-full flex items-center gap-3.5 p-3.5 bg-slate-50 border border-slate-200 rounded-2xl hover:bg-slate-100 transition-all text-left";
             btn.onclick = () => updateMilkState(id, k);
-            btn.innerHTML = `<div class="w-9 h-9 rounded-xl flex items-center justify-center ${s.bg} ${s.color}"><i class="ph-fill ${s.icon} text-lg"></i></div><div><div class="font-black text-slate-800 text-xs">Chuyển sang: ${s.label}</div><div class="text-[10px] font-bold text-slate-500">${durationLabel(item.type, k)}</div></div>`;
+            btn.innerHTML = `<div class="w-9 h-9 rounded-xl flex items-center justify-center ${s.bg} ${s.color}"><i class="ph-fill ${s.icon} text-lg"></i></div><div><div class="font-extrabold text-slate-800 text-xs">Chuyển sang: ${s.label}</div><div class="text-[10px] font-semibold text-slate-500">${durationLabel(item.type, k)}</div></div>`;
             list.appendChild(btn);
         });
     }
@@ -1082,14 +1304,14 @@ function renderApp() {
 
         let pct = isExp ? 0 : Math.max(0, 100 - ((now - m.start) / (m.expires - m.start) * 100));
         let barClass = s.bar;
-        let textClass = 'text-slate-800 font-black';
+        let textClass = 'text-slate-800 font-extrabold';
 
         if (isExp) { 
             barClass = 'bg-rose-500'; 
-            textClass = 'text-xs text-rose-600 font-black animate-pulse'; 
+            textClass = 'text-xs text-rose-600 font-extrabold animate-pulse'; 
         } else if (pct < 20) { 
             barClass = 'bg-amber-400'; 
-            textClass = 'text-amber-600 font-black'; 
+            textClass = 'text-amber-600 font-extrabold'; 
         }
 
         const card = document.createElement('div');
@@ -1098,27 +1320,27 @@ function renderApp() {
 
         card.innerHTML = `
             <div class="flex justify-between items-start mb-3">
-                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black border border-white/80 shadow-sm ${s.bg} ${s.color}">
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold border border-white/80 shadow-sm ${s.bg} ${s.color}">
                     <i class="ph-fill ${s.icon} text-sm"></i>
                     <span>${s.label}</span>
                 </div>
-                <span class="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg border border-white/60 ${m.type === 'FORMULA' ? 'bg-blue-100/90 text-blue-700' : 'bg-pink-100/90 text-pink-700'}">
+                <span class="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-lg border border-white/60 ${m.type === 'FORMULA' ? 'bg-blue-100/90 text-blue-700' : 'bg-pink-100/90 text-pink-700'}">
                     ${m.type === 'FORMULA' ? 'Công thức' : 'Sữa mẹ'}
                 </span>
             </div>
             
             <div class="flex items-baseline justify-between mb-3">
-                <div class="font-num font-black text-3xl text-slate-800 tracking-tight">
+                <div class="font-num font-extrabold text-3xl text-slate-800 tracking-tight">
                     ${m.volume}<span class="text-xs font-bold text-slate-400 ml-1">ml</span>
                 </div>
-                <div class="text-[11px] font-bold text-slate-400 flex items-center gap-1">
+                <div class="text-[11px] font-semibold text-slate-400 flex items-center gap-1">
                     <i class="ph-bold ph-clock"></i> ${timeStr}
                 </div>
             </div>
             
             <div>
                 <div class="flex justify-between items-center mb-1.5">
-                    <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Còn lại</span>
+                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Còn lại</span>
                     <span id="txt-${m.id}" class="text-xs ${textClass}">${isFed ? 'Đã bú xong' : formatTimeLeft(m.expires - now)}</span>
                 </div>
                 <div class="liquid-track">
@@ -1131,6 +1353,7 @@ function renderApp() {
 }
 
 function tick() {
+    checkDailyMedReset();
     if (document.hidden || !milks.length) return;
     const now = Date.now();
     milks.forEach(m => {
@@ -1144,10 +1367,10 @@ function tick() {
             const pct = isExp ? 0 : Math.max(0, 100 - ((now - m.start) / total * 100));
             bar.style.width = `${pct}%`;
             if (isExp) {
-                txt.className = 'text-xs text-rose-600 font-black animate-pulse';
+                txt.className = 'text-xs text-rose-600 font-extrabold animate-pulse';
                 bar.className = 'liquid-fill bg-rose-500';
             } else if (pct < 20) {
-                txt.className = 'text-xs text-amber-600 font-black';
+                txt.className = 'text-xs text-amber-600 font-extrabold';
                 bar.className = 'liquid-fill bg-amber-400';
             }
         }
@@ -1289,6 +1512,7 @@ async function init() {
     setSyncStatus(false, 'Đang kết nối...');
     try {
         await Promise.all([loadMilks(), loadMeds(), loadSchedule()]);
+        loadVaccines();
         subscribeRealtime();
         setSyncStatus(true, 'Đồng bộ realtime');
     } catch (e) {
