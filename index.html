@@ -1705,9 +1705,24 @@ function checkMedDue() {
     });
 }
 
+
+async function checkNoonMeds() {
+    const hour = Number(new Date().toLocaleString('en-GB', { timeZone: 'Asia/Ho_Chi_Minh', hour: '2-digit', hour12: false }));
+    if (hour < 12) return;
+    const key = 'noon-med-' + todayVN();
+    if (localStorage.getItem(key)) return;
+    const yellow = document.getElementById('toggle-yellow');
+    const red = document.getElementById('toggle-red');
+    const any = (yellow && yellow.checked) || (red && red.checked) || otherMeds.some(m => m.taken && m.dose !== '__hidden');
+    if (any) return;
+    localStorage.setItem(key, '1');
+    showToast('Đã qua 12 giờ mà chưa gạt thuốc nào. Mẹ kiểm tra Pép Pi đã uống chưa nhé.', 'ph-fill ph-warning text-amber-300', true);
+}
+
 function tick() {
     checkDailyMedReset();
     checkMedDue();
+    checkNoonMeds();
     if (document.hidden || !milks.length) return;
     const now = Date.now();
     milks.forEach(m => {
