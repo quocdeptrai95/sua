@@ -567,10 +567,12 @@
                 </div>
                 <div class="p-5 space-y-3">
                     <input id="bell-note" placeholder="Nhắc gì cho Pép Pi?" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3">
-                    <label class="block text-xs font-bold text-slate-500">Thời gian</label>
-                    <button type="button" onclick="document.getElementById('bell-time-wrap').classList.remove('hidden')" class="text-sm font-semibold text-rose-600">Thêm giờ</button>
+                    <label class="block text-xs font-bold text-slate-500">Ngày</label>
+                    <input id="bell-date" type="date" class="w-full min-h-[52px] bg-white border border-slate-200 rounded-2xl px-4 py-3 text-base text-slate-900">
+                    <button type="button" id="bell-add-time" onclick="showBellTime()" class="text-sm font-semibold text-rose-600 text-left">Thêm giờ</button>
                     <div id="bell-time-wrap" class="hidden">
-                        <input id="bell-time" type="datetime-local" class="w-full min-h-[52px] bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-base">
+                        <label class="block text-xs font-bold text-slate-500">Giờ</label>
+                        <input id="bell-clock" type="time" class="w-full min-h-[52px] bg-white border border-slate-200 rounded-2xl px-4 py-3 text-base text-slate-900">
                     </div>
                     <button onclick="saveBellReminder()" class="w-full py-3.5 bg-slate-900 text-white rounded-2xl font-semibold">Lưu nhắc</button>
                     <div id="bell-list" class="space-y-2 text-sm max-h-40 overflow-y-auto"></div>
@@ -2049,14 +2051,17 @@ async function loadBellReminders() {
 }
 async function saveBellReminder() {
     const note = document.getElementById('bell-note').value.trim();
-    const raw = document.getElementById('bell-time').value;
-    if (!note) return showToast('Nhập nội dung nhắc', 'ph-fill ph-warning text-amber-300');
-    const row = { family_id: FAMILY_ID, note, done: false };
-    if (raw) row.remind_at = new Date(raw).toISOString();
+    const date = document.getElementById('bell-date').value;
+    const clock = document.getElementById('bell-clock') ? document.getElementById('bell-clock').value : '';
+    const useTime = !document.getElementById('bell-time-wrap').classList.contains('hidden') && clock;
+    if (!note || !date) return showToast('Nhập nội dung và ngày', 'ph-fill ph-warning text-amber-300');
+    const row = { family_id: FAMILY_ID, note, done: false, remind_at: new Date(date + 'T' + (useTime ? clock : '00:00') + ':00').toISOString() };
     const { error } = await sb.from('reminders').insert(row);
     if (error) return showToast('Chưa có bảng nhắc. Chạy SQL reminders trước.', 'ph-fill ph-warning text-amber-300');
     document.getElementById('bell-note').value = '';
-    document.getElementById('bell-time').value = '';
+    document.getElementById('bell-date').value = '';
+    if (document.getElementById('bell-clock')) document.getElementById('bell-clock').value = '';
+    document.getElementById('bell-time-wrap').classList.add('hidden');
     await loadBellReminders();
     showToast('Đã lưu nhắc', 'ph-fill ph-check text-emerald-400');
 }
@@ -2083,6 +2088,24 @@ function checkBellReminders() {
     });
 }
 
+
+function showBellTime() {
+    const wrap = document.getElementById('bell-time-wrap');
+    wrap.classList.remove('hidden');
+    const clock = document.getElementById('bell-clock');
+    if (clock && !clock.value) {
+        const n = new Date();
+        clock.value = String(n.getHours()).padStart(2, '0') + ':' + String(n.getMinutes()).padStart(2, '0');
+    }
+}
+function fillBellDate() {
+    const date = document.getElementById('bell-date');
+    if (date && !date.value) {
+        const n = new Date();
+        date.value = n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0') + '-' + String(n.getDate()).padStart(2, '0');
+    }
+}
+
 async function onBellClick() {
     const perm = ('Notification' in window) ? Notification.permission : 'denied';
     if (perm !== 'granted') {
@@ -2090,6 +2113,7 @@ async function onBellClick() {
         return;
     }
     openModal('modal-bell');
+    fillBellDate();
     loadBellReminders();
 }
 
