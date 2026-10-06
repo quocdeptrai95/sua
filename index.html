@@ -325,18 +325,20 @@
             #action-list button:hover, #status-grid button:hover, .modal-content button:hover { transform: translateY(-1px); background: #fff7f8; }
         }
         .shell { padding-top: max(59px, calc(env(safe-area-inset-top, 0px) + 16px)); }
-        body { background: #f6f3f1 !important; color: #1c1917 !important; }
+        body { background: #f4f1ee !important; color: #1a1816 !important; }
         .glass-panel, .med-card, .milk-card {
             background: #fff !important;
-            border: 1px solid #efe8e4 !important;
+            border: 1px solid #e7e2de !important;
             box-shadow: none !important;
             backdrop-filter: none !important;
-            border-radius: 20px !important;
+            border-radius: 16px !important;
         }
         header .glass-panel { background: transparent !important; border: none !important; padding: 0 !important; box-shadow: none !important; }
-        .med-bottle { animation: none !important; width: 36px !important; height: 36px !important; border-radius: 12px !important; }
-        h1 { font-size: 1.25rem !important; letter-spacing: -0.03em; }
-        main h2 { letter-spacing: .14em; color: #a8a29e !important; }
+        .med-bottle { animation: none !important; width: 32px !important; height: 32px !important; border-radius: 10px !important; }
+        h1 { font-size: 1.15rem !important; font-weight: 700 !important; letter-spacing: -0.02em; color: #1a1816 !important; }
+        main h2 { letter-spacing: .12em; color: #8a817c !important; font-weight: 600 !important; }
+        .brand-mark { width: 36px; height: 36px; border-radius: 10px; background: #1a1816; color: #fff; display: flex; align-items: center; justify-content: center; }
+        button.w-16 { background: #1a1816 !important; border: none !important; box-shadow: none !important; }
         #milk-list { grid-template-columns: 1fr !important; }
         @media (min-width: 800px) { #milk-list { grid-template-columns: 1fr 1fr !important; } }
         .fab-btn, button.w-16 { width: 56px !important; height: 56px !important; border-radius: 18px !important; box-shadow: none !important; }
@@ -355,8 +357,8 @@
         <header class="flex-shrink-0">
             <div class="flex items-center justify-between glass-panel rounded-3xl p-4 px-5 shadow-xl relative">
                 <div class="flex items-center gap-3">
-                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-pink-500 to-rose-400 flex items-center justify-center text-white shadow-lg shadow-pink-500/30 border border-white/50">
-                        <i class="ph-fill ph-baby text-2xl"></i>
+                    <div class="brand-mark">
+                        <i class="ph-fill ph-baby text-lg"></i>
                     </div>
                     <div>
                         <div class="flex items-center gap-2">
