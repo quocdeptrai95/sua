@@ -318,6 +318,10 @@
                                 <h3 class="font-extrabold text-base text-slate-900 tracking-tight">Chai Vàng</h3>
                                 <p class="text-sm font-bold text-amber-700">Uống 5 giọt</p>
                                 <p id="status-yellow" class="text-xs font-extrabold text-slate-400 mt-0.5">Chưa cho uống</p>
+                                <div class="flex gap-2 mt-1">
+                                    <button type="button" onclick="openEditBuiltin('yellow')" class="text-[11px] font-bold text-slate-500">Sửa</button>
+                                    <button type="button" onclick="hideBuiltin('yellow')" class="text-[11px] font-bold text-rose-500">Xóa</button>
+                                </div>
                             </div>
                         </div>
                         <input type="checkbox" id="toggle-yellow" class="ios-switch switch-yellow" onchange="toggleMed('yellow')">
@@ -333,6 +337,10 @@
                                 <h3 class="font-extrabold text-base text-slate-900 tracking-tight">Chai Đỏ</h3>
                                 <p class="text-sm font-bold text-rose-700">Uống 3 giọt</p>
                                 <p id="status-red" class="text-xs font-extrabold text-slate-400 mt-0.5">Chưa cho uống</p>
+                                <div class="flex gap-2 mt-1">
+                                    <button type="button" onclick="openEditBuiltin('red')" class="text-[11px] font-bold text-slate-500">Sửa</button>
+                                    <button type="button" onclick="hideBuiltin('red')" class="text-[11px] font-bold text-rose-500">Xóa</button>
+                                </div>
                             </div>
                         </div>
                         <input type="checkbox" id="toggle-red" class="ios-switch switch-red" onchange="toggleMed('red')">
@@ -1041,10 +1049,35 @@ function renderVaccines() {
 
 
 let otherMeds = [];
+let editingMedId = null;
 function openAddMedModal() {
+    editingMedId = null;
+    document.querySelector('#modal-med h3').textContent = 'Thêm thuốc';
     document.getElementById('med-name').value = '';
     document.getElementById('med-dose').value = '';
     openModal('modal-med');
+}
+function openEditOtherMed(id) {
+    const m = otherMeds.find(x => x.id === id);
+    if (!m) return;
+    editingMedId = id;
+    document.querySelector('#modal-med h3').textContent = 'Sửa thuốc';
+    document.getElementById('med-name').value = m.name;
+    document.getElementById('med-dose').value = m.dose || '';
+    openModal('modal-med');
+}
+function openEditBuiltin(color) {
+    editingMedId = 'builtin-' + color;
+    const title = document.getElementById('card-' + color).querySelector('h3').textContent;
+    const dose = document.getElementById('card-' + color).querySelector('p').textContent;
+    document.querySelector('#modal-med h3').textContent = 'Sửa thuốc';
+    document.getElementById('med-name').value = title;
+    document.getElementById('med-dose').value = dose;
+    openModal('modal-med');
+}
+async function hideBuiltin(color) {
+    document.getElementById('card-' + color).classList.add('hidden');
+    await sb.from('other_meds').upsert({ id: 'builtin-' + color, family_id: FAMILY_ID, name: '', dose: '__hidden', taken: false }, { onConflict: 'id' });
 }
 async function loadOtherMeds() {
     const { data, error } = await sb.from('other_meds').select('*').eq('family_id', FAMILY_ID).order('created_at');
@@ -1061,7 +1094,19 @@ async function loadOtherMeds() {
             await sb.from('other_meds').update({ taken: false, updated_at: new Date().toISOString() }).eq('id', m.id);
         }
     }
+    otherMeds = otherMeds.filter(m => !String(m.id).startsWith('builtin-'));
     renderOtherMeds();
+    for (const color of ['yellow', 'red']) {
+        const card = document.getElementById('card-' + color);
+        const saved = (data || []).find(m => m.id === 'builtin-' + color);
+        if (!card || !saved) continue;
+        if (saved.dose === '__hidden') card.classList.add('hidden');
+        else {
+            card.classList.remove('hidden');
+            if (saved.name) card.querySelector('h3').textContent = saved.name;
+            if (saved.dose) card.querySelector('p').textContent = saved.dose;
+        }
+    }
 }
 function renderOtherMeds() {
     const el = document.getElementById('other-meds');
@@ -1078,9 +1123,12 @@ function renderOtherMeds() {
                     <p class="text-xs font-extrabold ${m.taken ? 'text-emerald-600' : 'text-slate-400'} mt-0.5">${m.taken ? 'Đã cho uống' : 'Chưa cho uống'}</p>
                 </div>
             </div>
-            <div class="flex items-center gap-2">
-                <button onclick="deleteOtherMed('${m.id}')" class="text-slate-300 text-sm" title="Xóa">×</button>
+            <div class="flex flex-col items-end gap-2">
                 <input type="checkbox" class="ios-switch switch-yellow" ${m.taken ? 'checked' : ''} onchange="toggleOtherMed('${m.id}', this.checked)">
+                <div class="flex gap-2">
+                    <button onclick="openEditOtherMed('${m.id}')" class="text-[11px] font-bold text-slate-500">Sửa</button>
+                    <button onclick="deleteOtherMed('${m.id}')" class="text-[11px] font-bold text-rose-500">Xóa</button>
+                </div>
             </div>
         </div>`).join('');
 }
@@ -1088,9 +1136,22 @@ async function saveOtherMed() {
     const name = document.getElementById('med-name').value.trim();
     const dose = document.getElementById('med-dose').value.trim();
     if (!name) return showToast('Nhập tên thuốc', 'ph-fill ph-warning text-amber-300');
-    const row = { id: 'med-' + uid(), family_id: FAMILY_ID, name, dose, taken: false };
-    const { error } = await sb.from('other_meds').insert(row);
-    if (error) return showToast('Chưa có bảng other_meds: ' + error.message, 'ph-fill ph-warning text-red-400');
+    if (editingMedId && editingMedId.startsWith('builtin-')) {
+        const color = editingMedId.slice(8);
+        document.getElementById('card-' + color).querySelector('h3').textContent = name;
+        document.getElementById('card-' + color).querySelector('p').textContent = dose || 'Uống theo chỉ định';
+        const { error } = await sb.from('other_meds').upsert({ id: editingMedId, family_id: FAMILY_ID, name, dose, taken: false }, { onConflict: 'id' });
+        if (error) return showToast('Lỗi sửa thuốc: ' + error.message, 'ph-fill ph-warning text-red-400');
+        editingMedId = null;
+        closeModals();
+        return;
+    }
+    const row = editingMedId
+        ? { id: editingMedId, family_id: FAMILY_ID, name, dose }
+        : { id: 'med-' + uid(), family_id: FAMILY_ID, name, dose, taken: false };
+    const { error } = await sb.from('other_meds').upsert(row, { onConflict: 'id' });
+    if (error) return showToast('Lỗi lưu thuốc: ' + error.message, 'ph-fill ph-warning text-red-400');
+    editingMedId = null;
     closeModals();
     await loadOtherMeds();
 }
