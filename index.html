@@ -1385,11 +1385,7 @@ async function testLocalNotif() {
     try {
         if (!swRegistration) await registerServiceWorker();
         const sub = await subscribePushSilent();
-<<<<<<< HEAD
-        const n = new Notification('Sổ sữa 🍼', { body: sub ? 'Đã đăng ký push trên máy này.' : 'Chưa đăng ký được push.', tag: 'local-test' });
-=======
         const n = new Notification('Sổ Sữa Của Pép Pi', { body: sub ? 'Đã đăng ký push trên máy này.' : 'Chưa đăng ký được push.', tag: 'local-test' });
->>>>>>> aa1eb42 (Đổi tên thông báo thành Sổ Sữa Của Pép Pi)
         n.onshow = () => { shown = true; };
         n.onerror = () => { shown = false; };
     } catch (e) {
@@ -1423,27 +1419,7 @@ async function autoEnableNotifications() {
         }
         if (Notification.permission !== 'granted') return;
         await subscribePushSilent();
-<<<<<<< HEAD
-=======
-        // Test local notification để xác nhận quyền OK
-        try {
-            const reg = await navigator.serviceWorker.ready;
-            await reg.showNotification('Sổ sữa 🍼', {
-                body: 'Thông báo đã bật! Mẹ sẽ nhận nhắc hạn sữa và tin vui.',
-                icon: './icon-192.png',
-                tag: 'welcome'
-            });
-        } catch (e) {
-            try {
-                new Notification('Sổ Sữa Của Pép Pi', {
-                    body: 'Thông báo đã bật! Mẹ sẽ nhận nhắc hạn sữa và tin vui.',
-                    icon: './icon-192.png'
-                });
-            } catch (e2) {
-                console.warn('local notif fail', e2);
-            }
-        }
->>>>>>> aa1eb42 (Đổi tên thông báo thành Sổ Sữa Của Pép Pi)
+
     } catch (e) {
         console.warn('autoEnableNotifications', e);
     }
