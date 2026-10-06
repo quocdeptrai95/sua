@@ -695,13 +695,13 @@ async function loadMeds() {
     }
 
     if (data) {
-        const isToday = data.date === todayStr;
+        const isToday = String(data.updated_at || '').slice(0, 10) === todayStr;
         if (!isToday && (data.yellow || data.red)) {
             document.getElementById('toggle-yellow').checked = false;
             document.getElementById('toggle-red').checked = false;
             updateMedUI('yellow', false);
             updateMedUI('red', false);
-            await upsertMeds(false, false, todayStr);
+            await upsertMeds(false, false);
         } else {
             const y = isToday ? !!data.yellow : false;
             const r = isToday ? !!data.red : false;
@@ -721,7 +721,7 @@ function checkDailyMedReset() {
         document.getElementById('toggle-red').checked = false;
         updateMedUI('yellow', false);
         updateMedUI('red', false);
-        upsertMeds(false, false, todayStr);
+        upsertMeds(false, false);
         showToast('🌅 Đã bước sang ngày mới! Thuốc hôm nay đã được làm mới.', 'ph-fill ph-sun text-amber-400');
     }
 }
@@ -787,11 +787,10 @@ async function deleteMilkRow(id) {
     return true;
 }
 
-async function upsertMeds(yellow, red, dateStr = null) {
-    const date = dateStr || new Date().toISOString().slice(0, 10);
+async function upsertMeds(yellow, red) {
     const { error } = await sb
         .from('meds')
-        .upsert({ family_id: FAMILY_ID, yellow, red, date }, { onConflict: 'family_id' });
+        .upsert({ family_id: FAMILY_ID, yellow, red, updated_at: new Date().toISOString() }, { onConflict: 'family_id' });
     if (error) {
         console.error('upsertMeds', error);
         showToast('Lỗi lưu thuốc: ' + error.message, 'ph-fill ph-warning text-red-400');
