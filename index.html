@@ -639,6 +639,15 @@ let isOnline = false;
 let tickRunning = false;
 let lastMedCheckDate = '';
 
+function todayVN() {
+    return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' });
+}
+function dayVN(iso) {
+    if (!iso) return '';
+    return new Date(iso).toLocaleDateString('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' });
+}
+
+
 // ============================================================
 // SUPABASE HELPERS & REALTIME SYNC
 // ============================================================
@@ -681,7 +690,7 @@ async function loadMilks() {
 }
 
 async function loadMeds() {
-    const todayStr = new Date().toISOString().slice(0, 10);
+    const todayStr = todayVN();
     lastMedCheckDate = todayStr;
 
     const { data, error } = await sb
@@ -695,7 +704,7 @@ async function loadMeds() {
     }
 
     if (data) {
-        const isToday = String(data.updated_at || '').slice(0, 10) === todayStr;
+        const isToday = dayVN(data.updated_at) === todayStr;
         if (!isToday && (data.yellow || data.red)) {
             document.getElementById('toggle-yellow').checked = false;
             document.getElementById('toggle-red').checked = false;
@@ -714,7 +723,7 @@ async function loadMeds() {
 }
 
 function checkDailyMedReset() {
-    const todayStr = new Date().toISOString().slice(0, 10);
+    const todayStr = todayVN();
     if (lastMedCheckDate && lastMedCheckDate !== todayStr) {
         lastMedCheckDate = todayStr;
         document.getElementById('toggle-yellow').checked = false;
