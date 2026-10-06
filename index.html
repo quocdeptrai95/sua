@@ -1331,7 +1331,7 @@ function urlBase64ToUint8Array(base64String) {
 async function registerServiceWorker() {
     if (!('serviceWorker' in navigator)) return null;
     try {
-        swRegistration = await navigator.serviceWorker.register('./sw.js?v=3', { updateViaCache: 'none' });
+        swRegistration = await navigator.serviceWorker.register('./sw.js?v=4', { updateViaCache: 'none' });
         await navigator.serviceWorker.ready;
         console.log('SW ready');
         return swRegistration;
@@ -1345,12 +1345,17 @@ async function subscribePushSilent() {
     if (!swRegistration) return null;
     try {
         let sub = await swRegistration.pushManager.getSubscription();
-        // Đăng ký lại để khớp khóa VAPID hiện tại
-        if (sub) { try { await sub.unsubscribe(); } catch (e) {} }
-        sub = await swRegistration.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-        });
+        if (sub && localStorage.getItem('push-refresh') !== 'v4') {
+            try { await sub.unsubscribe(); } catch (e) {}
+            sub = null;
+        }
+        if (!sub) {
+            sub = await swRegistration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+            });
+        }
+        localStorage.setItem('push-refresh', 'v4');
         const json = sub.toJSON();
         await sb.from('push_subscriptions').upsert({
             family_id: FAMILY_ID,
