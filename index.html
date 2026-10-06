@@ -1393,8 +1393,8 @@ async function testLocalNotif() {
         return;
     }
     setTimeout(() => {
-        if (shown) showToast('Windows đã vẽ thông báo', 'ph-fill ph-bell text-green-400');
-        else showToast('Chrome đã gửi nhưng Windows không vẽ. Bật thông báo cho Chrome trong Cài đặt Windows.', 'ph-fill ph-warning text-amber-300', true);
+        if (shown) showToast('Máy đã hiện thông báo', 'ph-fill ph-bell text-green-400');
+        else showToast('Trang đã gửi lệnh, nhưng hệ thống chưa vẽ ô thông báo.', 'ph-fill ph-warning text-amber-300');
     }, 1200);
 }
 
