@@ -553,14 +553,11 @@
                     <h3 class="font-extrabold text-lg text-slate-900">Nhắc của Pép Pi</h3>
                     <button onclick="closeModals()" class="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 text-slate-500"><i class="ph-bold ph-x text-sm"></i></button>
                 </div>
-                <div class="p-5 space-y-3 text-sm text-slate-600">
-                    <p class="font-semibold text-slate-800">Sữa</p>
-                    <p>Còn dưới 15 phút hoặc hết hạn thì nhắc một lần.</p>
-                    <p class="font-semibold text-slate-800">Thuốc</p>
-                    <p>Đến giờ đã đặt mà chưa uống thì nhắc. Sau 12 giờ, nếu chưa gạt thuốc nào, nhắc mỗi 30 phút. Bấm Hôm nay không uống thì im trong ngày.</p>
-                    <p class="font-semibold text-slate-800">Tiêm</p>
-                    <p>Sắp đến hạn, đúng ngày hoặc trễ hẹn thì nhắc, mỗi mũi cách 15 phút.</p>
-                    <p class="text-xs text-slate-400">Tin vui xen kẽ khoảng 10 phút. Tắt màn hình vẫn nhận nếu đã cho phép thông báo.</p>
+                <div class="p-5 space-y-3">
+                    <input id="bell-note" placeholder="Nhắc gì cho Pép Pi?" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3">
+                    <input id="bell-time" type="datetime-local" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3">
+                    <button onclick="saveBellReminder()" class="w-full py-3.5 bg-slate-900 text-white rounded-2xl font-semibold">Lưu nhắc</button>
+                    <div id="bell-list" class="space-y-2 text-sm"></div>
                 </div>
             </div>
         </div>
@@ -1411,16 +1408,19 @@ async function saveOtherMed() {
     closeModals();
     await loadOtherMeds();
         loadMedSkip();
+        loadBellReminders();
 }
 async function toggleOtherMed(id, taken) {
     await sb.from('other_meds').update({ taken, updated_at: new Date().toISOString() }).eq('id', id);
     await loadOtherMeds();
         loadMedSkip();
+        loadBellReminders();
 }
 async function deleteOtherMed(id) {
     await sb.from('other_meds').delete().eq('id', id);
     await loadOtherMeds();
         loadMedSkip();
+        loadBellReminders();
 }
 
 function subscribeRealtime() {
@@ -1432,7 +1432,8 @@ function subscribeRealtime() {
         .on('postgres_changes', { event: '*', schema: 'public', table: 'milk_entries' }, (payload) => { if (mine(payload)) handleMilkChange(payload); })
         .on('postgres_changes', { event: '*', schema: 'public', table: 'vaccines' }, (payload) => { if (mine(payload)) loadVaccines(); })
         .on('postgres_changes', { event: '*', schema: 'public', table: 'other_meds' }, (payload) => { if (mine(payload)) loadOtherMeds();
-        loadMedSkip(); })
+        loadMedSkip();
+        loadBellReminders(); })
         .on('postgres_changes', { event: '*', schema: 'public', table: 'meds' }, (payload) => {
             if (!mine(payload) || !payload.new) return;
             document.getElementById('toggle-yellow').checked = !!payload.new.yellow;
@@ -1911,6 +1912,7 @@ function tick() {
     checkDailyMedReset();
     checkMedDue();
     checkNoonMeds();
+    checkBellReminders();
     if (document.hidden || !milks.length) return;
     const now = Date.now();
     milks.forEach(m => {
@@ -2014,6 +2016,44 @@ async function subscribePushSilent() {
 }
 
 
+
+let bellReminders = [];
+async function loadBellReminders() {
+    const { data, error } = await sb.from('reminders').select('*').eq('family_id', FAMILY_ID).eq('done', false).order('remind_at');
+    if (error) return;
+    bellReminders = data || [];
+    const el = document.getElementById('bell-list');
+    if (!el) return;
+    el.innerHTML = bellReminders.map(r => `<div class="flex items-center justify-between gap-2 bg-slate-50 rounded-xl px-3 py-2"><div><p class="font-semibold text-slate-800">${r.note}</p><p class="text-xs text-slate-400">${new Date(r.remind_at).toLocaleString('vi-VN')}</p></div><button onclick="deleteBellReminder('${r.id}')" class="text-xs font-bold text-rose-500">Xóa</button></div>`).join('') || '<p class="text-xs text-slate-400">Chưa có nhắc riêng.</p>';
+}
+async function saveBellReminder() {
+    const note = document.getElementById('bell-note').value.trim();
+    const raw = document.getElementById('bell-time').value;
+    if (!note || !raw) return showToast('Nhập nội dung và thời gian', 'ph-fill ph-warning text-amber-300');
+    const { error } = await sb.from('reminders').insert({ family_id: FAMILY_ID, note, remind_at: new Date(raw).toISOString(), done: false });
+    if (error) return showToast('Chưa có bảng nhắc. Chạy SQL reminders trước.', 'ph-fill ph-warning text-amber-300');
+    document.getElementById('bell-note').value = '';
+    document.getElementById('bell-time').value = '';
+    await loadBellReminders();
+    showToast('Đã lưu nhắc', 'ph-fill ph-check text-emerald-400');
+}
+async function deleteBellReminder(id) {
+    await sb.from('reminders').delete().eq('id', id);
+    await loadBellReminders();
+}
+function checkBellReminders() {
+    const now = Date.now();
+    bellReminders.forEach(r => {
+        const due = new Date(r.remind_at).getTime();
+        if (now < due || now - due > 60 * 60 * 1000) return;
+        const key = 'bell-' + r.id;
+        if (localStorage.getItem(key)) return;
+        localStorage.setItem(key, '1');
+        showToast(r.note, 'ph-fill ph-bell text-rose-400', true);
+        sb.from('reminders').update({ done: true }).eq('id', r.id);
+    });
+}
+
 async function onBellClick() {
     const perm = ('Notification' in window) ? Notification.permission : 'denied';
     if (perm !== 'granted') {
@@ -2021,6 +2061,7 @@ async function onBellClick() {
         return;
     }
     openModal('modal-bell');
+    loadBellReminders();
 }
 
 async function testLocalNotif() {
@@ -2082,6 +2123,7 @@ async function init() {
         loadVaccines();
         loadOtherMeds();
         loadMedSkip();
+        loadBellReminders();
         subscribeRealtime();
         setSyncStatus(true, 'Đồng bộ realtime');
     } catch (e) {
