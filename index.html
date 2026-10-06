@@ -1375,18 +1375,27 @@ async function subscribePushSilent() {
 }
 
 async function testLocalNotif() {
-    const perm = await Notification.requestPermission();
+    const perm = ('Notification' in window) ? Notification.permission : 'không có';
     if (perm !== 'granted') {
-        showToast('Máy đang chặn thông báo: ' + perm, 'ph-fill ph-bell-slash text-slate-400');
+        const asked = await Notification.requestPermission();
+        if (asked !== 'granted') {
+            showToast('Chrome đang chặn: ' + asked, 'ph-fill ph-bell-slash text-slate-400');
+            return;
+        }
+    }
+    let shown = false;
+    try {
+        const n = new Notification('Thử chuông máy', { body: 'Nếu thấy ô này thì Windows đang cho hiện.', tag: 'local-test' });
+        n.onshow = () => { shown = true; };
+        n.onerror = () => { shown = false; };
+    } catch (e) {
+        showToast('Chrome lỗi: ' + (e && e.message ? e.message : e), 'ph-fill ph-warning text-amber-300');
         return;
     }
-    try {
-        const reg = await navigator.serviceWorker.ready;
-        await reg.showNotification('Thử chuông máy', { body: 'Nếu thấy dòng này thì máy cho phép thông báo.', tag: 'local-test' });
-        showToast('Đã gọi chuông trên máy này', 'ph-fill ph-bell text-green-400');
-    } catch (e) {
-        showToast('Chuông máy lỗi: ' + (e && e.message ? e.message : e), 'ph-fill ph-warning text-amber-300');
-    }
+    setTimeout(() => {
+        if (shown) showToast('Windows đã vẽ thông báo', 'ph-fill ph-bell text-green-400');
+        else showToast('Chrome đã gửi nhưng Windows không vẽ. Bật thông báo cho Chrome trong Cài đặt Windows.', 'ph-fill ph-warning text-amber-300', true);
+    }, 1200);
 }
 
 async function enablePush() {
