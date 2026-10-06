@@ -819,24 +819,34 @@ const DEFAULT_VACCINES = [
     { id: 'vac-3', name: '6 trong 1 (Mũi 2) + Rota 2 + Phế cầu 2', date: '', done: false, note: 'Khoảng 3-4 tháng tuổi' }
 ];
 
-function loadVaccines() {
-    try {
-        const stored = localStorage.getItem('peppi_vaccines');
-        if (stored) {
-            vaccines = JSON.parse(stored);
-        } else {
-            vaccines = DEFAULT_VACCINES;
-            saveVaccinesLocally();
-        }
-    } catch (e) {
-        vaccines = DEFAULT_VACCINES;
+function vacFromRow(r) {
+    return { id: r.id, name: r.name, date: r.vac_date || '', done: !!r.done, note: r.note || '' };
+}
+async function loadVaccines() {
+    const { data, error } = await sb.from('vaccines').select('*').eq('family_id', FAMILY_ID);
+    if (error) {
+        console.error('loadVaccines', error);
+        showToast('Chưa có bảng tiêm chủng trên Supabase', 'ph-fill ph-warning text-amber-300');
+        vaccines = [];
+        renderVaccines();
+        return;
     }
+    if (!data.length) {
+        const rows = DEFAULT_VACCINES.map(v => ({ id: v.id, family_id: FAMILY_ID, name: v.name, vac_date: v.date || null, done: v.done, note: v.note }));
+        await sb.from('vaccines').insert(rows);
+        vaccines = DEFAULT_VACCINES.slice();
+    } else {
+        vaccines = data.map(vacFromRow);
+    }
+    vaccines.sort((a, b) => !a.date ? 1 : !b.date ? -1 : new Date(a.date) - new Date(b.date));
     renderVaccines();
     checkVaccineAlerts();
 }
-
-function saveVaccinesLocally() {
-    localStorage.setItem('peppi_vaccines', JSON.stringify(vaccines));
+async function upsertVaccineRow(v) {
+    const { error } = await sb.from('vaccines').upsert({
+        id: v.id, family_id: FAMILY_ID, name: v.name, vac_date: v.date || null, done: !!v.done, note: v.note || ''
+    }, { onConflict: 'id' });
+    if (error) showToast('Lỗi lưu mũi tiêm: ' + error.message, 'ph-fill ph-warning text-red-400');
 }
 
 let editingVaccineId = null;
@@ -865,7 +875,7 @@ function setVacName(name) {
     document.getElementById('vac-name').value = name;
 }
 
-function saveVaccine() {
+async function saveVaccine() {
     const name = document.getElementById('vac-name').value.trim();
     const date = document.getElementById('vac-date').value;
     const note = document.getElementById('vac-note').value.trim();
@@ -875,52 +885,43 @@ function saveVaccine() {
         return;
     }
 
+    let saved;
     const wasEdit = !!editingVaccineId;
     if (editingVaccineId) {
-        const item = vaccines.find(v => v.id === editingVaccineId);
-        if (item) {
-            item.name = name;
-            item.date = date || '';
-            item.note = note || '';
+        saved = vaccines.find(v => v.id === editingVaccineId);
+        if (saved) {
+            saved.name = name;
+            saved.date = date || '';
+            saved.note = note || '';
         }
         editingVaccineId = null;
     } else {
-        vaccines.push({
-            id: 'vac-' + uid(),
-            name,
-            date: date || '',
-            done: false,
-            note: note || ''
-        });
+        saved = { id: 'vac-' + uid(), name, date: date || '', done: false, note: note || '' };
+        vaccines.push(saved);
     }
-
-    vaccines.sort((a, b) => {
-        if (!a.date) return 1;
-        if (!b.date) return -1;
-        return new Date(a.date) - new Date(b.date);
-    });
-
-    saveVaccinesLocally();
+    vaccines.sort((a, b) => !a.date ? 1 : !b.date ? -1 : new Date(a.date) - new Date(b.date));
+    if (saved) await upsertVaccineRow(saved);
     renderVaccines();
     closeModals();
     showToast(wasEdit ? `Đã sửa mũi ${name}` : `Đã thêm mũi ${name}`, 'ph-fill ph-syringe text-purple-400');
     checkVaccineAlerts();
 }
 
-function toggleVaccineDone(id) {
+async function toggleVaccineDone(id) {
     const item = vaccines.find(v => v.id === id);
     if (!item) return;
     item.done = !item.done;
-    saveVaccinesLocally();
+    await upsertVaccineRow(item);
     renderVaccines();
     if (item.done) {
         showToast(`🎉 Bé Pép Pi đã tiêm xong mũi: ${item.name}! Siêu dũng cảm!`, 'ph-fill ph-heart text-rose-400', true);
     }
 }
 
-function deleteVaccine(id) {
+async function deleteVaccine(id) {
     vaccines = vaccines.filter(v => v.id !== id);
-    saveVaccinesLocally();
+    const { error } = await sb.from('vaccines').delete().eq('id', id).eq('family_id', FAMILY_ID);
+    if (error) showToast('Lỗi xóa mũi tiêm: ' + error.message, 'ph-fill ph-warning text-red-400');
     renderVaccines();
     showToast('Đã xóa mũi tiêm', 'ph-fill ph-trash text-slate-400');
 }
@@ -1024,6 +1025,7 @@ function subscribeRealtime() {
         .on('postgres_changes', { event: '*', schema: 'public', table: 'milk_entries', filter: `family_id=eq.${FAMILY_ID}` }, (payload) => {
             handleMilkChange(payload);
         })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'vaccines', filter: `family_id=eq.${FAMILY_ID}` }, () => { loadVaccines(); })
         .on('postgres_changes', { event: '*', schema: 'public', table: 'meds', filter: `family_id=eq.${FAMILY_ID}` }, (payload) => {
             if (payload.new) {
                 document.getElementById('toggle-yellow').checked = !!payload.new.yellow;
