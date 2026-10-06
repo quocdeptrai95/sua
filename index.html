@@ -290,7 +290,7 @@
                 </div>
 
                 <!-- Right Action: Nút chuông rút gọn -->
-                <button type="button" onclick="testLocalNotif()" class="w-11 h-11 rounded-2xl bg-white/90 hover:bg-white text-rose-500 flex items-center justify-center border border-white shadow-sm transition-transform active:scale-90" title="Thử chuông máy">
+                <button type="button" onclick="onBellClick()" class="w-11 h-11 rounded-2xl bg-white/90 hover:bg-white text-rose-500 flex items-center justify-center border border-white shadow-sm transition-transform active:scale-90" title="Nhắc nhở">
                     <i class="ph-fill ph-bell text-2xl"></i>
                 </button>
             </div>
@@ -546,6 +546,25 @@
         </div>
 
         <!-- Safe Dynamic Island Toast -->
+        
+        <div id="modal-bell" class="modal-overlay fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/40">
+            <div class="modal-content w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden">
+                <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+                    <h3 class="font-extrabold text-lg text-slate-900">Nhắc của Pép Pi</h3>
+                    <button onclick="closeModals()" class="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 text-slate-500"><i class="ph-bold ph-x text-sm"></i></button>
+                </div>
+                <div class="p-5 space-y-3 text-sm text-slate-600">
+                    <p class="font-semibold text-slate-800">Sữa</p>
+                    <p>Còn dưới 15 phút hoặc hết hạn thì nhắc một lần.</p>
+                    <p class="font-semibold text-slate-800">Thuốc</p>
+                    <p>Đến giờ đã đặt mà chưa uống thì nhắc. Sau 12 giờ, nếu chưa gạt thuốc nào, nhắc mỗi 30 phút. Bấm Hôm nay không uống thì im trong ngày.</p>
+                    <p class="font-semibold text-slate-800">Tiêm</p>
+                    <p>Sắp đến hạn, đúng ngày hoặc trễ hẹn thì nhắc, mỗi mũi cách 15 phút.</p>
+                    <p class="text-xs text-slate-400">Tin vui xen kẽ khoảng 10 phút. Tắt màn hình vẫn nhận nếu đã cho phép thông báo.</p>
+                </div>
+            </div>
+        </div>
+
         <div id="toast" class="fixed left-1/2 -translate-x-1/2 z-[9999] w-[min(92vw,360px)] px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3 pointer-events-none -translate-y-24 opacity-0 bg-slate-900/95 text-white backdrop-blur-md border border-white/20">
             <i id="toast-icon" class="ph-fill ph-sparkle text-amber-300 text-lg flex-shrink-0"></i>
             <span id="toast-text" class="text-xs font-semibold leading-snug break-words">Thông báo</span>
@@ -1992,6 +2011,16 @@ async function subscribePushSilent() {
         console.warn('subscribePushSilent', e);
         return null;
     }
+}
+
+
+async function onBellClick() {
+    const perm = ('Notification' in window) ? Notification.permission : 'denied';
+    if (perm !== 'granted') {
+        await testLocalNotif();
+        return;
+    }
+    openModal('modal-bell');
 }
 
 async function testLocalNotif() {
