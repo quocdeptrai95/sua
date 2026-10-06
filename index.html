@@ -305,7 +305,9 @@
                     <h2 class="text-sm font-extrabold text-slate-600 uppercase tracking-wider flex items-center gap-2">
                         <i class="ph-fill ph-pill text-rose-500 text-base"></i> Thuốc hôm nay
                     </h2>
+                    <button onclick="openAddMedModal()" class="text-xs font-semibold text-rose-700 bg-rose-50 px-3 py-1.5 rounded-full border border-rose-100">Thêm thuốc</button>
                 </div>
+                <div id="other-meds" class="space-y-2.5"></div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     <!-- Chai Vàng -->
@@ -352,9 +354,9 @@
                 </div>
 
                 <!-- Danh sách vắc-xin -->
-                <div id="vaccine-list" class="space-y-2.5">
-                    <!-- Rendered by JS -->
-                </div>
+                <div id="vaccine-list" class="space-y-2.5"></div>
+                <h3 class="text-xs font-semibold text-slate-400 px-1 pt-2">Lịch sử tiêm chủng</h3>
+                <div id="vaccine-history" class="space-y-2.5"></div>
             </section>
 
             <!-- Tủ Sữa Của Pép Pi (Đã bỏ nhãn Tự động báo hạn) -->
@@ -388,6 +390,21 @@
             <button onclick="openAddModal()" class="main-fab" title="Thêm cữ sữa mới">
                 <i class="ph-bold ph-plus text-2xl"></i>
             </button>
+        </div>
+
+        
+        <div id="modal-med" class="modal-overlay fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/40">
+            <div class="modal-content w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl">
+                <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+                    <h3 class="font-bold text-lg text-slate-900">Thêm thuốc</h3>
+                    <button onclick="closeModals()" class="w-9 h-9 rounded-full bg-slate-100 text-slate-500">×</button>
+                </div>
+                <div class="p-5 space-y-3">
+                    <input id="med-name" placeholder="Tên thuốc" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3">
+                    <input id="med-dose" placeholder="Liều, ví dụ 2 giọt" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3">
+                    <button onclick="saveOtherMed()" class="w-full py-3.5 bg-slate-900 text-white rounded-2xl font-semibold">Lưu thuốc</button>
+                </div>
+            </div>
         </div>
 
         <!-- Modal Thêm Vắc-xin Mới -->
@@ -426,10 +443,6 @@
                         <label class="block text-xs font-semibold text-slate-500 mb-2">Nơi tiêm</label>
                         <input type="text" id="vac-note" placeholder="VNVC, bệnh viện..." class="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-2xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-rose-300">
                     </div>
-                    <label class="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3">
-                        <span class="text-sm font-semibold text-slate-700">Đã tiêm</span>
-                        <input type="checkbox" id="vac-done" class="w-5 h-5 accent-emerald-500">
-                    </label>
                 </div>
                 <div class="p-4 border-t border-slate-100">
                     <button onclick="saveVaccine()" class="w-full py-3.5 bg-slate-900 text-white font-semibold rounded-2xl">Lưu mũi tiêm</button>
@@ -862,8 +875,7 @@ function openAddVaccineModal() {
     document.getElementById('vac-name').value = '';
     document.getElementById('vac-date').value = new Date().toISOString().slice(0, 10);
     document.getElementById('vac-note').value = '';
-    document.getElementById('vac-done').checked = false;
-    openModal('modal-vaccine');
+        openModal('modal-vaccine');
 }
 
 function openEditVaccine(id) {
@@ -874,8 +886,7 @@ function openEditVaccine(id) {
     document.getElementById('vac-name').value = item.name;
     document.getElementById('vac-date').value = item.date || '';
     document.getElementById('vac-note').value = item.note || '';
-    document.getElementById('vac-done').checked = !!item.done;
-    openModal('modal-vaccine');
+        openModal('modal-vaccine');
 }
 
 function setVacName(name) {
@@ -886,7 +897,6 @@ async function saveVaccine() {
     const name = document.getElementById('vac-name').value.trim();
     const date = document.getElementById('vac-date').value;
     const note = document.getElementById('vac-note').value.trim();
-    const done = document.getElementById('vac-done').checked;
 
     if (!name) {
         showToast('Vui lòng nhập tên vắc-xin', 'ph-fill ph-warning text-amber-300');
@@ -901,11 +911,10 @@ async function saveVaccine() {
             saved.name = name;
             saved.date = date || '';
             saved.note = note || '';
-            saved.done = done;
         }
         editingVaccineId = null;
     } else {
-        saved = { id: 'vac-' + uid(), name, date: date || '', done: false, note: note || '', done };
+        saved = { id: 'vac-' + uid(), name, date: date || '', done: false, note: note || '', done: false };
         vaccines.push(saved);
     }
     vaccines.sort((a, b) => !a.date ? 1 : !b.date ? -1 : new Date(a.date) - new Date(b.date));
@@ -955,6 +964,10 @@ function checkVaccineAlerts() {
 
 function renderVaccines() {
     const listEl = document.getElementById('vaccine-list');
+    const histEl = document.getElementById('vaccine-history');
+    listEl.innerHTML = '';
+    if (histEl) histEl.innerHTML = '';
+
     if (!listEl) return;
     listEl.innerHTML = '';
 
@@ -1014,8 +1027,67 @@ function renderVaccines() {
                 <button onclick="deleteVaccine('${v.id}')" class="px-3 py-2 rounded-xl text-xs font-semibold bg-rose-50 text-rose-600">Xóa</button>
             </div>
         `;
-        listEl.appendChild(card);
+        (v.done && histEl ? histEl : listEl).appendChild(card);
     });
+    if (histEl && !vaccines.some(v => v.done)) histEl.innerHTML = '<p class="text-xs text-slate-400 px-1">Chưa có mũi nào đã tiêm.</p>';
+}
+
+
+let otherMeds = [];
+function openAddMedModal() {
+    document.getElementById('med-name').value = '';
+    document.getElementById('med-dose').value = '';
+    openModal('modal-med');
+}
+async function loadOtherMeds() {
+    const { data, error } = await sb.from('other_meds').select('*').eq('family_id', FAMILY_ID).order('created_at');
+    if (error) {
+        otherMeds = [];
+        renderOtherMeds();
+        return;
+    }
+    const today = todayVN();
+    otherMeds = data || [];
+    for (const m of otherMeds) {
+        if (m.taken && dayVN(m.updated_at) !== today) {
+            m.taken = false;
+            await sb.from('other_meds').update({ taken: false, updated_at: new Date().toISOString() }).eq('id', m.id);
+        }
+    }
+    renderOtherMeds();
+}
+function renderOtherMeds() {
+    const el = document.getElementById('other-meds');
+    if (!el) return;
+    el.innerHTML = otherMeds.map(m => `
+        <div class="glass-card p-4 flex items-center justify-between">
+            <div>
+                <h3 class="font-bold text-slate-900">${m.name}</h3>
+                <p class="text-xs text-slate-400">${m.dose || ''}</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="deleteOtherMed('${m.id}')" class="text-xs text-rose-500 px-2">Xóa</button>
+                <input type="checkbox" ${m.taken ? 'checked' : ''} onchange="toggleOtherMed('${m.id}', this.checked)" class="w-5 h-5 accent-rose-500">
+            </div>
+        </div>`).join('');
+}
+async function saveOtherMed() {
+    const name = document.getElementById('med-name').value.trim();
+    const dose = document.getElementById('med-dose').value.trim();
+    if (!name) return showToast('Nhập tên thuốc', 'ph-fill ph-warning text-amber-300');
+    const row = { id: 'med-' + uid(), family_id: FAMILY_ID, name, dose, taken: false };
+    const { error } = await sb.from('other_meds').insert(row);
+    if (error) return showToast('Chưa có bảng other_meds: ' + error.message, 'ph-fill ph-warning text-red-400');
+    closeModals();
+    await loadOtherMeds();
+}
+async function toggleOtherMed(id, taken) {
+    await sb.from('other_meds').update({ taken, updated_at: new Date().toISOString() }).eq('id', id);
+    await loadOtherMeds();
+}
+async function deleteOtherMed(id) {
+    await sb.from('other_meds').delete().eq('id', id);
+    await loadOtherMeds();
 }
 
 function subscribeRealtime() {
@@ -1023,7 +1095,8 @@ function subscribeRealtime() {
         .on('postgres_changes', { event: '*', schema: 'public', table: 'milk_entries', filter: `family_id=eq.${FAMILY_ID}` }, (payload) => {
             handleMilkChange(payload);
         })
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'vaccines', filter: `family_id=eq.${FAMILY_ID}` }, () => { loadVaccines(); })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'vaccines', filter: `family_id=eq.${FAMILY_ID}` }, () => { loadVaccines();
+        loadOtherMeds(); })
         .on('postgres_changes', { event: '*', schema: 'public', table: 'meds', filter: `family_id=eq.${FAMILY_ID}` }, (payload) => {
             if (payload.new) {
                 document.getElementById('toggle-yellow').checked = !!payload.new.yellow;
@@ -1614,6 +1687,7 @@ async function init() {
     try {
         await Promise.all([loadMilks(), loadMeds(), loadSchedule()]);
         loadVaccines();
+        loadOtherMeds();
         subscribeRealtime();
         setSyncStatus(true, 'Đồng bộ realtime');
     } catch (e) {
