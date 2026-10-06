@@ -290,8 +290,9 @@
                 </div>
 
                 <!-- Right Action: Nút chuông rút gọn -->
-                <button type="button" onclick="onBellClick()" class="w-11 h-11 rounded-2xl bg-white/90 hover:bg-white text-rose-500 flex items-center justify-center border border-white shadow-sm transition-transform active:scale-90" title="Nhắc nhở">
-                    <i class="ph-fill ph-bell text-2xl"></i>
+                <button type="button" onclick="onBellClick()" class="relative w-12 h-12 rounded-2xl bg-white/90 hover:bg-white text-rose-500 flex items-center justify-center border border-white shadow-sm transition-transform active:scale-90" title="Nhắc nhở">
+                    <i class="ph-fill ph-bell text-[28px]"></i>
+                    <span id="bell-count" class="hidden absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-extrabold leading-[18px] text-center">0</span>
                 </button>
             </div>
         </header>
@@ -2022,6 +2023,11 @@ async function loadBellReminders() {
     const { data, error } = await sb.from('reminders').select('*').eq('family_id', FAMILY_ID).eq('done', false).order('remind_at');
     if (error) return;
     bellReminders = data || [];
+    const badge = document.getElementById('bell-count');
+    if (badge) {
+        badge.textContent = String(bellReminders.length);
+        badge.classList.toggle('hidden', bellReminders.length === 0);
+    }
     const el = document.getElementById('bell-list');
     if (!el) return;
     el.innerHTML = bellReminders.map(r => `<div class="flex items-center justify-between gap-2 bg-slate-50 rounded-xl px-3 py-2"><div><p class="font-semibold text-slate-800">${r.note}</p><p class="text-xs text-slate-400">${new Date(r.remind_at).toLocaleString('vi-VN')}</p></div><button onclick="deleteBellReminder('${r.id}')" class="text-xs font-bold text-rose-500">Xóa</button></div>`).join('') || '<p class="text-xs text-slate-400">Chưa có nhắc riêng.</p>';
