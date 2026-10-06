@@ -956,15 +956,24 @@ function openAddVaccineModal() {
         openModal('modal-vaccine');
 }
 
+function setVacFieldsLocked(locked) {
+    ['vac-name', 'vac-date', 'vac-note'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = locked;
+    });
+    document.querySelectorAll('#modal-vaccine button[onclick^="setVacName"]').forEach(btn => btn.disabled = locked);
+}
 function openHistoryVaccine(id) {
     openEditVaccine(id);
     document.querySelector('#modal-vaccine h3').textContent = 'Mũi đã tiêm';
     const save = document.querySelector('#modal-vaccine button[onclick="saveVaccine()"]');
     if (save) save.classList.add('hidden');
+    setVacFieldsLocked(true);
 }
 function openEditVaccine(id) {
     const save = document.querySelector('#modal-vaccine button[onclick="saveVaccine()"]');
     if (save) save.classList.remove('hidden');
+    setVacFieldsLocked(false);
 
     const item = vaccines.find(v => v.id === id);
     if (!item) return;
