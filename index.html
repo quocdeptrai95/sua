@@ -329,8 +329,17 @@
         .shell { padding-top: max(62px, calc(env(safe-area-inset-top, 0px) + 18px)) !important; }
         .med-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .med-col h2, .milk-col h2 { grid-column: 1 / -1; margin: 0 0 2px 2px; }
-        .med-card { padding: 12px !important; }
-        .milk-card { padding: 16px !important; }
+        .med-card { padding: 12px !important; min-width: 0; }
+        .milk-card { padding: 16px !important; min-width: 0; position: relative; z-index: 1; }
+        main { display: flex !important; flex-direction: column; gap: 18px; }
+        #milk-list { display: flex !important; flex-direction: column; gap: 12px; }
+        .milk-card .font-extrabold { font-size: 1.7rem !important; line-height: 1; }
+        @media (min-width: 900px) {
+            main { display: grid !important; grid-template-columns: 280px 1fr; align-items: start; }
+            .med-col { order: 0; }
+            .milk-col { order: 0; }
+            #milk-list { display: grid !important; grid-template-columns: 1fr 1fr; }
+        }
         .glass-panel, .med-card, .milk-card {
             background: #fff !important;
             border: 1px solid #f3e4e8 !important;
@@ -348,11 +357,7 @@
         #milk-list { grid-template-columns: 1fr !important; }
         @media (min-width: 800px) { #milk-list { grid-template-columns: 1fr 1fr !important; } }
         .fab-btn, button.w-16 { width: 56px !important; height: 56px !important; border-radius: 18px !important; box-shadow: none !important; }
-        @media (max-width: 1023px) {
-            main { display: flex !important; flex-direction: column; }
-            .milk-col { order: 1; }
-            .med-col { order: 2; }
-        }
+
     </style>
 </head>
 <body class="selection:bg-pink-500 selection:text-white">
