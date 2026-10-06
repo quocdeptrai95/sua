@@ -568,7 +568,10 @@
                 <div class="p-5 space-y-3">
                     <input id="bell-note" placeholder="Nhắc gì cho Pép Pi?" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3">
                     <label class="block text-xs font-bold text-slate-500">Thời gian</label>
-                    <input id="bell-time" type="datetime-local" class="w-full min-h-[52px] bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-base">
+                    <button type="button" onclick="document.getElementById('bell-time-wrap').classList.remove('hidden')" class="text-sm font-semibold text-rose-600">Thêm giờ</button>
+                    <div id="bell-time-wrap" class="hidden">
+                        <input id="bell-time" type="datetime-local" class="w-full min-h-[52px] bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-base">
+                    </div>
                     <button onclick="saveBellReminder()" class="w-full py-3.5 bg-slate-900 text-white rounded-2xl font-semibold">Lưu nhắc</button>
                     <div id="bell-list" class="space-y-2 text-sm max-h-40 overflow-y-auto"></div>
                 </div>
@@ -2042,13 +2045,15 @@ async function loadBellReminders() {
     }
     const el = document.getElementById('bell-list');
     if (!el) return;
-    el.innerHTML = bellReminders.map(r => `<div class="flex items-center justify-between gap-2 bg-slate-50 rounded-xl px-3 py-2"><div><p class="font-semibold text-slate-800">${r.note}</p><p class="text-xs font-semibold text-rose-500">${new Date(r.remind_at).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' })}</p></div><button onclick="deleteBellReminder('${r.id}')" class="text-xs font-bold text-rose-500">Xóa</button></div>`).join('') || '<p class="text-xs text-slate-400">Chưa có nhắc riêng.</p>';
+    el.innerHTML = bellReminders.map(r => `<div class="flex items-center justify-between gap-2 bg-slate-50 rounded-xl px-3 py-2"><div><p class="font-semibold text-slate-800">${r.note}</p><p class="text-xs font-semibold text-rose-500">${r.remind_at ? new Date(r.remind_at).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' }) : 'Không kèm giờ'}</p></div><button onclick="deleteBellReminder('${r.id}')" class="text-xs font-bold text-rose-500">Xóa</button></div>`).join('') || '<p class="text-xs text-slate-400">Chưa có nhắc riêng.</p>';
 }
 async function saveBellReminder() {
     const note = document.getElementById('bell-note').value.trim();
     const raw = document.getElementById('bell-time').value;
-    if (!note || !raw) return showToast('Nhập nội dung và thời gian', 'ph-fill ph-warning text-amber-300');
-    const { error } = await sb.from('reminders').insert({ family_id: FAMILY_ID, note, remind_at: new Date(raw).toISOString(), done: false });
+    if (!note) return showToast('Nhập nội dung nhắc', 'ph-fill ph-warning text-amber-300');
+    const row = { family_id: FAMILY_ID, note, done: false };
+    if (raw) row.remind_at = new Date(raw).toISOString();
+    const { error } = await sb.from('reminders').insert(row);
     if (error) return showToast('Chưa có bảng nhắc. Chạy SQL reminders trước.', 'ph-fill ph-warning text-amber-300');
     document.getElementById('bell-note').value = '';
     document.getElementById('bell-time').value = '';
@@ -2063,6 +2068,7 @@ function checkBellReminders() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     bellReminders.forEach(r => {
+        if (!r.remind_at) return;
         const due = new Date(r.remind_at);
         due.setHours(0, 0, 0, 0);
         const diff = Math.round((due - today) / 86400000);
@@ -2070,8 +2076,8 @@ function checkBellReminders() {
         const key = 'bell-' + r.id + '-' + diff;
         if (localStorage.getItem(key)) return;
         localStorage.setItem(key, '1');
-        const when = new Date(r.remind_at).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
-        const msg = (diff === 0 ? 'Hôm nay ' : 'Còn ' + diff + ' ngày, ') + when + ': ' + r.note;
+        const hm = new Date(r.remind_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+        const msg = hm && hm !== '00:00' ? r.note + ' vào lúc ' + hm + ' nhé' : r.note;
         showToast(msg, 'ph-fill ph-bell text-rose-400', true);
         if (diff === 0) sb.from('reminders').update({ done: true }).eq('id', r.id);
     });
