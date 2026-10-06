@@ -1104,26 +1104,24 @@ async function deleteOtherMed(id) {
 }
 
 function subscribeRealtime() {
+    const mine = (payload) => {
+        const row = payload.new && payload.new.family_id ? payload.new : payload.old;
+        return !row || !row.family_id || row.family_id === FAMILY_ID;
+    };
     sb.channel('family-sync')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'milk_entries', filter: `family_id=eq.${FAMILY_ID}` }, (payload) => {
-            handleMilkChange(payload);
-        })
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'vaccines', filter: `family_id=eq.${FAMILY_ID}` }, () => { loadVaccines(); })
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'other_meds', filter: `family_id=eq.${FAMILY_ID}` }, () => { loadOtherMeds(); })
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'meds', filter: `family_id=eq.${FAMILY_ID}` }, (payload) => {
-            if (payload.new) {
-                document.getElementById('toggle-yellow').checked = !!payload.new.yellow;
-                document.getElementById('toggle-red').checked = !!payload.new.red;
-                updateMedUI('yellow', !!payload.new.yellow);
-                updateMedUI('red', !!payload.new.red);
-            }
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'milk_entries' }, (payload) => { if (mine(payload)) handleMilkChange(payload); })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'vaccines' }, (payload) => { if (mine(payload)) loadVaccines(); })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'other_meds' }, (payload) => { if (mine(payload)) loadOtherMeds(); })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'meds' }, (payload) => {
+            if (!mine(payload) || !payload.new) return;
+            document.getElementById('toggle-yellow').checked = !!payload.new.yellow;
+            document.getElementById('toggle-red').checked = !!payload.new.red;
+            updateMedUI('yellow', !!payload.new.yellow);
+            updateMedUI('red', !!payload.new.red);
         })
         .subscribe((status) => {
-            if (status === 'SUBSCRIBED') {
-                setSyncStatus(true, 'Đồng bộ realtime');
-            } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-                setSyncStatus(false, 'Mất realtime');
-            }
+            if (status === 'SUBSCRIBED') setSyncStatus(true, 'Đồng bộ realtime');
+            else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') setSyncStatus(false, 'Mất realtime');
         });
 }
 
