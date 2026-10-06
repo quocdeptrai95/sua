@@ -324,11 +324,32 @@
             .vol-chip:hover { transform: translateY(-1px); border-color: #fda4af; background: #fff1f2; }
             #action-list button:hover, #status-grid button:hover, .modal-content button:hover { transform: translateY(-1px); background: #fff7f8; }
         }
+        .shell { padding-top: max(59px, calc(env(safe-area-inset-top, 0px) + 16px)); }
+        body { background: #f6f3f1 !important; color: #1c1917 !important; }
+        .glass-panel, .med-card, .milk-card {
+            background: #fff !important;
+            border: 1px solid #efe8e4 !important;
+            box-shadow: none !important;
+            backdrop-filter: none !important;
+            border-radius: 20px !important;
+        }
+        header .glass-panel { background: transparent !important; border: none !important; padding: 0 !important; box-shadow: none !important; }
+        .med-bottle { animation: none !important; width: 36px !important; height: 36px !important; border-radius: 12px !important; }
+        h1 { font-size: 1.25rem !important; letter-spacing: -0.03em; }
+        main h2 { letter-spacing: .14em; color: #a8a29e !important; }
+        #milk-list { grid-template-columns: 1fr !important; }
+        @media (min-width: 800px) { #milk-list { grid-template-columns: 1fr 1fr !important; } }
+        .fab-btn, button.w-16 { width: 56px !important; height: 56px !important; border-radius: 18px !important; box-shadow: none !important; }
+        @media (max-width: 1023px) {
+            main { display: flex !important; flex-direction: column; }
+            .milk-col { order: 1; }
+            .med-col { order: 2; }
+        }
     </style>
 </head>
 <body class="selection:bg-pink-500 selection:text-white">
     <div id="ios-push-hint" class="hidden fixed bottom-24 left-3 right-3 z-40 bg-white border border-rose-100 text-slate-700 text-xs font-semibold rounded-2xl px-4 py-3 shadow-lg">iPhone không nhận push trong tab Safari. Bấm Chia sẻ, Thêm vào Màn hình chính, bật Mở dưới dạng ứng dụng web, rồi mở từ icon đó và bấm Cho phép.</div>
-    <div class="relative z-10 flex flex-col h-[100dvh] w-full max-w-6xl mx-auto overflow-hidden px-3 sm:px-6 pb-3 sm:pb-6 gap-4" style="padding-top: calc(env(safe-area-inset-top, 0px) + 12px)">
+    <div class="shell relative z-10 flex flex-col h-[100dvh] w-full max-w-3xl mx-auto overflow-hidden px-4 pb-4 gap-5">
 
         <!-- Header -->
         <header class="flex-shrink-0">
@@ -388,7 +409,7 @@
             </div>
 
             <!-- Cột Phải: Tủ sữa -->
-            <div class="lg:col-span-2 space-y-4">
+            <div class="milk-col lg:col-span-2 space-y-4">
                 <h2 class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-3 flex items-center gap-2">
                     <i class="ph-fill ph-drop text-blue-500 text-base"></i> Tủ sữa
                 </h2>
