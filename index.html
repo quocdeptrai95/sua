@@ -309,7 +309,7 @@
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5" id="med-grid">
                     <!-- Chai Vàng -->
-                    <div id="card-yellow" ondblclick="openEditBuiltin('yellow')" class="glass-card p-4 sm:p-5 flex items-center justify-between">
+                    <div id="card-yellow" onclick="openEditBuiltin('yellow')" class="glass-card p-4 sm:p-5 flex items-center justify-between">
                         <div class="flex items-center gap-3.5">
                             <div id="bottle-yellow" class="med-icon-3d med-yellow">
                                 <i class="ph-fill ph-flask text-2xl"></i>
@@ -320,11 +320,11 @@
                                 <p id="status-yellow" class="text-xs font-extrabold text-slate-400 mt-0.5">Chưa cho uống</p>
                             </div>
                         </div>
-                        <input type="checkbox" id="toggle-yellow" class="ios-switch switch-yellow" onchange="toggleMed('yellow')">
+                        <input type="checkbox" id="toggle-yellow" class="ios-switch switch-yellow" onclick="event.stopPropagation()" onchange="toggleMed('yellow')">
                     </div>
 
                     <!-- Chai Đỏ -->
-                    <div id="card-red" ondblclick="openEditBuiltin('red')" class="glass-card p-4 sm:p-5 flex items-center justify-between">
+                    <div id="card-red" onclick="openEditBuiltin('red')" class="glass-card p-4 sm:p-5 flex items-center justify-between">
                         <div class="flex items-center gap-3.5">
                             <div id="bottle-red" class="med-icon-3d med-red">
                                 <i class="ph-fill ph-flask text-2xl"></i>
@@ -335,7 +335,7 @@
                                 <p id="status-red" class="text-xs font-extrabold text-slate-400 mt-0.5">Chưa cho uống</p>
                             </div>
                         </div>
-                        <input type="checkbox" id="toggle-red" class="ios-switch switch-red" onchange="toggleMed('red')">
+                        <input type="checkbox" id="toggle-red" class="ios-switch switch-red" onclick="event.stopPropagation()" onchange="toggleMed('red')">
                     </div>
                     <div id="other-meds" class="contents"></div>
                 </div>
@@ -1024,7 +1024,7 @@ function renderVaccines() {
 
         const card = document.createElement('div');
         card.className = 'glass-card p-4';
-        card.ondblclick = () => openEditVaccine(v.id);
+        card.onclick = () => openEditVaccine(v.id);
         card.innerHTML = `
             <div class="flex items-center justify-between gap-3">
                 <div class="flex items-center gap-3.5 min-w-0">
@@ -1040,7 +1040,7 @@ function renderVaccines() {
                 ${statusBadge}
             </div>
             <div class="flex gap-2 mt-3">
-                <button onclick="toggleVaccineDone('${v.id}')" class="flex-1 py-2.5 rounded-xl text-xs font-extrabold ${v.done ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-50 text-slate-600'}">${v.done ? 'Bỏ đánh dấu' : 'Đã tiêm'}</button>
+                <button onclick="event.stopPropagation(); toggleVaccineDone('${v.id}')" class="flex-1 py-2.5 rounded-xl text-xs font-extrabold ${v.done ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-50 text-slate-600'}">${v.done ? 'Bỏ đánh dấu' : 'Đã tiêm'}</button>
             </div>
         `;
         (v.done && histEl ? histEl : listEl).appendChild(card);
@@ -1123,7 +1123,7 @@ function renderOtherMeds() {
     const el = document.getElementById('other-meds');
     if (!el) return;
     el.innerHTML = otherMeds.map(m => `
-        <div class="glass-card p-4 sm:p-5 flex items-center justify-between" ondblclick="openEditOtherMed('${m.id}')">
+        <div class="glass-card p-4 sm:p-5 flex items-center justify-between" onclick="openEditOtherMed('${m.id}')">
             <div class="flex items-center gap-3.5">
                 <div class="med-icon-3d med-yellow">
                     <i class="ph-fill ph-flask text-2xl"></i>
@@ -1134,7 +1134,7 @@ function renderOtherMeds() {
                     <p class="text-xs font-extrabold ${m.taken ? 'text-emerald-600' : 'text-slate-400'} mt-0.5">${m.taken ? 'Đã cho uống' : 'Chưa cho uống'}</p>
                 </div>
             </div>
-            <input type="checkbox" class="ios-switch switch-yellow" ${m.taken ? 'checked' : ''} onchange="toggleOtherMed('${m.id}', this.checked)">
+            <input type="checkbox" class="ios-switch switch-yellow" ${m.taken ? 'checked' : ''} onclick="event.stopPropagation()" onchange="toggleOtherMed('${m.id}', this.checked)">
         </div>`).join('');
 }
 async function saveOtherMed() {
