@@ -337,9 +337,12 @@
                     <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-pink-500 to-rose-400 flex items-center justify-center text-white shadow-lg shadow-pink-500/30 border border-white/50">
                         <i class="ph-fill ph-baby text-2xl"></i>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <h1 class="text-xl font-extrabold text-slate-800 tracking-tight">Sổ sữa của bé</h1>
-                        <div id="sync-dot" class="sync-dot" title="Trạng thái kết nối"></div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h1 class="text-xl font-extrabold text-slate-800 tracking-tight">Sổ sữa của bé</h1>
+                            <div id="sync-dot" class="sync-dot" title="Trạng thái kết nối"></div>
+                        </div>
+                        <button type="button" onclick="testLocalNotif()" class="text-[11px] font-bold text-rose-600">Thử chuông máy</button>
                     </div>
                 </div>
                 
@@ -1368,6 +1371,21 @@ async function subscribePushSilent() {
     } catch (e) {
         console.warn('subscribePushSilent', e);
         return null;
+    }
+}
+
+async function testLocalNotif() {
+    const perm = await Notification.requestPermission();
+    if (perm !== 'granted') {
+        showToast('Máy đang chặn thông báo: ' + perm, 'ph-fill ph-bell-slash text-slate-400');
+        return;
+    }
+    try {
+        const reg = await navigator.serviceWorker.ready;
+        await reg.showNotification('Thử chuông máy', { body: 'Nếu thấy dòng này thì máy cho phép thông báo.', tag: 'local-test' });
+        showToast('Đã gọi chuông trên máy này', 'ph-fill ph-bell text-green-400');
+    } catch (e) {
+        showToast('Chuông máy lỗi: ' + (e && e.message ? e.message : e), 'ph-fill ph-warning text-amber-300');
     }
 }
 
