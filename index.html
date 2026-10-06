@@ -2042,15 +2042,19 @@ async function deleteBellReminder(id) {
     await loadBellReminders();
 }
 function checkBellReminders() {
-    const now = Date.now();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     bellReminders.forEach(r => {
-        const due = new Date(r.remind_at).getTime();
-        if (now < due || now - due > 60 * 60 * 1000) return;
-        const key = 'bell-' + r.id;
+        const due = new Date(r.remind_at);
+        due.setHours(0, 0, 0, 0);
+        const diff = Math.round((due - today) / 86400000);
+        if (diff < 0 || diff > 3) return;
+        const key = 'bell-' + r.id + '-' + diff;
         if (localStorage.getItem(key)) return;
         localStorage.setItem(key, '1');
-        showToast(r.note, 'ph-fill ph-bell text-rose-400', true);
-        sb.from('reminders').update({ done: true }).eq('id', r.id);
+        const msg = diff === 0 ? 'Hôm nay: ' + r.note : 'Còn ' + diff + ' ngày: ' + r.note;
+        showToast(msg, 'ph-fill ph-bell text-rose-400', true);
+        if (diff === 0) sb.from('reminders').update({ done: true }).eq('id', r.id);
     });
 }
 
