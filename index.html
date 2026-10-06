@@ -1108,8 +1108,8 @@ function subscribeRealtime() {
         .on('postgres_changes', { event: '*', schema: 'public', table: 'milk_entries', filter: `family_id=eq.${FAMILY_ID}` }, (payload) => {
             handleMilkChange(payload);
         })
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'vaccines', filter: `family_id=eq.${FAMILY_ID}` }, () => { loadVaccines();
-        loadOtherMeds(); })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'vaccines', filter: `family_id=eq.${FAMILY_ID}` }, () => { loadVaccines(); })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'other_meds', filter: `family_id=eq.${FAMILY_ID}` }, () => { loadOtherMeds(); })
         .on('postgres_changes', { event: '*', schema: 'public', table: 'meds', filter: `family_id=eq.${FAMILY_ID}` }, (payload) => {
             if (payload.new) {
                 document.getElementById('toggle-yellow').checked = !!payload.new.yellow;
