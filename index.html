@@ -2065,9 +2065,9 @@ function checkBellReminders() {
 }
 
 async function onBellClick() {
-    if (localStorage.getItem('bell-activated') !== '1') {
+    const perm = ('Notification' in window) ? Notification.permission : 'denied';
+    if (perm !== 'granted') {
         await testLocalNotif();
-        if (Notification.permission === 'granted') localStorage.setItem('bell-activated', '1');
         return;
     }
     openModal('modal-bell');
