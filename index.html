@@ -1708,7 +1708,7 @@ function checkMedDue() {
         const key = 'med-due-' + m.id + '-' + m.remind_at;
         if (localStorage.getItem(key)) return;
         localStorage.setItem(key, '1');
-        showToast('Đến giờ uống ' + m.name + '. Mẹ cho Pép Pi uống nhé.', 'ph-fill ph-pill text-rose-400', true);
+        showToast('Ting ting, đến giờ thuốc ' + m.name + '. Mẹ cho Pép Pi uống nhé.', 'ph-fill ph-pill text-rose-400', true);
     });
 }
 
@@ -1737,7 +1737,7 @@ async function checkNoonMeds() {
     const any = (yellow && yellow.checked) || (red && red.checked) || otherMeds.some(m => m.taken && m.dose !== '__hidden');
     if (any) return;
     localStorage.setItem(key, '1');
-    showToast('Đã qua 12 giờ mà chưa gạt thuốc nào. Mẹ kiểm tra Pép Pi đã uống chưa nhé.', 'ph-fill ph-warning text-amber-300', true);
+    showToast('Ơ kìa, trưa rồi mà thuốc của Pép Pi vẫn nằm im. Mẹ cho bé uống một cái cho xong chuyện nha!', 'ph-fill ph-warning text-amber-300', true);
 }
 
 function tick() {
