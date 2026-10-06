@@ -430,7 +430,7 @@
                 <div class="overflow-y-auto p-5 space-y-4">
                     <div>
                         <label class="block text-xs font-extrabold text-slate-500 uppercase mb-2">Chọn mũi trong lịch</label>
-                        <input id="vac-search" type="search" placeholder="Tìm tên mũi..." oninput="renderVacPicks()" class="w-full mb-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300">
+                        <input id="vac-search" type="search" placeholder="Tìm tên hoặc bệnh, ví dụ thủy đậu" oninput="renderVacPicks()" class="w-full mb-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300">
                         <div id="vac-picks" class="max-h-40 overflow-y-auto grid grid-cols-1 gap-1.5 pr-1"></div>
                         <p id="vac-info" class="hidden text-xs text-slate-500 bg-purple-50 rounded-xl px-3 py-2 leading-relaxed"></p>
                     </div>
@@ -1059,7 +1059,10 @@ function renderVacPicks() {
     const el = document.getElementById('vac-picks');
     if (!el) return;
     const q = (document.getElementById('vac-search')?.value || '').trim().toLowerCase();
-    const list = VAC_PICKS.filter(name => name.toLowerCase().includes(q));
+    const list = VAC_PICKS.filter(name => {
+        const info = (VAC_INFO[name] || '').toLowerCase();
+        return name.toLowerCase().includes(q) || info.includes(q);
+    });
     el.innerHTML = list.length
         ? list.map(name => `<button type="button" onclick="setVacName('${name}')" class="text-left px-3 py-2 rounded-xl bg-purple-50 text-purple-800 text-sm font-semibold border border-purple-100">${name}</button>`).join('')
         : '<p class="text-xs text-slate-400 px-1">Không thấy tên này. Gõ thẳng ở ô bên dưới cũng được.</p>';
