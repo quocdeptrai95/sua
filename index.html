@@ -429,13 +429,8 @@
                 </div>
                 <div class="overflow-y-auto p-5 space-y-4">
                     <div>
-                        <label class="block text-xs font-extrabold text-slate-500 uppercase mb-2">Mũi thường gặp</label>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button type="button" onclick="setVacName('6 trong 1')" class="py-3 rounded-2xl bg-purple-50 text-purple-700 text-sm font-bold border border-purple-100">6 trong 1</button>
-                            <button type="button" onclick="setVacName('Phế cầu')" class="py-3 rounded-2xl bg-purple-50 text-purple-700 text-sm font-bold border border-purple-100">Phế cầu</button>
-                            <button type="button" onclick="setVacName('Rota')" class="py-3 rounded-2xl bg-purple-50 text-purple-700 text-sm font-bold border border-purple-100">Rota</button>
-                            <button type="button" onclick="setVacName('Sởi - MMR')" class="py-3 rounded-2xl bg-purple-50 text-purple-700 text-sm font-bold border border-purple-100">Sởi MMR</button>
-                        </div>
+                        <label class="block text-xs font-extrabold text-slate-500 uppercase mb-2">Chọn mũi trong lịch</label>
+                        <div id="vac-picks" class="max-h-40 overflow-y-auto grid grid-cols-1 gap-1.5 pr-1"></div>
                     </div>
                     <div>
                         <label class="block text-xs font-extrabold text-slate-500 uppercase mb-2">Tên mũi tiêm</label>
@@ -951,6 +946,7 @@ function openAddVaccineModal() {
     document.getElementById('vac-delete').classList.add('hidden');
     document.querySelector('#modal-vaccine h3').textContent = 'Lên lịch tiêm chủng';
     document.getElementById('vac-name').value = '';
+    renderVacPicks();
     document.getElementById('vac-date').value = new Date().toISOString().slice(0, 10);
     document.getElementById('vac-note').value = '';
         openModal('modal-vaccine');
@@ -984,6 +980,38 @@ function openEditVaccine(id) {
     document.getElementById('vac-date').value = item.date || '';
     document.getElementById('vac-note').value = item.note || '';
         openModal('modal-vaccine');
+}
+
+
+const VAC_PICKS = [
+    'Lao (BCG)',
+    'Viêm gan B sơ sinh',
+    'Bại liệt uống (OPV)',
+    'Bại liệt tiêm (IPV)',
+    'Bạch hầu - Ho gà - Uốn ván',
+    '5 trong 1',
+    '6 trong 1',
+    'Hib',
+    'Tiêu chảy do Rota',
+    'Phế cầu',
+    'Sởi',
+    'Sởi - Quai bị - Rubella (MMR)',
+    'Viêm não Nhật Bản',
+    'Thương hàn',
+    'Tả',
+    'Viêm gan A',
+    'Viêm gan B nhắc lại',
+    'Não mô cầu',
+    'Thủy đậu',
+    'Cúm',
+    'Uốn ván',
+    'HPV',
+    'Dại'
+];
+function renderVacPicks() {
+    const el = document.getElementById('vac-picks');
+    if (!el) return;
+    el.innerHTML = VAC_PICKS.map(name => `<button type="button" onclick="setVacName('${name}')" class="text-left px-3 py-2 rounded-xl bg-purple-50 text-purple-800 text-sm font-semibold border border-purple-100">${name}</button>`).join('');
 }
 
 function setVacName(name) {
