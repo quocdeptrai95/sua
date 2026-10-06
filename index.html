@@ -309,7 +309,7 @@
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5" id="med-grid">
                     <!-- Chai Vàng -->
-                    <div id="card-yellow" class="glass-card p-4 sm:p-5 flex items-center justify-between">
+                    <div id="card-yellow" ondblclick="openEditBuiltin('yellow')" class="glass-card p-4 sm:p-5 flex items-center justify-between">
                         <div class="flex items-center gap-3.5">
                             <div id="bottle-yellow" class="med-icon-3d med-yellow">
                                 <i class="ph-fill ph-flask text-2xl"></i>
@@ -318,17 +318,13 @@
                                 <h3 class="font-extrabold text-base text-slate-900 tracking-tight">Chai Vàng</h3>
                                 <p class="text-sm font-bold text-amber-700">Uống 5 giọt</p>
                                 <p id="status-yellow" class="text-xs font-extrabold text-slate-400 mt-0.5">Chưa cho uống</p>
-                                <div class="flex gap-2 mt-1">
-                                    <button type="button" onclick="openEditBuiltin('yellow')" class="text-[11px] font-bold text-slate-500">Sửa</button>
-                                    <button type="button" onclick="hideBuiltin('yellow')" class="text-[11px] font-bold text-rose-500">Xóa</button>
-                                </div>
                             </div>
                         </div>
                         <input type="checkbox" id="toggle-yellow" class="ios-switch switch-yellow" onchange="toggleMed('yellow')">
                     </div>
 
                     <!-- Chai Đỏ -->
-                    <div id="card-red" class="glass-card p-4 sm:p-5 flex items-center justify-between">
+                    <div id="card-red" ondblclick="openEditBuiltin('red')" class="glass-card p-4 sm:p-5 flex items-center justify-between">
                         <div class="flex items-center gap-3.5">
                             <div id="bottle-red" class="med-icon-3d med-red">
                                 <i class="ph-fill ph-flask text-2xl"></i>
@@ -337,10 +333,6 @@
                                 <h3 class="font-extrabold text-base text-slate-900 tracking-tight">Chai Đỏ</h3>
                                 <p class="text-sm font-bold text-rose-700">Uống 3 giọt</p>
                                 <p id="status-red" class="text-xs font-extrabold text-slate-400 mt-0.5">Chưa cho uống</p>
-                                <div class="flex gap-2 mt-1">
-                                    <button type="button" onclick="openEditBuiltin('red')" class="text-[11px] font-bold text-slate-500">Sửa</button>
-                                    <button type="button" onclick="hideBuiltin('red')" class="text-[11px] font-bold text-rose-500">Xóa</button>
-                                </div>
                             </div>
                         </div>
                         <input type="checkbox" id="toggle-red" class="ios-switch switch-red" onchange="toggleMed('red')">
@@ -416,6 +408,7 @@
                     <input id="med-name" placeholder="Tên thuốc" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3">
                     <input id="med-dose" placeholder="Liều, ví dụ 2 giọt" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3">
                     <button onclick="saveOtherMed()" class="w-full py-3.5 bg-slate-900 text-white rounded-2xl font-semibold">Lưu thuốc</button>
+                    <button id="med-delete" onclick="deleteEditingMed()" class="hidden w-full py-3 text-rose-600 font-semibold">Xóa thuốc</button>
                 </div>
             </div>
         </div>
@@ -1055,6 +1048,7 @@ function openAddMedModal() {
     document.querySelector('#modal-med h3').textContent = 'Thêm thuốc';
     document.getElementById('med-name').value = '';
     document.getElementById('med-dose').value = '';
+    document.getElementById('med-delete').classList.add('hidden');
     openModal('modal-med');
 }
 function openEditOtherMed(id) {
@@ -1064,6 +1058,7 @@ function openEditOtherMed(id) {
     document.querySelector('#modal-med h3').textContent = 'Sửa thuốc';
     document.getElementById('med-name').value = m.name;
     document.getElementById('med-dose').value = m.dose || '';
+    document.getElementById('med-delete').classList.remove('hidden');
     openModal('modal-med');
 }
 function openEditBuiltin(color) {
@@ -1073,11 +1068,19 @@ function openEditBuiltin(color) {
     document.querySelector('#modal-med h3').textContent = 'Sửa thuốc';
     document.getElementById('med-name').value = title;
     document.getElementById('med-dose').value = dose;
+    document.getElementById('med-delete').classList.remove('hidden');
     openModal('modal-med');
 }
 async function hideBuiltin(color) {
     document.getElementById('card-' + color).classList.add('hidden');
     await sb.from('other_meds').upsert({ id: 'builtin-' + color, family_id: FAMILY_ID, name: '', dose: '__hidden', taken: false }, { onConflict: 'id' });
+}
+async function deleteEditingMed() {
+    if (!editingMedId) return;
+    if (editingMedId.startsWith('builtin-')) await hideBuiltin(editingMedId.slice(8));
+    else await deleteOtherMed(editingMedId);
+    editingMedId = null;
+    closeModals();
 }
 async function loadOtherMeds() {
     const { data, error } = await sb.from('other_meds').select('*').eq('family_id', FAMILY_ID).order('created_at');
@@ -1112,7 +1115,7 @@ function renderOtherMeds() {
     const el = document.getElementById('other-meds');
     if (!el) return;
     el.innerHTML = otherMeds.map(m => `
-        <div class="glass-card p-4 sm:p-5 flex items-center justify-between">
+        <div class="glass-card p-4 sm:p-5 flex items-center justify-between" ondblclick="openEditOtherMed('${m.id}')">
             <div class="flex items-center gap-3.5">
                 <div class="med-icon-3d med-yellow">
                     <i class="ph-fill ph-flask text-2xl"></i>
@@ -1123,13 +1126,7 @@ function renderOtherMeds() {
                     <p class="text-xs font-extrabold ${m.taken ? 'text-emerald-600' : 'text-slate-400'} mt-0.5">${m.taken ? 'Đã cho uống' : 'Chưa cho uống'}</p>
                 </div>
             </div>
-            <div class="flex flex-col items-end gap-2">
-                <input type="checkbox" class="ios-switch switch-yellow" ${m.taken ? 'checked' : ''} onchange="toggleOtherMed('${m.id}', this.checked)">
-                <div class="flex gap-2">
-                    <button onclick="openEditOtherMed('${m.id}')" class="text-[11px] font-bold text-slate-500">Sửa</button>
-                    <button onclick="deleteOtherMed('${m.id}')" class="text-[11px] font-bold text-rose-500">Xóa</button>
-                </div>
-            </div>
+            <input type="checkbox" class="ios-switch switch-yellow" ${m.taken ? 'checked' : ''} onchange="toggleOtherMed('${m.id}', this.checked)">
         </div>`).join('');
 }
 async function saveOtherMed() {
