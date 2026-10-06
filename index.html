@@ -306,7 +306,7 @@
                         <i class="ph-fill ph-pill text-rose-500 text-base"></i> Thuốc hôm nay
                     </h2>
                     <div class="flex gap-2">
-                        <button id="btn-no-med" onclick="skipMedsToday()" class="text-xs font-semibold text-slate-500 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200">Hôm nay không uống</button>
+                        <button id="btn-no-med" onclick="skipMedsToday()" class="text-xs font-semibold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200">Hôm nay không uống</button>
                         <button onclick="openAddMedModal()" class="text-xs font-semibold text-rose-700 bg-rose-50 px-3 py-1.5 rounded-full border border-rose-100">Thêm thuốc</button>
                     </div>
                 </div>
@@ -1718,13 +1718,13 @@ async function loadMedSkip() {
     const { data } = await sb.from('other_meds').select('dose').eq('id', 'no-med-today').maybeSingle();
     skipMedToday = !!(data && data.dose === todayVN());
     const btn = document.getElementById('btn-no-med');
-    if (btn) btn.textContent = skipMedToday ? 'Đã tắt nhắc hôm nay' : 'Hôm nay không uống';
+    if (btn) btn.classList.toggle('hidden', skipMedToday);
 }
 async function skipMedsToday() {
-    skipMedToday = !skipMedToday;
-    await sb.from('other_meds').upsert({ id: 'no-med-today', family_id: FAMILY_ID, name: 'Không uống', dose: skipMedToday ? todayVN() : '', taken: false }, { onConflict: 'id' });
+    skipMedToday = true;
+    await sb.from('other_meds').upsert({ id: 'no-med-today', family_id: FAMILY_ID, name: 'Không uống', dose: todayVN(), taken: false }, { onConflict: 'id' });
     await loadMedSkip();
-    showToast(skipMedToday ? 'Hôm nay không nhắc thuốc nữa.' : 'Đã bật lại nhắc thuốc.', 'ph-fill ph-check text-emerald-400');
+    showToast('Hôm nay không nhắc thuốc nữa. Ngày mai nút sẽ hiện lại.', 'ph-fill ph-check text-emerald-400');
 }
 async function checkNoonMeds() {
     const hour = Number(new Date().toLocaleString('en-GB', { timeZone: 'Asia/Ho_Chi_Minh', hour: '2-digit', hour12: false }));
