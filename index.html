@@ -448,6 +448,7 @@
                 </div>
                 <div class="p-4 border-t border-slate-100">
                     <button onclick="saveVaccine()" class="w-full py-4 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-extrabold rounded-2xl">Lưu mũi tiêm</button>
+                    <button id="vac-delete" onclick="deleteEditingVaccine()" class="hidden w-full py-3 text-rose-600 font-semibold">Xóa mũi tiêm</button>
                 </div>
             </div>
         </div>
@@ -873,6 +874,7 @@ let editingVaccineId = null;
 
 function openAddVaccineModal() {
     editingVaccineId = null;
+    document.getElementById('vac-delete').classList.add('hidden');
     document.querySelector('#modal-vaccine h3').textContent = 'Lên lịch tiêm chủng';
     document.getElementById('vac-name').value = '';
     document.getElementById('vac-date').value = new Date().toISOString().slice(0, 10);
@@ -884,6 +886,7 @@ function openEditVaccine(id) {
     const item = vaccines.find(v => v.id === id);
     if (!item) return;
     editingVaccineId = id;
+    document.getElementById('vac-delete').classList.remove('hidden');
     document.querySelector('#modal-vaccine h3').textContent = 'Sửa mũi tiêm';
     document.getElementById('vac-name').value = item.name;
     document.getElementById('vac-date').value = item.date || '';
@@ -938,6 +941,12 @@ async function toggleVaccineDone(id) {
     }
 }
 
+async function deleteEditingVaccine() {
+    if (!editingVaccineId) return;
+    await deleteVaccine(editingVaccineId);
+    editingVaccineId = null;
+    closeModals();
+}
 async function deleteVaccine(id) {
     vaccines = vaccines.filter(v => v.id !== id);
     const { error } = await sb.from('vaccines').delete().eq('id', id).eq('family_id', FAMILY_ID);
@@ -1015,6 +1024,7 @@ function renderVaccines() {
 
         const card = document.createElement('div');
         card.className = 'glass-card p-4';
+        card.ondblclick = () => openEditVaccine(v.id);
         card.innerHTML = `
             <div class="flex items-center justify-between gap-3">
                 <div class="flex items-center gap-3.5 min-w-0">
@@ -1031,8 +1041,6 @@ function renderVaccines() {
             </div>
             <div class="flex gap-2 mt-3">
                 <button onclick="toggleVaccineDone('${v.id}')" class="flex-1 py-2.5 rounded-xl text-xs font-extrabold ${v.done ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-50 text-slate-600'}">${v.done ? 'Bỏ đánh dấu' : 'Đã tiêm'}</button>
-                <button onclick="openEditVaccine('${v.id}')" class="px-3 py-2.5 rounded-xl text-xs font-extrabold bg-slate-50 text-slate-600">Sửa</button>
-                <button onclick="deleteVaccine('${v.id}')" class="px-3 py-2.5 rounded-xl text-xs font-extrabold bg-rose-50 text-rose-600">Xóa</button>
             </div>
         `;
         (v.done && histEl ? histEl : listEl).appendChild(card);
