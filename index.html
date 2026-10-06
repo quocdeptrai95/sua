@@ -2065,13 +2065,10 @@ function checkBellReminders() {
 }
 
 async function onBellClick() {
-    const perm = ('Notification' in window) ? Notification.permission : 'denied';
-    if (perm !== 'granted') {
-        await testLocalNotif();
-        return;
-    }
     openModal('modal-bell');
     loadBellReminders();
+    const perm = ('Notification' in window) ? Notification.permission : 'denied';
+    if (perm !== 'granted') testLocalNotif();
 }
 
 async function testLocalNotif() {
