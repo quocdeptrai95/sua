@@ -325,20 +325,21 @@
             #action-list button:hover, #status-grid button:hover, .modal-content button:hover { transform: translateY(-1px); background: #fff7f8; }
         }
         .shell { padding-top: max(59px, calc(env(safe-area-inset-top, 0px) + 16px)); }
-        body { background: #f4f1ee !important; color: #1a1816 !important; }
+        body { background: radial-gradient(900px 420px at 0% -10%, #ffe4e8 0%, transparent 55%), #fff8f6 !important; color: #2a2226 !important; }
         .glass-panel, .med-card, .milk-card {
             background: #fff !important;
-            border: 1px solid #e7e2de !important;
-            box-shadow: none !important;
+            border: 1px solid #f3e4e8 !important;
+            box-shadow: 0 10px 30px rgba(90, 40, 55, .06) !important;
             backdrop-filter: none !important;
-            border-radius: 16px !important;
+            border-radius: 22px !important;
         }
         header .glass-panel { background: transparent !important; border: none !important; padding: 0 !important; box-shadow: none !important; }
-        .med-bottle { animation: none !important; width: 32px !important; height: 32px !important; border-radius: 10px !important; }
-        h1 { font-size: 1.15rem !important; font-weight: 700 !important; letter-spacing: -0.02em; color: #1a1816 !important; }
-        main h2 { letter-spacing: .12em; color: #8a817c !important; font-weight: 600 !important; }
-        .brand-mark { width: 36px; height: 36px; border-radius: 10px; background: #1a1816; color: #fff; display: flex; align-items: center; justify-content: center; }
-        button.w-16 { background: #1a1816 !important; border: none !important; box-shadow: none !important; }
+        .med-bottle { animation: none !important; }
+        h1 { font-size: 1.35rem !important; letter-spacing: -0.03em; color: #2a2226 !important; }
+        main h2 { color: #b08998 !important; }
+        .brand-mark { width: 44px; height: 44px; border-radius: 16px; background: linear-gradient(160deg, #fb7185, #e11d48); color: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 18px rgba(225, 29, 72, .28); }
+        .milk-card .font-extrabold { font-size: 2rem !important; letter-spacing: -0.04em; }
+        button.w-16 { background: linear-gradient(160deg, #fb7185, #e11d48) !important; border: none !important; box-shadow: 0 12px 24px rgba(225, 29, 72, .32) !important; }
         #milk-list { grid-template-columns: 1fr !important; }
         @media (min-width: 800px) { #milk-list { grid-template-columns: 1fr 1fr !important; } }
         .fab-btn, button.w-16 { width: 56px !important; height: 56px !important; border-radius: 18px !important; box-shadow: none !important; }
