@@ -906,11 +906,6 @@ async function upsertMeds(yellow, red) {
 // ============================================================
 // VACCINE LOGIC
 // ============================================================
-const DEFAULT_VACCINES = [
-    { id: 'vac-1', name: 'Lao (BCG) & Viêm gan B (Sơ sinh)', date: '', done: true, note: 'Bệnh viện phụ sản' },
-    { id: 'vac-2', name: '6 trong 1 (Mũi 1) + Rota 1 + Phế cầu 1', date: '', done: false, note: 'Khoảng 2 tháng tuổi' },
-    { id: 'vac-3', name: '6 trong 1 (Mũi 2) + Rota 2 + Phế cầu 2', date: '', done: false, note: 'Khoảng 3-4 tháng tuổi' }
-];
 
 function vacFromRow(r) {
     return { id: r.id, name: r.name, date: r.vac_date || '', done: !!r.done, note: r.note || '' };
