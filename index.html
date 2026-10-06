@@ -609,27 +609,53 @@ const ALLOWED_TRANSITIONS = {
 };
 
 const FUN_MESSAGES = [
-    "Cố lên mẹ nhé, Pép Pi ngoan sẽ mau lớn lắm! 🍼",
-    "Mẹ siêu nhân ơi, tự thưởng một ly nước ấm đi! ❤️",
-    "Đứng lên vươn vai cái nào, đỡ mỏi lưng nha! 🧘‍♀️",
-    "Trộm vía Pép Pi bú giỏi ngủ ngoan quá! 🌟",
-    "Mỗi cữ sữa là một viên năng lượng tình yêu! 🥰",
-    "Nhớ uống nước đầy đủ kẻo sữa 'đình công' đó nha! 💧",
-    "Hôm nay mẹ làm rất xuất sắc rồi đó! ✨",
-    "Pép Pi đang thì thầm: cảm ơn mẹ siêu nhân sữa ạ! 🦸‍♀️",
-    "Bé ngủ rồi, mẹ chợp mắt 5 phút lấy sức nha! 🌙",
-    "Sữa mẹ mát lành, tình mẹ bao la! 🌸",
-    "Pép Pi: 'Đói rồi đó nha mẹ ơi!' 😆🍼",
-    "Milk time! Pép Pi đang chờ kìa~ 🍼✨",
-    "Hôm nay Pép Pi ngoan quá, mẹ cũng xứng được khen! 👏",
-    "Vắt sữa xong nhớ thở sâu 3 hơi nha mẹ! 🌬️",
-    "Cữ này thơm phức, Pép Pi chuẩn bị 'chiến' đây! 💪",
-    "Pép Pi lớn từng ngày nhờ tình yêu của mẹ đó! 📈",
-    "Đừng quên ăn no — mẹ no thì sữa về đều! 🍚",
-    "Pép Pi cười với mẹ một cái là hết mệt luôn á! 😊",
-    "Sữa trong tủ đang 'check-in' đúng hạn nè! ✅",
-    "Mẹ làm được mà! Một cữ nữa thôi! 🚀",
-    "Một cái ôm từ Pép Pi đáng giá hơn cả thế giới! 🌍💕"
+    // --- Khích lệ & Tự hào về mẹ ---
+    "Cố lên mẹ nhé, Pép Pi ngoan sẽ mau lớn lắm! 🍼✨",
+    "Mẹ siêu nhân ơi, tự thưởng ngay một ly nước ấm ấm đi nào! ❤️",
+    "Đứng lên vươn vai 3 cái nào, đỡ mỏi lưng tức thì mẹ ơi! 🧘‍♀️",
+    "Hôm nay mẹ đã làm quá xuất sắc rồi, xứng đáng 100 điểm không có nhưng! 💯",
+    "Pép Pi đang thì thầm: 'Cảm ơn mẹ siêu nhân sữa của con ạ!' 🦸‍♀️👶",
+    "Top 1 người phụ nữ vĩ đại nhất vũ trụ hôm nay: Mẹ Pép Pi! 🏆👑",
+    "Vắt sữa là bộ môn thể thao Olympic không chính thức, mẹ đang giữ kỷ lục đó! 🏅🐄",
+    "Mỗi cữ sữa là một viên ngọc năng lượng chứa đầy tình yêu của mẹ! 🥰💎",
+    "Bé ngủ rồi kìa, mẹ mau tranh thủ nằm chợp mắt 10 phút sạc pin nha! 🌙⚡",
+    "Nhớ ăn no mẹ nha — mẹ no căng bụng thì sữa mới ào ào về như thác! 🍚🥛",
+    "Mẹ bỉm sữa mode: BẬT. Siêu năng lực: Yêu thương vô bờ bến! 💖",
+    "Đừng so sánh với ai cả, nhịp điệu của mẹ và Pép Pi là chuẩn nhất trần đời! 🎵🌸",
+    "Hôm nay mẹ đã 'level up' thêm một bậc kỹ năng làm mẹ siêu đẳng rồi đó! 🎮🆙",
+    "Một cái ôm từ Pép Pi có thể xóa tan mọi mệt mỏi của cả ngày dài! 🌍💕",
+    "Mẹ ơi cười lên một cái nào, nụ cười của mẹ làm cả nhà sáng bừng luôn! 😄☀️",
+
+    // --- Hài hước & Đáng yêu từ góc nhìn của bé Pép Pi ---
+    "Pép Pi: 'Con no bụng rồi, mẹ yên tâm lướt Shopee săn sale nha!' 🛒😆",
+    "Ngân hàng dinh dưỡng Pép Pi vừa nhận thêm một khoản tiền gửi siêu béo ngậy! 💰🍼",
+    "Pép Pi: 'Mẹ bế con khéo thế này, mai mốt con lớn con bế lại mẹ nha!' 🤗❤️",
+    "Tút tút! Bình sữa này chất lượng 5 sao, bé xin tặng mẹ ngàn sao! ⭐⭐⭐⭐⭐",
+    "Pép Pi: 'Con đang ngủ mơ thấy mẹ xinh đẹp đang cười với con nè!' 💭👶",
+    "Sữa mẹ thơm ngon đến giọt cuối cùng, Pép Pi uống xong là say sưa liền! 🤤✨",
+    "Pép Pi: 'Ai bảo con khó tính? Tại sữa mẹ ngon quá nên con thèm hoài đó chứ!' 🍼😜",
+    "Em bé má phúng phính này là sản phẩm độc quyền của mẹ Pép Pi đó! 🥟🥰",
+    "Pép Pi: 'Mẹ ơi, con đang tích cực lớn để sau này bảo vệ mẹ nè!' 💪👶",
+    "Pép Pi đánh giá dịch vụ chăm sóc hôm nay: 10/10 sao kèm lời khen mẹ đỉnh chóp! 🎖️",
+
+    // --- Nhắc nhở chăm sóc bản thân mẹ bỉm (Hài & Thực tế) ---
+    "🔔 Ting ting! Tổng đài Pép Pi nhắc: Mẹ đã uống cốc nước nào trong 1 tiếng qua chưa? 💧👀",
+    "Xoay cổ trái 3 vòng, xoay cổ phải 3 vòng, vai đỡ mỏi hẳn liền mẹ ơi! 🔄💆‍♀️",
+    "Đừng quên uống nước ấm nha, kẻo 'nhà máy sữa' lại dọa đình công đó! 🚿🍼",
+    "Mẹ ăn miếng bánh ngọt nhỏ lấy năng lượng đi, calo này Pép Pi bú hộ cho! 🍰😋",
+    "Thở sâu vào... thở từ từ ra... Mẹ đang làm việc quan trọng nhất thế giới đó! 🌬️🍀",
+    "Ca trực đêm có thể hơi mệt, nhưng ngắm cục bông ngủ say là tan chảy luôn! 🫠💤",
+    "Uống 1 ngụm nước ấm, xoa ấm bàn tay rồi mới ẵm bé cưng mẹ nha! 🍵👐",
+    "Nhắc nhẹ: Bình sữa dùng xong mẹ nhớ ngâm rửa sạch sẽ khử khuẩn nha! 🧼🍼",
+    "Mẹ đừng ôm đồm hết mọi việc, nhớ chia việc cho ba bé làm cùng nữa nè! 👨‍🍼💪",
+
+    // --- Khoảnh khắc ấm lòng & Năng lượng tích cực ---
+    "Sữa trong tủ mát đang 'xếp hàng nghiêm chỉnh' chờ phục vụ sếp nhỏ Pép Pi! 🧊🫡",
+    "Hôm nay trời có mưa hay nắng thì trong nhà vẫn luôn ấm áp vì có Pép Pi! 🌈🌻",
+    "Thời gian bé còn nhỏ trôi nhanh lắm, mẹ hãy tận hưởng từng khoảnh khắc ngọt ngào này nhé! 📸🧸",
+    "Một ngày nữa trôi qua thật bình an, trộm vía Pép Pi ăn ngoan ngủ kỹ! 🍀👼",
+    "Cữ sữa thơm lừng đã sẵn sàng, Pép Pi chuẩn bị nạp năng lượng chiến đấu tiếp! 🚀🍼",
+    "Mẹ khỏe - Bé ngoan - Gia đình ngập tràn tiếng cười! 🏡❤️"
 ];
 
 let milks = [];
@@ -734,6 +760,66 @@ function checkDailyMedReset() {
 }
 
 async function loadSchedule() {
+    const { data, error } = await sb
+        .from('milk_schedule')
+        .select('*')
+        .eq('family_id', FAMILY_ID)
+        .order('time_hhmm');
+    if (error) {
+        console.error('loadSchedule', error);
+        return;
+    }
+    schedule = data || [];
+}
+
+async function insertMilk(entry) {
+    const { error } = await sb.from('milk_entries').insert({
+        id: entry.id,
+        family_id: FAMILY_ID,
+        type: entry.type,
+        volume: entry.volume,
+        state: entry.state,
+        start_ms: entry.start,
+        expires_ms: entry.expires,
+        warned: false,
+        expired: false
+    });
+    if (error) {
+        console.error('insertMilk', error);
+        showToast('Lỗi lưu sữa: ' + error.message, 'ph-fill ph-warning text-red-400');
+        return false;
+    }
+    return true;
+}
+
+async function updateMilkRow(id, patch) {
+    const { error } = await sb
+        .from('milk_entries')
+        .update(patch)
+        .eq('id', id)
+        .eq('family_id', FAMILY_ID);
+    if (error) {
+        console.error('updateMilk', error);
+        showToast('Lỗi cập nhật: ' + error.message, 'ph-fill ph-warning text-red-400');
+        return false;
+    }
+    return true;
+}
+
+async function deleteMilkRow(id) {
+    const { error } = await sb
+        .from('milk_entries')
+        .delete()
+        .eq('id', id)
+        .eq('family_id', FAMILY_ID);
+    if (error) {
+        console.error('deleteMilk', error);
+        showToast('Lỗi xóa: ' + error.message, 'ph-fill ph-warning text-red-400');
+        return false;
+    }
+    return true;
+}
+
 async function upsertMeds(yellow, red, dateStr = null) {
     const date = dateStr || new Date().toISOString().slice(0, 10);
     const { error } = await sb
@@ -1057,15 +1143,19 @@ async function toggleMed(type) {
 
     if (isChecked) {
         const medMsgs = type === 'yellow' ? [
-            'Pép Pi uống Chai Vàng ngoan quá! 🌟',
-            'Chai Vàng check-in, Pép Pi mau lớn nhé! ✨',
-            '5 giọt vàng — nạp đầy năng lượng! 🔋',
-            'Chai Vàng: nhiệm vụ hoàn thành xuất sắc! 🏆'
+            'Pép Pi uống Chai Vàng ngoan quá, trộm vía bé cưng! 🌟',
+            '5 giọt vàng đã check-in an toàn — nạp đầy khiên bảo vệ! 🔋🛡️',
+            'Pép Pi siêu dũng cảm: Chai Vàng 5 giọt đã vào bụng ngon lành! 🏆✨',
+            'Chai Vàng hoàn thành xuất sắc! Mẹ giỏi mà Pép Pi cũng giỏi quá trời! 👏💛',
+            '5 giọt vàng lung linh giúp Pép Pi tăng đề kháng vèo vèo! 🚀🍼',
+            'Ting ting! Nhiệm vụ Chai Vàng hôm nay đã xong tinh tươm! ✅⭐'
         ] : [
-            'Pép Pi đã uống Chai Đỏ siêu giỏi! ❤️',
-            'Chai Đỏ check-in thành công! 🔴',
-            '3 giọt đỏ — hoàn thành nhiệm vụ! 💪',
-            'Pép Pi ngoan quá, Chai Đỏ đã vào bụng! 😊'
+            'Pép Pi đã uống Chai Đỏ siêu ngoan, không khóc nhè tí nào! ❤️👶',
+            '3 giọt đỏ nạp đầy năng lượng — Pép Pi khỏe khoắn cả ngày! 💪🔴',
+            'Chai Đỏ check-in thành công rực rỡ! Thưởng mẹ và bé một tràng pháo tay! 👏🎉',
+            'Bé yêu uống Chai Đỏ giỏi ơi là giỏi, mẹ tự hào về con lắm đó! 🥰✨',
+            '3 giọt đỏ hạ cánh an toàn! Pép Pi chuẩn bị bay vút lên nấc thang sức khỏe! 🚀❤️️',
+            'Nhiệm vụ Chai Đỏ hoàn tất! Bé ngoan số 1 hành tinh! 🥇🍓'
         ];
         showToast(medMsgs[Math.floor(Math.random() * medMsgs.length)], 'ph-fill ph-star text-amber-300');
     } else {
