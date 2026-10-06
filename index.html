@@ -2037,6 +2037,7 @@ async function subscribePushSilent() {
 
 let bellReminders = [];
 async function loadBellReminders() {
+    await sb.from('reminders').delete().eq('family_id', FAMILY_ID).lt('remind_at', new Date().toISOString().slice(0, 10));
     const { data, error } = await sb.from('reminders').select('*').eq('family_id', FAMILY_ID).eq('done', false).order('remind_at');
     if (error) return;
     bellReminders = data || [];
@@ -2084,7 +2085,7 @@ function checkBellReminders() {
         const hm = new Date(r.remind_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
         const msg = hm && hm !== '00:00' ? r.note + ' vào lúc ' + hm + ' nhé' : r.note;
         showToast(msg, 'ph-fill ph-bell text-rose-400', true);
-        if (diff === 0) sb.from('reminders').update({ done: true }).eq('id', r.id);
+        if (diff <= 0) sb.from('reminders').delete().eq('id', r.id);
     });
 }
 
