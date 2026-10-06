@@ -911,6 +911,7 @@ function vacFromRow(r) {
     return { id: r.id, name: r.name, date: r.vac_date || '', done: !!r.done, note: r.note || '' };
 }
 async function loadVaccines() {
+    await sb.from('vaccines').delete().in('id', ['vac-1', 'vac-2', 'vac-3']);
     const { data, error } = await sb.from('vaccines').select('*').eq('family_id', FAMILY_ID);
     if (error) {
         console.error('loadVaccines', error);
