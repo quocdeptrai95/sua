@@ -1934,6 +1934,7 @@ function tick() {
     if (document.hidden || !milks.length) return;
     const now = Date.now();
     milks.forEach(m => {
+        if (m.state === 'FED') return;
         const isExp = now >= m.expires;
         const msLeft = m.expires - now;
         const txt = document.getElementById(`txt-${m.id}`);
