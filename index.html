@@ -363,6 +363,14 @@
                         <i class="ph-fill ph-drop text-blue-500 text-base"></i> Tủ sữa của Pép Pi
                     </h2>
                 </div>
+                <div class="glass-card p-4">
+                    <p class="text-xs font-extrabold text-slate-400 uppercase">Hôm nay đã uống</p>
+                    <p id="today-total" class="text-2xl font-extrabold text-slate-900 mt-1">0 ml</p>
+                    <div class="flex gap-3 mt-2 text-sm font-semibold">
+                        <span class="text-pink-600">Sữa mẹ <b id="today-breast">0</b> ml</span>
+                        <span class="text-blue-600">Công thức <b id="today-formula">0</b> ml</span>
+                    </div>
+                </div>
 
                 <!-- Empty State -->
                 <div id="empty-state" class="glass-card p-10 flex flex-col items-center justify-center text-center border-dashed border-slate-300">
@@ -1819,6 +1827,16 @@ function renderApp() {
     const emptyEl = document.getElementById('empty-state');
     const now = Date.now();
 
+    const today = todayVN();
+    const fedToday = milks.filter(m => m.state === 'FED' && dayVN(m.start) === today);
+    const breast = fedToday.filter(m => m.type !== 'FORMULA').reduce((s, m) => s + Number(m.volume || 0), 0);
+    const formula = fedToday.filter(m => m.type === 'FORMULA').reduce((s, m) => s + Number(m.volume || 0), 0);
+    const totalEl = document.getElementById('today-total');
+    if (totalEl) totalEl.textContent = (breast + formula) + ' ml';
+    const breastEl = document.getElementById('today-breast');
+    const formulaEl = document.getElementById('today-formula');
+    if (breastEl) breastEl.textContent = breast;
+    if (formulaEl) formulaEl.textContent = formula;
     if (milks.length === 0) {
         listEl.innerHTML = '';
         emptyEl.classList.remove('hidden');
