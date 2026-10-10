@@ -1643,7 +1643,7 @@ function selectType(type) {
 function renderAddStates() {
     const grid = document.getElementById('status-grid');
     grid.innerHTML = '';
-    const opts = addType === 'BREAST' ? ['FRIDGE', 'FREEZER', 'ROOM', 'PARTIAL'] : ['FRIDGE', 'ROOM', 'PARTIAL'];
+    const opts = addType === 'BREAST' ? ['FRIDGE', 'FREEZER', 'ROOM', 'PARTIAL', 'FED'] : ['FRIDGE', 'ROOM', 'PARTIAL', 'FED'];
     if (!opts.includes(addState)) addState = 'FRIDGE';
     opts.forEach(k => {
         const s = STATES[k];
@@ -1687,8 +1687,7 @@ async function saveMilk() {
     closeModals();
     renderApp();
 
-    const randomMsg = FUN_MESSAGES[Math.floor(Math.random() * FUN_MESSAGES.length)];
-    showToast(randomMsg, 'ph-fill ph-sparkle text-amber-300');
+    showToast('Đã lưu cữ sữa', 'ph-fill ph-check text-emerald-400');
 }
 
 function openActionModal(id) {
@@ -1743,7 +1742,53 @@ function openActionModal(id) {
             list.appendChild(btn);
         });
     }
+    if (item.state !== 'FED' && item.volume > 1) {
+        const box = document.createElement('div');
+        box.className = 'p-4 bg-blue-50 border border-blue-100 rounded-2xl space-y-2';
+        box.innerHTML = `
+            <label class="block text-xs font-extrabold text-slate-500 uppercase">Lấy ra một phần (ml)</label>
+            <input id="take-volume" type="number" inputmode="numeric" placeholder="Ví dụ 100" class="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3 font-extrabold text-slate-900">
+            <p class="text-xs text-slate-500">Phần còn lại giữ nguyên chỗ cũ và hạn cũ.</p>
+            <div class="flex gap-2">
+                <button onclick="splitTake('${id}', 'WARMED')" class="flex-1 py-3 bg-orange-500 text-white rounded-2xl font-bold text-sm">Lấy ra hâm</button>
+                <button onclick="splitTake('${id}', 'FED')" class="flex-1 py-3 bg-emerald-600 text-white rounded-2xl font-bold text-sm">Lấy ra đã bú</button>
+            </div>`;
+        list.appendChild(box);
+    }
     openModal('modal-action');
+}
+
+
+async function splitTake(id, targetState) {
+    const item = milks.find(m => m.id === id);
+    if (!item) return;
+    const take = parseInt(document.getElementById('take-volume').value, 10);
+    if (!take || take <= 0 || take >= item.volume) {
+        showToast('Nhập số ml nhỏ hơn lượng đang có', 'ph-fill ph-warning text-amber-300');
+        return;
+    }
+    const remain = item.volume - take;
+    const ok = await updateMilkRow(id, { volume: remain });
+    if (!ok) return;
+    const now = Date.now();
+    const entry = {
+        id: uid(),
+        type: item.type,
+        volume: take,
+        state: targetState,
+        start: now,
+        expires: now + durationFor(item.type, targetState),
+        warned: false,
+        expired: false
+    };
+    const inserted = await insertMilk(entry);
+    if (!inserted) return;
+    item.volume = remain;
+    milks.push(entry);
+    milks.sort((a, b) => a.expires - b.expires);
+    closeModals();
+    renderApp();
+    showToast('Đã lấy ' + take + 'ml, còn ' + remain + 'ml', 'ph-fill ph-check text-emerald-400');
 }
 
 async function saveVolume(id) {
@@ -2203,7 +2248,6 @@ async function init() {
         setSyncStatus(false, 'Lỗi kết nối');
     }
     ensureTick();
-    startAutoFunNotifications();
     autoEnableNotifications();
 }
 
