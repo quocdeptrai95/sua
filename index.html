@@ -364,7 +364,10 @@
                     </h2>
                 </div>
                 <div class="glass-card p-4">
-                    <p class="text-xs font-extrabold text-slate-400 uppercase">Hôm nay đã uống</p>
+                    <div class="flex items-start justify-between gap-+2">
+                        <p class="text-xs font-extrabold text-slate-400 uppercase">Hôm nay đã uống</p>
+                        <button onclick="openMilkHistory()" class="text-xs font-bold text-rose-600 bg-rose-50 px-3 py-1.5 rounded-full">Lịch sử bú</button>
+                    </div>
                     <p id="today-total" class="text-2xl font-extrabold text-slate-900 mt-1">0 ml</p>
                     <div class="flex gap-3 mt-2 text-sm font-semibold">
                         <span class="text-pink-600">Sữa mẹ <b id="today-breast">0</b> ml</span>
@@ -585,6 +588,17 @@
                     <button onclick="saveBellReminder()" class="w-full py-3.5 bg-slate-900 text-white rounded-2xl font-semibold">Lưu nhắc</button>
                     <div id="bell-list" class="space-y-2 text-sm max-h-64 overflow-y-auto"></div>
                 </div>
+            </div>
+        </div>
+
+        
+        <div id="modal-history" class="modal-overlay modal-center fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40">
+            <div class="modal-content w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[80dvh]">
+                <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+                    <h3 class="font-extrabold text-lg text-slate-900">7 ngày bú gần nhất</h3>
+                    <button onclick="closeModals()" class="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 text-slate-500"><i class="ph-bold ph-x text-sm"></i></button>
+                </div>
+                <div id="history-list" class="p-4 space-y-2 overflow-y-auto max-h-[60dvh]"></div>
             </div>
         </div>
 
@@ -824,6 +838,7 @@ async function loadMilks() {
         warned: r.warned,
         expired: r.expired
     }));
+    await cleanupStaleMilk();
     renderApp();
     ensureTick();
 }
@@ -1750,8 +1765,9 @@ function openActionModal(id) {
             <input id="take-volume" type="number" inputmode="numeric" placeholder="Ví dụ 100" class="w-full bg-white border border-slate-200 rounded-2xl px-4 py-3 font-extrabold text-slate-900">
             <p class="text-xs text-slate-500">Phần còn lại giữ nguyên chỗ cũ và hạn cũ.</p>
             <div class="flex gap-2">
-                <button onclick="splitTake('${id}', 'WARMED')" class="flex-1 py-3 bg-orange-500 text-white rounded-2xl font-bold text-sm">Lấy ra hâm</button>
-                <button onclick="splitTake('${id}', 'FED')" class="flex-1 py-3 bg-emerald-600 text-white rounded-2xl font-bold text-sm">Lấy ra đã bú</button>
+                <button onclick="splitTake('${id}', 'WARMED')" class="flex-1 py-3 bg-orange-500 text-white rounded-2xl font-bold text-sm">Hâm</button>
+                <button onclick="splitTake('${id}', 'PARTIAL')" class="flex-1 py-3 bg-purple-600 text-white rounded-2xl font-bold text-sm">Bú dở</button>
+                <button onclick="splitTake('${id}', 'FED')" class="flex-1 py-3 bg-emerald-600 text-white rounded-2xl font-bold text-sm">Đã bú</button>
             </div>`;
         list.appendChild(box);
     }
@@ -1867,6 +1883,39 @@ function formatTimeLeft(ms) {
     return `${m} phút`;
 }
 
+
+function isStaleMilk(m, today, now) {
+    if (m.state === 'FED' && dayVN(m.start) !== today) return true;
+    if (m.state !== 'FED' && now >= m.expires && dayVN(m.expires) < today) return true;
+    return false;
+}
+async function cleanupStaleMilk() {
+    const today = todayVN();
+    const now = Date.now();
+    const stale = milks.filter(m => isStaleMilk(m, today, now));
+    for (const m of stale) {
+        if (m.state === 'FED') continue;
+        await deleteMilkRow(m.id);
+        milks = milks.filter(x => x.id !== m.id);
+    }
+}
+function openMilkHistory() {
+    const box = document.getElementById('history-list');
+    if (!box) return;
+    const rows = [];
+    for (let i = 0; i < 7; i++) {
+        const d = new Date(Date.now() - i * 86400000);
+        const key = d.toLocaleDateString('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' });
+        const label = d.toLocaleDateString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh', weekday: 'short', day: '2-digit', month: '2-digit' });
+        const fed = milks.filter(m => m.state === 'FED' && dayVN(m.start) === key);
+        const breast = fed.filter(m => m.type !== 'FORMULA').reduce((s, m) => s + Number(m.volume || 0), 0);
+        const formula = fed.filter(m => m.type === 'FORMULA').reduce((s, m) => s + Number(m.volume || 0), 0);
+        rows.push(`<div class="flex items-center justify-between bg-slate-50 rounded-xl px-3 py-2"><div><p class="font-bold text-slate-800">${label}</p><p class="text-xs text-pink-600">Mẹ ${breast} ml</p><p class="text-xs text-blue-600">Công thức ${formula} ml</p></div><p class="font-extrabold text-slate-900">${breast + formula} ml</p></div>`);
+    }
+    box.innerHTML = rows.join('');
+    openModal('modal-history');
+}
+
 function renderApp() {
     const listEl = document.getElementById('milk-list');
     const emptyEl = document.getElementById('empty-state');
@@ -1882,15 +1931,17 @@ function renderApp() {
     const formulaEl = document.getElementById('today-formula');
     if (breastEl) breastEl.textContent = breast;
     if (formulaEl) formulaEl.textContent = formula;
-    if (milks.length === 0) {
+    const visible = milks.filter(m => !isStaleMilk(m, today, now));
+    if (visible.length === 0) {
         listEl.innerHTML = '';
         emptyEl.classList.remove('hidden');
         return;
     }
     emptyEl.classList.add('hidden');
     listEl.innerHTML = '';
+    visible.sort((a, b) => (a.state === 'FED') - (b.state === 'FED') || a.expires - b.expires);
 
-    milks.forEach(m => {
+    visible.forEach(m => {
         const s = STATES[m.state] || STATES.FRIDGE;
         const isFed = m.state === 'FED';
         const isExp = !isFed && now >= m.expires;
