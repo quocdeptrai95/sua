@@ -668,118 +668,6 @@ const ALLOWED_TRANSITIONS = {
     PARTIAL: []
 };
 
-const FUN_MESSAGES = [
-    "Cố lên mẹ nhé, Pép Pi ngoan sẽ mau lớn lắm! 🍼✨",
-    "Mẹ siêu nhân ơi, tự thưởng ngay một ly nước ấm ấm đi nào! ❤️",
-    "Đứng lên vươn vai 3 cái nào, đỡ mỏi lưng tức thì mẹ ơi! 🧘‍♀️",
-    "Hôm nay mẹ đã làm quá xuất sắc rồi, xứng đáng 100 điểm không có nhưng! 💯",
-    "Pép Pi đang thì thầm: 'Cảm ơn mẹ siêu nhân sữa của con ạ!' 🦸‍♀️👶",
-    "Top 1 người phụ nữ vĩ đại nhất vũ trụ hôm nay: Mẹ Pép Pi! 🏆👑",
-    "Vắt sữa là bộ môn thể thao Olympic không chính thức, mẹ đang giữ kỷ lục đó! 🏅🐄",
-    "Mỗi cữ sữa là một viên ngọc năng lượng chứa đầy tình yêu của mẹ! 🥰💎",
-    "Bé ngủ rồi kìa, mẹ mau tranh thủ nằm chợp mắt 10 phút sạc pin nha! 🌙⚡",
-    "Nhớ ăn no mẹ nha — mẹ no căng bụng thì sữa mới ào ào về như thác! 🍚🥛",
-    "Mẹ bỉm sữa mode: BẬT. Siêu năng lực: Yêu thương vô bờ bến! 💖",
-    "Đừng so sánh với ai cả, nhịp điệu của mẹ và Pép Pi là chuẩn nhất trần đời! 🎵🌸",
-    "Hôm nay mẹ đã 'level up' thêm một bậc kỹ năng làm mẹ siêu đẳng rồi đó! 🎮🆙",
-    "Một cái ôm từ Pép Pi có thể xóa tan mọi mệt mỏi của cả ngày dài! 🌍💕",
-    "Mẹ ơi cười lên một cái nào, nụ cười của mẹ làm cả nhà sáng bừng luôn! 😄☀️",
-    "Pép Pi: 'Con no bụng rồi, mẹ yên tâm lướt Shopee săn sale nha!' 🛒😆",
-    "Ngân hàng dinh dưỡng Pép Pi vừa nhận thêm một khoản tiền gửi siêu béo ngậy! 💰🍼",
-    "Pép Pi: 'Mẹ bế con khéo thế này, mai mốt con lớn con bế lại mẹ nha!' 🤗❤️",
-    "Tút tút! Bình sữa này chất lượng 5 sao, bé xin tặng mẹ ngàn sao! ⭐⭐⭐⭐⭐",
-    "Pép Pi: 'Con đang ngủ mơ thấy mẹ xinh đẹp đang cười với con nè!' 💭👶",
-    "Sữa mẹ thơm ngon đến giọt cuối cùng, Pép Pi uống xong là say sưa liền! 🤤✨",
-    "Pép Pi: 'Ai bảo con khó tính? Tại sữa mẹ ngon quá nên con thèm hoài đó chứ!' 🍼😜",
-    "Em bé má phúng phính này là sản phẩm độc quyền của mẹ Pép Pi đó! 🥟🥰",
-    "Pép Pi: 'Mẹ ơi, con đang tích cực lớn để sau này bảo vệ mẹ nè!' 💪👶",
-    "Pép Pi đánh giá dịch vụ chăm sóc hôm nay: 10/10 sao kèm lời khen mẹ đỉnh chóp! 🎖️",
-    "🔔 Ting ting! Tổng đài Pép Pi nhắc: Mẹ đã uống cốc nước nào trong 1 tiếng qua chưa? 💧👀",
-    "Xoay cổ trái 3 vòng, xoay cổ phải 3 vòng, vai đỡ mỏi hẳn liền mẹ ơi! 🔄💆‍♀️",
-    "Đừng quên uống nước ấm nha, kẻo 'nhà máy sữa' lại dọa đình công đó! 🚿🍼",
-    "Mẹ ăn miếng bánh ngọt nhỏ lấy năng lượng đi, calo này Pép Pi bú hộ cho! 🍰😋",
-    "Thở sâu vào... thở từ từ ra... Mẹ đang làm việc quan trọng nhất thế giới đó! 🌬️🍀",
-    "Ca trực đêm có thể hơi mệt, nhưng ngắm cục bông ngủ say là tan chảy luôn! 🫠💤",
-    "Uống 1 ngụm nước ấm, xoa ấm bàn tay rồi mới ẵm bé cưng mẹ nha! 🍵👐",
-    "Nhắc nhẹ: Bình sữa dùng xong mẹ nhớ ngâm rửa sạch sẽ khử khuẩn nha! 🧼🍼",
-    "Mẹ đừng ôm đồm hết mọi việc, nhớ chia việc cho ba bé làm cùng nữa nè! 👨‍🍼💪",
-    "Sữa trong tủ mát đang 'xếp hàng nghiêm chỉnh' chờ phục vụ sếp nhỏ Pép Pi! 🧊🫡",
-    "Hôm nay trời có mưa hay nắng thì trong nhà vẫn luôn ấm áp vì có Pép Pi! 🌈🌻",
-    "Thời gian bé còn nhỏ trôi nhanh lắm, mẹ hãy tận hưởng từng khoảnh khắc ngọt ngào này nhé! 📸🧸",
-    "Một ngày nữa trôi qua thật bình an, trộm vía Pép Pi ăn ngoan ngủ kỹ! 🍀👼",
-    "Cữ sữa thơm lừng đã sẵn sàng, Pép Pi chuẩn bị nạp năng lượng chiến đấu tiếp! 🚀🍼",
-    "Mẹ khỏe - Bé ngoan - Gia đình ngập tràn tiếng cười! 🏡❤️",,
-    "Pép Pi tiêm chủng là khoác áo giáp cho bé đó mẹ. Lâu lâu nhắc mà cười cái đã!",
-    "Mũi tiêm hôm nay là ít sốt mai, cả năm đỡ bệnh. Mẹ chịu khó là bé được lợi.",
-    "Tiêm chủng không phải làm bé đau suông. Đó là cách bé mượn sức khỏe của mẹ khoa học.",
-    "Một mũi đúng lịch bằng nhiều đêm đỡ phải nhập viện. Pép Pi sẽ cảm ơn mẹ sau.",
-    "Vắc-xin là quà nhỏ, bảo vệ dài. Mẹ giỏi vì đã để ý lịch tiêm.",
-    "Buổi sáng rồi mẹ ơi. Chai thuốc của Pép Pi đang chờ, cho bé uống kẻo quên.",
-    "Nhắc vui buổi sáng: thuốc vàng thuốc đỏ uống đều, bé đỡ quấy hơn đó.",
-    "Mẹ pha một ly nước, cho Pép Pi uống thuốc xong rồi mẹ mới uống cà phê nha.",
-    "Đừng để thuốc nằm đó tới trưa. Sáng uống một lần, cả ngày mẹ đỡ thấp thỏm.",
-    "Pép Pi ngoan uống thuốc là mẹ được một buổi nhẹ đầu. Làm ngay cho xong nào.",
-    "Sáng nào cũng một nhịp: kiểm tra thuốc, cho bú, rồi mẹ mới ngồi xuống.",
-    "Thuốc không thay được sữa, nhưng uống đúng giờ thì bé dễ chịu hơn hẳn.",
-    "Mẹ ơi liếc cái tủ thuốc cái. Ai chưa uống thì cho uống, ai uống rồi thì mẹ yên tâm.",
-    "Pép Pi bú thêm một ngụm là mẹ được một điểm cộng vũ trụ.",
-    "Sữa mẹ hôm nay ngọt hơn vì mẹ đã cố uống nước đấy.",
-    "Cữ sữa trong tủ là thành quả của mẹ, không phải chuyện nhỏ.",
-    "Mẹ vắt được sữa là đã làm một việc rất giỏi rồi.",
-    "Bé no là mẹ được ngồi xuống năm phút. Năm phút cũng quý.",
-    "Hạn sữa không chờ mẹ. Liếc tủ sữa một cái cho yên tâm.",
-    "Sữa công thức pha đúng liều là mẹ đang làm rất chuẩn.",
-    "Đừng so với mẹ khác. Cữ sữa của Pép Pi là đủ với Pép Pi.",
-    "Một bình sữa ấm là mẹ đang ôm bé theo cách khác.",
-    "Ca đêm vắt sữa cũng tính là ca trực. Mẹ đáng được khen.",
-    "Sữa còn hạn là còn dùng được. Hết hạn thì mẹ bỏ, không tiếc.",
-    "Pép Pi đói sẽ báo. Mẹ không cần đoán đúng từng phút.",
-    "Hôm nay bú ít hơn hôm qua cũng chưa sao. Bé có ngày riêng.",
-    "Mẹ ghi cữ sữa là mẹ đang nhớ giúp cả nhà.",
-    "Tủ sữa đầy một chút là mẹ được ngủ một chút.",
-    "Tiêm đúng lịch là bé đỡ phải nằm viện vì bệnh lẽ ra tránh được.",
-    "Mũi tiêm hơi khóc một lúc, cả năm đỡ sốt cao. Mẹ đang đổi rất lời.",
-    "Vắc-xin không làm bé yếu. Nó tập cho bé biết đánh vi trùng.",
-    "Lịch tiêm là bản đồ. Mẹ giữ bản đồ là bé đỡ lạc.",
-    "Một mũi 6 trong 1 gọn hơn sáu lần đau. Mẹ chọn cách khôn.",
-    "Phế cầu, rota, sởi: mỗi mũi chặn một cửa vi trùng.",
-    "Bé tiêm xong bú và ngủ là ổn. Mẹ ở cạnh là đủ.",
-    "Sốt nhẹ sau tiêm là bé đang tập quân sự, không phải hỏng.",
-    "Mẹ nhớ ngày tiêm là mẹ nhớ tương lai của Pép Pi.",
-    "Tiêm chủng là việc nhà làm cho cả xóm đỡ lây. Mẹ góp một phần.",
-    "Đừng trì hoãn mũi đã đến hạn. Càng đúng lịch, bé càng được che.",
-    "Lịch sử tiêm là bằng khen thầm của mẹ. Giữ nó cho đủ.",
-    "Mũi nào chưa có ngày thì mẹ đặt ngày, khỏi để trong đầu.",
-    "Pép Pi không hiểu tiêm, nhưng cơ thể bé hiểu. Mẹ hiểu giúp bé.",
-    "Sáng nay thuốc của Pép Pi chưa uống thì mẹ cho uống trước khi quên.",
-    "Chai Vàng năm giọt, Chai Đỏ ba giọt. Xong là mẹ gạch một việc.",
-    "Thuốc uống đều còn hơn uống nhiều một lần rồi quên ba ngày.",
-    "Mẹ để thuốc cạnh bình sữa, nhìn thấy là cho uống.",
-    "Pép Pi uống thuốc ngoan là mẹ được một buổi đỡ lo.",
-    "Quên thuốc không có nghĩa mẹ dở. Nhắc là để mẹ đỡ quên.",
-    "Buổi sáng là giờ vàng của thuốc. Trưa mới nhớ thì vẫn cho uống.",
-    "Thuốc khác cũng cần một nhịp. Mẹ bật công tắc là cả nhà biết.",
-    "Đừng để chai nằm đó tới tối. Sáng uống, tối mẹ nhẹ đầu.",
-    "Một thìa thuốc, một nụ cười. Pép Pi sẽ quên ngay chuyện hơi đắng.",
-    "Mẹ uống nước của mẹ, bé uống thuốc của bé. Cả hai đều được chăm.",
-    "Hôm nay ai uống rồi thì mẹ yên tâm. Ai chưa thì cho uống nốt.",
-    "Thuốc không thay sữa, nhưng uống đúng thì bé bớt khó chịu.",
-    "Mẹ là người duy nhất nhớ lịch thuốc. App nhắc để mẹ đỡ một mình.",
-    "Pép Pi khỏe một phần vì mẹ không bỏ liều.",
-    "Mẹ ơi, vai đang gồng. Hạ vai xuống rồi mới bế bé.",
-    "Đói thì mẹ ăn trước. Mẹ xỉu thì không ai pha sữa.",
-    "Năm phút nằm ngửa cũng là nghỉ. Mẹ được phép.",
-    "Hôm nay mẹ đã làm đủ. Không cần làm đẹp hơn nữa.",
-    "Pép Pi không cần mẹ hoàn hảo. Bé cần mẹ còn thức và còn dịu.",
-    "Nhà hơi bừa cũng được. Bé no và mẹ còn tỉnh là đạt.",
-    "Mẹ cười một cái là phòng sáng hơn. Không cần dọn hết.",
-    "Có người phụ một tay là mẹ nhận. Không phải mẹ yếu.",
-    "Đêm qua thức thì hôm nay mẹ làm chậm lại. Bé vẫn lớn.",
-    "Pép Pi đang lớn từng ngày mẹ không kịp thấy. Mẹ đang làm đúng.",
-    "Mẹ nhớ kiểm tra hạn sữa, lịch tiêm và chai thuốc. Xong là mẹ tự do một lúc.",
-    "Cả nhà nhìn app là biết bé đã bú, đã uống, đã tiêm. Mẹ không phải nhắc miệng.",
-    "Pép Pi có mẹ như vầy là hên. App chỉ đứng cạnh nhắc thôi."
-];
 
 let milks = [];
 let schedule = [];
@@ -1214,7 +1102,7 @@ async function toggleVaccineDone(id) {
     await upsertVaccineRow(item);
     renderVaccines();
     if (item.done) {
-        showToast(`🎉 Bé Pép Pi đã tiêm xong mũi: ${item.name}! Siêu dũng cảm!`, 'ph-fill ph-heart text-rose-400', true);
+        showToast('Đã đánh dấu tiêm xong: ' + item.name, 'ph-fill ph-check text-emerald-400');
     }
 }
 
@@ -1605,26 +1493,8 @@ async function toggleMed(type) {
     const red = document.getElementById('toggle-red').checked;
     upsertMeds(yellow, red);
 
-    if (isChecked) {
-        const medMsgs = type === 'yellow' ? [
-            'Pép Pi uống Chai Vàng ngoan quá, trộm vía bé cưng! 🌟',
-            '5 giọt vàng đã check-in an toàn — nạp đầy khiên bảo vệ! 🔋🛡️',
-            'Pép Pi siêu dũng cảm: Chai Vàng 5 giọt đã vào bụng ngon lành! 🏆✨',
-            'Chai Vàng hoàn thành xuất sắc! Mẹ giỏi mà Pép Pi cũng giỏi quá trời! 👏💛',
-            '5 giọt vàng lung linh giúp Pép Pi tăng đề kháng vèo vèo! 🚀🍼',
-            'Ting ting! Nhiệm vụ Chai Vàng hôm nay đã xong tinh tươm! ✅⭐'
-        ] : [
-            'Pép Pi đã uống Chai Đỏ siêu ngoan, không khóc nhè tí nào! ❤️👶',
-            '3 giọt đỏ nạp đầy năng lượng — Pép Pi khỏe khoắn cả ngày! 💪🔴',
-            'Chai Đỏ check-in thành công rực rỡ! Thưởng mẹ và bé một tràng pháo tay! 👏🎉',
-            'Bé yêu uống Chai Đỏ giỏi ơi là giỏi, mẹ tự hào về con lắm đó! 🥰✨',
-            '3 giọt đỏ hạ cánh an toàn! Pép Pi chuẩn bị bay vút lên nấc thang sức khỏe! 🚀❤',
-            'Nhiệm vụ Chai Đỏ hoàn tất! Bé ngoan số 1 hành tinh! 🥇🍓'
-        ];
-        showToast(medMsgs[Math.floor(Math.random() * medMsgs.length)], 'ph-fill ph-star text-amber-300');
-    } else {
-        showToast('Đã hủy trạng thái uống thuốc', 'ph-fill ph-info text-slate-300');
-    }
+    if (isChecked) showToast('Đã ghi nhận uống thuốc', 'ph-fill ph-check text-emerald-400');
+    else showToast('Đã hủy trạng thái uống thuốc', 'ph-fill ph-info text-slate-300');
 }
 
 function setVol(n) {
@@ -2256,14 +2126,6 @@ async function testLocalNotif() {
         if (shown) showToast('Máy đã rung/chuông thông báo!', 'ph-fill ph-bell text-emerald-400');
         else showToast('Lệnh gửi chuông thành công!', 'ph-fill ph-check-circle text-emerald-400');
     }, 1200);
-}
-
-function startAutoFunNotifications() {
-    setInterval(() => {
-        if (document.hidden) return;
-        const randomMsg = FUN_MESSAGES[Math.floor(Math.random() * FUN_MESSAGES.length)];
-        showToast(randomMsg, 'ph-fill ph-sparkle text-amber-300', false);
-    }, 10 * 60 * 1000);
 }
 
 async function autoEnableNotifications() {
