@@ -1559,7 +1559,7 @@ async function saveMilk() {
         volume: vol,
         state: addState,
         start: start,
-        expires: start + durationFor(addType, addState),
+        expires: addState === 'FED' ? start + 3650 * 24 * 60 * 60 * 1000 : start + durationFor(addType, addState),
         warned: false,
         expired: false
     };
@@ -1663,7 +1663,7 @@ async function splitTake(id, targetState) {
         volume: take,
         state: targetState,
         start: now,
-        expires: now + durationFor(item.type, targetState),
+        expires: targetState === 'FED' ? now + 3650 * 24 * 60 * 60 * 1000 : now + durationFor(item.type, targetState),
         warned: false,
         expired: false
     };
@@ -1700,7 +1700,7 @@ async function updateMilkState(id, newState) {
     const patch = {
         state: newState,
         start_ms: now,
-        expires_ms: now + durationFor(item.type, newState),
+        expires_ms: newState === 'FED' ? now + 3650 * 24 * 60 * 60 * 1000 : now + durationFor(item.type, newState),
         warned: false,
         expired: false
     };
