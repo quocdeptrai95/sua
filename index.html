@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#fff5f7">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Sổ Theo Dõi Của Pép Pi</title>
+<title>Sổ Theo Dõi Của Péppi</title>
 <!-- Tailwind CSS -->
 <script src="https://cdn.tailwindcss.com"></script>
 <!-- Phosphor Icons -->
@@ -277,7 +277,7 @@ h1, h2, h3, .font-extrabold { font-weight: 700 !important; letter-spacing: -0.02
 </div>
 <div>
 <div class="flex items-center gap-2">
-<h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight leading-none">Sổ Theo Dõi Của Pép Pi</h1>
+<h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight leading-none">Sổ Theo Dõi Của Péppi</h1>
 </div>
 <p class="text-xs sm:text-sm font-semibold text-slate-400 mt-1">Nhật ký sữa, thuốc & tiêm chủng bé yêu</p>
 </div>
@@ -338,7 +338,7 @@ h1, h2, h3, .font-extrabold { font-weight: 700 !important; letter-spacing: -0.02
 <section class="space-y-3">
 <div class="flex items-center justify-between px-1">
 <h2 class="text-sm font-extrabold text-slate-600 uppercase tracking-wider flex items-center gap-2">
-<i class="ph-fill ph-drop text-blue-500 text-base"></i> Tủ sữa của Pép Pi
+<i class="ph-fill ph-drop text-blue-500 text-base"></i> Tủ sữa của Péppi
 </h2>
 </div>
 <div class="glass-card p-4">
@@ -416,7 +416,7 @@ Chưa có cữ sữa nào. Hãy bấm nút dấu cộng <b>(+)</b> bên dưới 
 <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
 <div>
 <h3 class="font-extrabold text-lg text-slate-900">Lên lịch tiêm chủng</h3>
-<p class="text-xs font-semibold text-slate-400 mt-0.5">Mũi tiêm của Pép Pi</p>
+<p class="text-xs font-semibold text-slate-400 mt-0.5">Mũi tiêm của Péppi</p>
 </div>
 <button onclick="closeModals()" class="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 text-slate-500"><i class="ph-bold ph-x text-sm"></i></button>
 </div>
@@ -453,7 +453,7 @@ Chưa có cữ sữa nào. Hãy bấm nút dấu cộng <b>(+)</b> bên dưới 
 <div class="flex-shrink-0 px-6 py-4 border-b border-slate-100 flex items-center justify-between">
 <div>
 <h3 class="font-extrabold text-lg text-slate-800">Thêm cữ sữa mới</h3>
-<p class="text-xs font-bold text-slate-400 mt-0.5">Ghi nhận cữ sữa cho bé Pép Pi</p>
+<p class="text-xs font-bold text-slate-400 mt-0.5">Ghi nhận cữ sữa cho bé Péppi</p>
 </div>
 <button onclick="closeModals()" class="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors">
 <i class="ph-bold ph-x text-sm"></i>
@@ -531,11 +531,11 @@ Chưa có cữ sữa nào. Hãy bấm nút dấu cộng <b>(+)</b> bên dưới 
 <div id="modal-bell" class="modal-overlay modal-center fixed inset-0 z-50 flex items-start justify-center p-4 pt-16 bg-slate-900/40">
 <div class="modal-content w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[80dvh]">
 <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
-<h3 class="font-extrabold text-lg text-slate-900">Nhắc của Pép Pi</h3>
+<h3 class="font-extrabold text-lg text-slate-900">Nhắc của Péppi</h3>
 <button onclick="closeModals()" class="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 text-slate-500"><i class="ph-bold ph-x text-sm"></i></button>
 </div>
 <div class="p-5 space-y-3">
-<input id="bell-note" placeholder="Nhắc gì cho Pép Pi?" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3">
+<input id="bell-note" placeholder="Nhắc gì cho Péppi?" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3">
 <label class="block text-xs font-bold text-slate-500">Ngày</label>
 <input id="bell-date" type="date" class="w-full min-h-[52px] bg-white border border-slate-200 rounded-2xl px-4 py-3 text-base text-slate-900">
 <button type="button" id="bell-add-time" onclick="showBellTime()" class="text-sm font-semibold text-rose-600 text-left">Thêm giờ</button>
@@ -1089,7 +1089,7 @@ function checkVaccineAlerts() {
         if (Date.now() - last < 15 * 60 * 1000) return;
         localStorage.setItem(key, String(Date.now()));
         const msg = diffDays === 0
-            ? `Hôm nay Pép Pi có hẹn tiêm ${v.name}. Bé dũng cảm là mẹ có thưởng.`
+            ? `Hôm nay Péppi có hẹn tiêm ${v.name}. Bé dũng cảm là mẹ có thưởng.`
             : diffDays < 0
             ? `Mũi ${v.name} hơi trễ hẹn rồi. Mẹ sắp xếp khi rảnh nha.`
             : `Còn ${diffDays} ngày nữa tới mũi ${v.name}. Mẹ để sẵn lịch giúp bé.`;
@@ -1560,7 +1560,7 @@ function openActionModal(id) {
         const fedBtn = document.createElement('button');
         fedBtn.className = 'w-full flex items-center gap-4 p-4 bg-emerald-50/90 border border-emerald-200 rounded-2xl text-left hover:bg-emerald-100/80 transition-all';
         fedBtn.onclick = () => updateMilkState(id, 'FED');
-        fedBtn.innerHTML = '<div class="w-10 h-10 rounded-2xl flex items-center justify-center bg-emerald-100 text-emerald-600 flex-shrink-0"><i class="ph-fill ph-check-circle text-xl"></i></div><div><div class="font-extrabold text-emerald-800 text-sm">Đã bú</div><div class="text-xs font-bold text-emerald-600 mt-0.5">Pép Pi đã uống xong cữ này</div></div>';
+        fedBtn.innerHTML = '<div class="w-10 h-10 rounded-2xl flex items-center justify-center bg-emerald-100 text-emerald-600 flex-shrink-0"><i class="ph-fill ph-check-circle text-xl"></i></div><div><div class="font-extrabold text-emerald-800 text-sm">Đã bú</div><div class="text-xs font-bold text-emerald-600 mt-0.5">Péppi đã uống xong cữ này</div></div>';
         list.appendChild(fedBtn);
     }
 
@@ -1856,7 +1856,7 @@ function checkMedDue() {
         const key = 'med-due-' + m.id + '-' + m.remind_at;
         if (localStorage.getItem(key)) return;
         localStorage.setItem(key, '1');
-        showToast('Ting ting, đến giờ thuốc ' + m.name + '. Mẹ cho Pép Pi uống nhé.', 'ph-fill ph-pill text-rose-400', true);
+        showToast('Ting ting, đến giờ thuốc ' + m.name + '. Mẹ cho Péppi uống nhé.', 'ph-fill ph-pill text-rose-400', true);
     });
 }
 
@@ -1885,7 +1885,7 @@ async function checkNoonMeds() {
     const any = (yellow && yellow.checked) || (red && red.checked) || otherMeds.some(m => m.taken && m.dose !== '__hidden');
     if (any) return;
     localStorage.setItem(key, '1');
-    showToast('Ơ kìa, trưa rồi mà thuốc của Pép Pi vẫn nằm im. Mẹ cho bé uống một cái cho xong chuyện nha!', 'ph-fill ph-warning text-amber-300', true);
+    showToast('Ơ kìa, trưa rồi mà thuốc của Péppi vẫn nằm im. Mẹ cho bé uống một cái cho xong chuyện nha!', 'ph-fill ph-warning text-amber-300', true);
 }
 
 function tick() {
