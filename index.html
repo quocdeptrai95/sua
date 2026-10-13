@@ -1532,6 +1532,8 @@ function openActionModal(id) {
     currentTargetId = id;
     const item = milks.find(m => m.id === id);
     if (!item) return;
+    // Cữ đã bú chỉ xem trong list, không mở form cập nhật
+    if (item.state === 'FED') return;
 
     const list = document.getElementById('action-list');
     list.innerHTML = '';
@@ -1828,7 +1830,7 @@ function renderApp() {
             const hm = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
             const kind = m.type === 'FORMULA' ? 'Công thức' : 'Sữa mẹ';
             const chip = m.type === 'FORMULA' ? 'bg-blue-50 text-blue-700' : 'bg-pink-50 text-pink-700';
-            return `<button onclick="openActionModal('${m.id}')" class="w-full flex items-center justify-between bg-white rounded-xl px-3 py-2.5 text-left"><span class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-emerald-500"></i><span class="font-bold text-slate-800">${hm}</span><span class="text-sm text-slate-500">${m.volume} ml</span></span><span class="text-xs font-bold px-2 py-1 rounded-full ${chip}">${kind}</span></button>`;
+            return `<div class="w-full flex items-center justify-between bg-white rounded-xl px-3 py-2.5"><span class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-emerald-500"></i><span class="font-bold text-slate-800">${hm}</span><span class="text-sm text-slate-500">${m.volume} ml</span></span><span class="text-xs font-bold px-2 py-1 rounded-full ${chip}">${kind}</span></div>`;
         }).join('');
         box.innerHTML = `<button onclick="toggleFedList()" class="fed-head w-full flex items-center justify-between bg-emerald-50 border border-emerald-100 rounded-2xl px-4 py-3"><span class="flex items-center gap-2 font-extrabold text-emerald-800"><i class="ph-fill ph-check-circle"></i> Đã bú hôm nay <span class="text-xs bg-emerald-600 text-white rounded-full px-2 py-0.5">${fed.length}</span></span><i class="ph-bold ph-caret-down fed-chev text-emerald-600"></i></button><div id="fed-wrap" class="fed-wrap"><div><div class="mt-2 space-y-2">${rows}</div></div></div>`;
         listEl.appendChild(box);
