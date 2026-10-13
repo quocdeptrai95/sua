@@ -632,6 +632,7 @@ let currentTargetId = null;
 let isOnline = false;
 let tickRunning = false;
 let lastMedCheckDate = '';
+let fedListOpen = false;
 
 function todayVN() {
     return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' });
@@ -1832,7 +1833,9 @@ function renderApp() {
             const chip = m.type === 'FORMULA' ? 'bg-blue-50 text-blue-700' : 'bg-pink-50 text-pink-700';
             return `<div class="w-full flex items-center justify-between bg-white rounded-xl px-3 py-2.5"><span class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-emerald-500"></i><span class="font-bold text-slate-800">${hm}</span><span class="text-sm text-slate-500">${m.volume} ml</span></span><span class="text-xs font-bold px-2 py-1 rounded-full ${chip}">${kind}</span></div>`;
         }).join('');
-        box.innerHTML = `<button onclick="toggleFedList()" class="fed-head w-full flex items-center justify-between bg-emerald-50 border border-emerald-100 rounded-2xl px-4 py-3"><span class="flex items-center gap-2 font-extrabold text-emerald-800"><i class="ph-fill ph-check-circle"></i> Đã bú hôm nay <span class="text-xs bg-emerald-600 text-white rounded-full px-2 py-0.5">${fed.length}</span></span><i class="ph-bold ph-caret-down fed-chev text-emerald-600"></i></button><div id="fed-wrap" class="fed-wrap"><div><div class="mt-2 space-y-2">${rows}</div></div></div>`;
+        const openCls = fedListOpen ? ' open' : '';
+        const headCls = fedListOpen ? ' fed-head open' : ' fed-head';
+        box.innerHTML = `<button onclick="toggleFedList()" class="${headCls.trim()} w-full flex items-center justify-between bg-emerald-50 border border-emerald-100 rounded-2xl px-4 py-3"><span class="flex items-center gap-2 font-extrabold text-emerald-800"><i class="ph-fill ph-check-circle"></i> Đã bú hôm nay <span class="text-xs bg-emerald-600 text-white rounded-full px-2 py-0.5">${fed.length}</span></span><i class="ph-bold ph-caret-down fed-chev text-emerald-600"></i></button><div id="fed-wrap" class="fed-wrap${openCls}"><div><div class="mt-2 space-y-2">${rows}</div></div></div>`;
         listEl.appendChild(box);
     }
 }
@@ -1843,8 +1846,9 @@ function toggleFedList() {
     const wrap = document.getElementById('fed-wrap');
     const head = document.querySelector('.fed-head');
     if (!wrap) return;
-    wrap.classList.toggle('open');
-    if (head) head.classList.toggle('open');
+    fedListOpen = !wrap.classList.contains('open');
+    wrap.classList.toggle('open', fedListOpen);
+    if (head) head.classList.toggle('open', fedListOpen);
 }
 
 function checkMedDue() {
