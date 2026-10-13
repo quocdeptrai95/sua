@@ -1,1 +1,102 @@
-PLACEHOLDER
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#fef3c7">
+<title>Sổ Theo Dõi Của Pép Pi</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root { --safe-top: env(safe-area-inset-top); --safe-bottom: env(safe-area-inset-bottom); }
+body { font-family: system-ui, -apple-system, sans-serif; overscroll-behavior: none; }
+.safe-pad { padding-top: max(12px, var(--safe-top)); padding-bottom: max(12px, var(--safe-bottom)); }
+.modal-safe { padding-bottom: max(24px, calc(var(--safe-bottom) + 16px)); }
+.card-shadow { box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+.toast { animation: slideUp 0.3s ease; }
+@keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.fade-in { animation: fadeIn 0.25s ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.fed-wrap { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.32s cubic-bezier(0.16, 1, 0.3, 1); }
+.fed-wrap.open { grid-template-rows: 1fr; }
+.fed-wrap > div { overflow: hidden; }
+.fed-chev { transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1); }
+.fed-wrap.open + .fed-head .fed-chev, .fed-head.open .fed-chev { transform: rotate(180deg); }
+.progress-bar { transition: width 1s linear; }
+.tab-active { background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type=number] { -moz-appearance: textfield; }
+</style>
+</head>
+<body class="bg-amber-50 text-stone-800 min-h-screen safe-pad">
+<div id="app" class="max-w-lg mx-auto px-3 pb-24">
+  <!-- Header -->
+  <header class="flex items-center justify-between py-3">
+    <div>
+      <h1 class="text-xl font-black text-amber-900">Sổ Theo Dõi Của Pép Pi</h1>
+      <p class="text-xs text-stone-500">Realtime · Sữa · Thuốc · Vaccine</p>
+    </div>
+    <button onclick="openSettings()" class="w-10 h-10 rounded-full bg-white card-shadow flex items-center justify-center"><i class="ph-bold ph-gear text-lg"></i></button>
+  </header>
+
+  <!-- Tabs -->
+  <nav class="flex gap-1 bg-amber-100/80 p-1 rounded-2xl mb-4">
+    <button onclick="switchTab('milk')" id="tab-milk" class="flex-1 py-2.5 rounded-xl font-bold text-sm tab-active">Sữa</button>
+    <button onclick="switchTab('med')" id="tab-med" class="flex-1 py-2.5 rounded-xl font-bold text-sm text-stone-500">Thuốc</button>
+    <button onclick="switchTab('vac')" id="tab-vac" class="flex-1 py-2.5 rounded-xl font-bold text-sm text-stone-500">Vaccine</button>
+    <button onclick="switchTab('bell')" id="tab-bell" class="flex-1 py-2.5 rounded-xl font-bold text-sm text-stone-500">Chuông</button>
+  </nav>
+
+  <!-- Milk Tab -->
+  <section id="panel-milk">
+    <div class="flex gap-2 mb-3">
+      <button onclick="openAddMilk()" class="flex-1 py-3 bg-amber-500 text-white rounded-2xl font-bold flex items-center justify-center gap-2"><i class="ph-fill ph-plus-circle"></i> Thêm sữa</button>
+      <button onclick="openHistory()" class="px-4 py-3 bg-white rounded-2xl card-shadow"><i class="ph-bold ph-clock-counter-clockwise text-lg"></i></button>
+    </div>
+    <div id="milk-totals" class="grid grid-cols-3 gap-2 mb-3 text-center"></div>
+    <div id="milk-list" class="space-y-3"></div>
+  </section>
+
+  <!-- Med Tab -->
+  <section id="panel-med" class="hidden">
+    <div class="flex gap-2 mb-3">
+      <button onclick="openAddMed()" class="flex-1 py-3 bg-rose-500 text-white rounded-2xl font-bold flex items-center justify-center gap-2"><i class="ph-fill ph-plus-circle"></i> Thêm thuốc</button>
+    </div>
+    <div id="med-list" class="space-y-3"></div>
+  </section>
+
+  <!-- Vaccine Tab -->
+  <section id="panel-vac" class="hidden">
+    <div class="flex gap-2 mb-3">
+      <button onclick="openAddVac()" class="flex-1 py-3 bg-violet-500 text-white rounded-2xl font-bold flex items-center justify-center gap-2"><i class="ph-fill ph-plus-circle"></i> Thêm vaccine</button>
+    </div>
+    <div id="vac-list" class="space-y-3"></div>
+  </section>
+
+  <!-- Bell Tab -->
+  <section id="panel-bell" class="hidden">
+    <div class="flex gap-2 mb-3">
+      <button onclick="openAddBell()" class="flex-1 py-3 bg-sky-500 text-white rounded-2xl font-bold flex items-center justify-center gap-2"><i class="ph-fill ph-plus-circle"></i> Thêm chuông</button>
+    </div>
+    <div id="bell-list" class="space-y-3"></div>
+  </section>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 hidden"></div>
+
+<!-- Modals container -->
+<div id="modals"></div>
+
+<script>
+const SUPABASE_URL = 'https://xqkzjvjvqzqzqzqzqzqz.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.PLACEHOLDER';
+// NOTE: This is a truncated placeholder for the tool call test - I need the REAL full content
+</script>
+</body>
+</html>
